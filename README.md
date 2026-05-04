@@ -30,8 +30,8 @@ Trong `docker-compose.yml`, he thong duoc chay bang cac service chinh:
 - `worker`: background worker xu ly cac job AI.
 - `database`: PostgreSQL, luu user, employee, camera, access log va embedding.
 - `redis`: queue trung gian giua backend va worker.
-- `minio`: object storage, chuan bi cho viec luu anh/file theo kieu S3.
-- `qdrant`: vector database, chuan bi cho tim kiem embedding khuon mat.
+
+MinIO va Qdrant chua nam trong compose toi thieu cua Giai Doan 1. Hai service nay se duoc them sau khi core flow da on dinh.
 
 Co the hinh dung luong tong quat nhu sau:
 
@@ -65,7 +65,7 @@ Flow chinh cua MVP:
 7. Worker so sanh embedding cua snapshot voi embedding da dang ky.
 8. He thong ghi access log voi ket qua `granted`, `denied` hoac `error`.
 
-Hien tai pipeline embedding dang o muc MVP/fake deterministic embedding de he thong co the chay truoc khi tich hop DeepFace that. Buoc AI tiep theo la thay logic trong `worker/app/ml/embedder.py` bang `DeepFace.represent()` va tien toi luu/tim embedding bang Qdrant.
+Hien tai project dang o Giai Doan 1: khung service toi thieu chay duoc. Pipeline embedding/fake AI se duoc lam o cac giai doan sau.
 
 ## Cau Truc Thu Muc Nen Doc Truoc
 
@@ -96,13 +96,8 @@ Sau khi chay, co the mo:
 - Backend API docs: http://localhost:8000/docs
 - User app: http://localhost:5173
 - Admin app: http://localhost:5174
-- MinIO console: http://localhost:9001
-- Qdrant API: http://localhost:6333
 
-Tai khoan demo:
-
-- Admin: `admin` / `admin123`
-- User: `user` / `user123`
+Tai khoan demo se duoc them sau khi lam den phan database/auth.
 
 ## File Cau Hinh Quan Trong
 

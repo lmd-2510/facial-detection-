@@ -108,10 +108,10 @@ Kiem tra nhanh:
 - Worker container khong crash.
 - `docker compose logs` khong co loi import/module not found.
 
-## Giai Doan 2: Thiet Ke Database Toi Thieu 
+## Giai Doan 2: Thiet Ke Database Toi Thieu
 Muc tieu: xac dinh he thong can luu nhung du lieu gi.
 
-Tai lieu can cap nhat:  🚩 ĐANG DỪNG TẠI ĐÂY
+Tai lieu can cap nhat:
 
 ```text
 docs/db-schema.md

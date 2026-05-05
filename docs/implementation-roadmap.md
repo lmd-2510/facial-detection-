@@ -438,8 +438,7 @@ Muon ket hop lam viec va review sau moi moc:
 
 ```text
 Hay kiem tra Giai Doan 1 trong docs/implementation-roadmap.md.
-So sanh repo hien tai voi roadmap, xem thieu file nao, service nao chua noi duoc,
-can update docs nao, roi chay test/command kiem tra neu co the.
+So sanh repo hien tai voi roadmap, xem thieu file nao, service nao chua noi duoc, can update docs nao, roi chay test/command kiem tra neu co the, hay kiem tra mot luot giup toi nhe.
 Chi sua cac loi nho ro rang, con loi lon thi bao toi truoc.
 Neu loi nho va chac chan dung huong thi sua truc tiep luon.
 ```

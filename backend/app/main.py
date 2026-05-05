@@ -1,6 +1,7 @@
 from fastapi import FastAPI, status
 from fastapi.responses import JSONResponse
 
+from app.api.access import router as access_router
 from app.api.auth import router as auth_router
 from app.api.cameras import router as cameras_router
 from app.api.employees import router as employees_router
@@ -13,6 +14,7 @@ app.include_router(auth_router)
 app.include_router(employees_router)
 app.include_router(cameras_router)
 app.include_router(logs_router)
+app.include_router(access_router)
 
 
 @app.get("/health", response_model=None)

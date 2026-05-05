@@ -65,7 +65,7 @@ Flow chinh cua MVP:
 7. Worker so sanh embedding cua snapshot voi embedding da dang ky.
 8. He thong ghi access log voi ket qua `granted`, `denied` hoac `error`.
 
-Hien tai project dang o Giai Doan 1: khung service toi thieu chay duoc. Pipeline embedding/fake AI se duoc lam o cac giai doan sau.
+Hien tai project dang o Giai Doan 3: backend da co API cot loi cho auth, employees, cameras, logs va access check placeholder. Queue, worker flow va fake AI pipeline se duoc lam o cac giai doan sau.
 
 ## Cau Truc Thu Muc Nen Doc Truoc
 
@@ -97,7 +97,16 @@ Sau khi chay, co the mo:
 - User app: http://localhost:5173
 - Admin app: http://localhost:5174
 
-Tai khoan demo se duoc them sau khi lam den phan database/auth.
+Tao bang va seed tai khoan demo:
+
+```powershell
+docker compose run --rm backend python -m app.db.seed
+```
+
+Tai khoan demo mac dinh:
+
+- `admin` / `admin123`
+- `user` / `user123`
 
 ## File Cau Hinh Quan Trong
 

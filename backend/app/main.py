@@ -2,11 +2,13 @@ from fastapi import FastAPI, status
 from fastapi.responses import JSONResponse
 
 from app.api.auth import router as auth_router
+from app.api.employees import router as employees_router
 from app.db.health import check_database_connection
 
 
 app = FastAPI(title="DeepFace Access Control API")
 app.include_router(auth_router)
+app.include_router(employees_router)
 
 
 @app.get("/health", response_model=None)

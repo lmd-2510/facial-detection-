@@ -458,13 +458,3 @@ Neu loi nho va chac chan dung huong thi sua truc tiep luon.
 9. DeepFace that
 10. deploy / monitoring / backup
 ```
-
-## Buoc Nen Lam Ngay
-
-Neu bat dau code lai tu dau, buoc dau tien nen la:
-
-```text
-Viet lai docker-compose.yml toi gian va backend health check.
-```
-
-Ly do: khi khung chay duoc, cac phan sau se co diem bam ro rang de phat trien va test.

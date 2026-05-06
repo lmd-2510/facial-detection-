@@ -1,7 +1,8 @@
 import logging
 import os
 import signal
-import time
+
+from app.tasks.queue_worker import run_queue_worker
 
 
 logging.basicConfig(
@@ -26,9 +27,7 @@ def main() -> None:
     signal.signal(signal.SIGINT, stop_worker)
     signal.signal(signal.SIGTERM, stop_worker)
 
-    while is_running:
-        logging.info("Worker service is running")
-        time.sleep(30)
+    run_queue_worker(lambda: is_running)
 
     logging.info("Worker service stopped")
 

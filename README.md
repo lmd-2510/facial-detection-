@@ -65,7 +65,7 @@ Flow chinh cua MVP:
 7. Worker so sanh embedding cua snapshot voi embedding da dang ky.
 8. He thong ghi access log voi ket qua `granted`, `denied` hoac `error`.
 
-Hien tai project dang o Giai Doan 4: backend da co API cot loi cho auth, employees, cameras, logs, va da day duoc `embedding_jobs` / `access_jobs` vao Redis. Worker da nghe Redis queue va log payload job. Fake AI pipeline va viec cap nhat embedding/ket qua access that se duoc lam o Giai Doan 5.
+Hien tai project da hoan thanh core flow cua Giai Doan 5: backend co API cot loi cho auth, employees, cameras, logs, va day duoc `embedding_jobs` / `access_jobs` vao Redis. Worker nghe Redis queue, chay fake AI pipeline deterministic, luu fake embedding vao `face_embeddings`, va cap nhat `access_logs` thanh `granted`, `denied` hoac `error`.
 
 ## Cau Truc Thu Muc Nen Doc Truoc
 
@@ -122,8 +122,7 @@ Tai khoan demo mac dinh:
 Nhung phan nen uu tien sau khi da nam tong quan:
 
 - Hoan thien `docs/architecture.md` de mo ta kien truc ro hon.
-- Hoan thien `docs/ai-pipeline.md` de giai thich pipeline khuon mat.
-- Lam fake AI pipeline trong worker de xu ly `embedding_jobs` va `access_jobs` end-to-end.
-- Luu fake embedding vao `face_embeddings` va cap nhat `access_logs` thanh `granted`, `denied` hoac `error`.
+- Hoan thien frontend theo API de thao tac flow chinh khong can Swagger.
+- Bo sung upload file that thay vi nhap `image_path` thu cong.
 - Sau khi fake pipeline on dinh, thay fake embedding bang DeepFace that trong worker.
 - Dua embedding search sang Qdrant khi pipeline AI da on dinh.

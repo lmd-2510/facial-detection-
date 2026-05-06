@@ -1,6 +1,6 @@
 # Backend API
 
-Tai lieu nay tom tat API backend hien co den Giai Doan 4. Swagger chi tiet co tai:
+Tai lieu nay tom tat API backend hien co den Giai Doan 5. Swagger chi tiet co tai:
 
 ```text
 http://localhost:8000/docs
@@ -61,7 +61,7 @@ Request tao embedding job:
 }
 ```
 
-Response tra ve `job_id`, `type = embedding`, `employee_id`, `image_path` va `queue_name = embedding_jobs`. Giai Doan 4 moi day job vao Redis; worker nhan job va log payload, chua tao embedding that.
+Response tra ve `job_id`, `type = embedding`, `employee_id`, `image_path` va `queue_name = embedding_jobs`. Worker se nhan job tu Redis, chay fake detector/anti-spoof/embedder, roi luu fake vector deterministic vao bang `face_embeddings`.
 
 ## Cameras
 
@@ -97,7 +97,7 @@ id, employee_id, camera_id, status, score, image_path, created_at
 
 ### `POST /access/check`
 
-Can Bearer token. Giai Doan 4 tao `access_log` trang thai `processing`, day job vao Redis queue `access_jobs`, roi tra response `202 Accepted`. Worker nhan job va log payload; AI pipeline se duoc lam o giai doan sau.
+Can Bearer token. Backend tao `access_log` trang thai `processing`, day job vao Redis queue `access_jobs`, roi tra response `202 Accepted`. Worker se xu ly job bat dong bo bang fake AI pipeline va cap nhat `access_logs`.
 
 Request:
 
@@ -108,4 +108,10 @@ Request:
 }
 ```
 
-Response hien tai co `status` mac dinh la `processing`, `employee_id` la `null`, `job_id` cua Redis job va `log_id` cua access log vua duoc tao. Fake AI pipeline o Giai Doan 5 se cap nhat log thanh `granted`, `denied` hoac `error`.
+Response ban dau co `status` mac dinh la `processing`, `employee_id` la `null`, `job_id` cua Redis job va `log_id` cua access log vua duoc tao. Sau khi worker xu ly xong, log co the duoc cap nhat thanh:
+
+- `granted`: match duoc employee active vuot threshold.
+- `denied`: khong co embedding phu hop hoac score duoi threshold.
+- `error`: fake pipeline loi, vi du khong detect duoc mat.
+
+Co the goi `GET /logs` de xem ket qua sau khi worker xu ly.

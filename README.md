@@ -57,11 +57,11 @@ Backend API
 Flow chinh cua MVP:
 
 1. Admin tao employee.
-2. Admin upload anh khuon mat cho employee.
-3. Backend luu anh va tao embedding job trong Redis.
+2. Admin cung cap `image_path` anh khuon mat cho employee.
+3. Backend tao embedding job trong Redis.
 4. Worker doc job tu Redis.
 5. Worker tao embedding cho anh khuon mat.
-6. User upload anh/snapshot de kiem tra quyen ra vao.
+6. User cung cap `image_path` anh/snapshot de kiem tra quyen ra vao.
 7. Worker so sanh embedding cua snapshot voi embedding da dang ky.
 8. He thong ghi access log voi ket qua `granted`, `denied` hoac `error`.
 

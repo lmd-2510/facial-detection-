@@ -30,3 +30,16 @@ class EmployeeRead(EmployeeBase):
 
     id: int
     created_at: datetime
+
+
+class EmployeeEmbeddingJobRequest(BaseModel):
+    image_path: str = Field(min_length=1, max_length=1000)
+
+
+class EmployeeEmbeddingJobResponse(BaseModel):
+    job_id: str
+    type: str
+    employee_id: int
+    image_path: str
+    queue_name: str
+    message: str

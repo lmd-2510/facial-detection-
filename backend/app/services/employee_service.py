@@ -1,6 +1,11 @@
 from sqlalchemy.orm import Session
 
 from app.models.employee import Employee
+from app.queues.embedding_queue import (
+    EMBEDDING_QUEUE_NAME,
+    EmbeddingJob,
+    enqueue_embedding_job,
+)
 from app.repositories.employee_repository import (
     create_employee,
     get_employee_by_code,
@@ -13,6 +18,10 @@ from app.schemas.employee import EmployeeCreate, EmployeeUpdate
 
 
 class EmployeeCodeAlreadyExistsError(Exception):
+    pass
+
+
+class EmployeeNotFoundError(Exception):
     pass
 
 
@@ -55,3 +64,19 @@ def delete_employee(db: Session, employee_id: int) -> Employee | None:
         return None
 
     return soft_delete_employee(db, employee)
+
+
+def queue_employee_embedding_job(
+    db: Session,
+    employee_id: int,
+    image_path: str,
+) -> EmbeddingJob:
+    employee = get_employee_by_id(db, employee_id)
+    if employee is None:
+        raise EmployeeNotFoundError
+
+    return enqueue_embedding_job(employee_id=employee.id, image_path=image_path)
+
+
+def get_embedding_queue_name() -> str:
+    return EMBEDDING_QUEUE_NAME

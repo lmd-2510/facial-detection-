@@ -95,7 +95,36 @@ def test_access_check_returns_404_for_missing_camera(client, auth_headers):
     assert response.status_code == 404
 
 
-def test_access_check_records_placeholder_log(client, auth_headers):
+def test_access_check_queues_job(client, auth_headers, monkeypatch):
+    from app.queues.access_queue import AccessJob
+
+    queued_jobs = []
+
+    def fake_enqueue_access_job(
+        log_id: int,
+        camera_id: int,
+        image_path: str,
+    ) -> AccessJob:
+        queued_jobs.append(
+            {
+                "log_id": log_id,
+                "camera_id": camera_id,
+                "image_path": image_path,
+            }
+        )
+        return AccessJob(
+            job_id="access-job-123",
+            type="access_check",
+            log_id=log_id,
+            camera_id=camera_id,
+            image_path=image_path,
+        )
+
+    monkeypatch.setattr(
+        "app.services.access_service.enqueue_access_job",
+        fake_enqueue_access_job,
+    )
+
     response = client.post(
         "/access/check",
         headers=auth_headers,
@@ -105,10 +134,11 @@ def test_access_check_records_placeholder_log(client, auth_headers):
         },
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 202
     body = response.json()
     assert body["log_id"]
-    assert body["status"] == "denied"
+    assert body["job_id"] == "access-job-123"
+    assert body["status"] == "processing"
     assert body["employee_id"] is None
     assert body["camera_id"] == 1
     assert body["score"] is None
@@ -120,4 +150,11 @@ def test_access_check_records_placeholder_log(client, auth_headers):
     logs_body = logs_response.json()
     assert len(logs_body) == 1
     assert logs_body[0]["id"] == body["log_id"]
-    assert logs_body[0]["status"] == "denied"
+    assert logs_body[0]["status"] == "processing"
+    assert queued_jobs == [
+        {
+            "log_id": body["log_id"],
+            "camera_id": 1,
+            "image_path": "/app/storage/uploads/snapshot.jpg",
+        }
+    ]

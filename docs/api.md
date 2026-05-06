@@ -97,7 +97,7 @@ id, employee_id, camera_id, status, score, image_path, created_at
 
 ### `POST /access/check`
 
-Can Bearer token. Giai Doan 3 moi ghi access log placeholder, chua xu ly AI/queue that.
+Can Bearer token. Giai Doan 4 tao `access_log` trang thai `processing`, day job vao Redis queue `access_jobs`, roi tra response `202 Accepted`. Worker nhan job va log payload; AI pipeline se duoc lam o giai doan sau.
 
 Request:
 
@@ -108,4 +108,4 @@ Request:
 }
 ```
 
-Response hien tai co `status` mac dinh la `denied`, `employee_id` la `null`, va `log_id` cua access log vua duoc tao. Queue va fake AI pipeline se thay the logic placeholder nay o cac giai doan sau.
+Response hien tai co `status` mac dinh la `processing`, `employee_id` la `null`, `job_id` cua Redis job va `log_id` cua access log vua duoc tao. Fake AI pipeline o Giai Doan 5 se cap nhat log thanh `granted`, `denied` hoac `error`.

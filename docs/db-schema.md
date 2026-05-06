@@ -109,6 +109,7 @@ Luu lich su check ra vao.
 
 Gia tri `status` ban dau:
 
+- `processing`: da nhan request va dang cho worker xu ly.
 - `granted`: match duoc employee active va vuot threshold.
 - `denied`: khong match, score thap, employee inactive, hoac khong du quyen.
 - `error`: pipeline loi hoac input khong hop le.

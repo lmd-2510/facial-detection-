@@ -5,16 +5,22 @@ from collections.abc import Callable
 from typing import Any
 
 from app.config.redis import get_redis_client
+from app.tasks.access_job import handle_access_job
 from app.tasks.embedding_job import handle_embedding_job
 
 
+ACCESS_QUEUE_NAME = "access_jobs"
 EMBEDDING_QUEUE_NAME = "embedding_jobs"
-QUEUE_NAMES = [EMBEDDING_QUEUE_NAME]
+QUEUE_NAMES = [EMBEDDING_QUEUE_NAME, ACCESS_QUEUE_NAME]
 
 
 def process_job(queue_name: str, payload: dict[str, Any]) -> None:
     if queue_name == EMBEDDING_QUEUE_NAME:
         handle_embedding_job(payload)
+        return
+
+    if queue_name == ACCESS_QUEUE_NAME:
+        handle_access_job(payload)
         return
 
     raise ValueError(f"Unsupported queue: {queue_name}")

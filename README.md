@@ -65,7 +65,7 @@ Flow chinh cua MVP:
 7. Worker so sanh embedding cua snapshot voi embedding da dang ky.
 8. He thong ghi access log voi ket qua `granted`, `denied` hoac `error`.
 
-Hien tai project dang o Giai Doan 3: backend da co API cot loi cho auth, employees, cameras, logs va access check placeholder. Queue, worker flow va fake AI pipeline se duoc lam o cac giai doan sau.
+Hien tai project dang o Giai Doan 4: backend da co API cot loi cho auth, employees, cameras, logs, va da day duoc `embedding_jobs` / `access_jobs` vao Redis. Worker da nghe Redis queue va log payload job. Fake AI pipeline va viec cap nhat embedding/ket qua access that se duoc lam o Giai Doan 5.
 
 ## Cau Truc Thu Muc Nen Doc Truoc
 
@@ -123,7 +123,7 @@ Nhung phan nen uu tien sau khi da nam tong quan:
 
 - Hoan thien `docs/architecture.md` de mo ta kien truc ro hon.
 - Hoan thien `docs/ai-pipeline.md` de giai thich pipeline khuon mat.
-- Hoan thien `docs/db-schema.md` de ghi lai cac bang va quan he.
-- Hoan thien `docs/api.md` de tong hop cac endpoint chinh.
-- Thay fake embedding bang DeepFace that trong worker.
+- Lam fake AI pipeline trong worker de xu ly `embedding_jobs` va `access_jobs` end-to-end.
+- Luu fake embedding vao `face_embeddings` va cap nhat `access_logs` thanh `granted`, `denied` hoac `error`.
+- Sau khi fake pipeline on dinh, thay fake embedding bang DeepFace that trong worker.
 - Dua embedding search sang Qdrant khi pipeline AI da on dinh.

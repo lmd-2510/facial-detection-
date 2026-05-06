@@ -4,7 +4,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict
 
 
-AccessLogStatus = Literal["granted", "denied", "error"]
+AccessLogStatus = Literal["processing", "granted", "denied", "error"]
 
 
 class AccessLogRead(BaseModel):

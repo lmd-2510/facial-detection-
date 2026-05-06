@@ -4,7 +4,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 
-AccessDecision = Literal["granted", "denied", "error"]
+AccessDecision = Literal["processing", "granted", "denied", "error"]
 
 
 class AccessCheckRequest(BaseModel):
@@ -14,6 +14,7 @@ class AccessCheckRequest(BaseModel):
 
 class AccessCheckResponse(BaseModel):
     log_id: int
+    job_id: str | None = None
     status: AccessDecision
     employee_id: int | None
     camera_id: int

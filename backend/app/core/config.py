@@ -8,6 +8,7 @@ class Settings:
         "DATABASE_URL",
         "postgresql://deepface:deepface@localhost:5432/deepface_access",
     )
+    redis_url: str = getenv("REDIS_URL", "redis://localhost:6379/0")
     auth_secret_key: str = getenv(
         "AUTH_SECRET_KEY",
         "deepface-access-dev-secret",

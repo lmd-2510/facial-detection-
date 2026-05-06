@@ -157,3 +157,65 @@ def test_delete_employee_soft_deletes_record(client, auth_headers):
     get_response = client.get("/employees/1", headers=auth_headers)
     assert get_response.status_code == 200
     assert get_response.json()["status"] == "inactive"
+
+
+def test_create_embedding_job_requires_auth(client):
+    response = client.post(
+        "/employees/1/embedding-jobs",
+        json={"image_path": "/app/storage/uploads/employee_1.jpg"},
+    )
+
+    assert response.status_code == 401
+
+
+def test_create_embedding_job_returns_404_for_missing_employee(
+    client,
+    auth_headers,
+):
+    response = client.post(
+        "/employees/999/embedding-jobs",
+        headers=auth_headers,
+        json={"image_path": "/app/storage/uploads/employee_999.jpg"},
+    )
+
+    assert response.status_code == 404
+
+
+def test_create_embedding_job_queues_job(client, auth_headers, monkeypatch):
+    from app.queues.embedding_queue import EmbeddingJob
+
+    queued_jobs = []
+
+    def fake_enqueue_embedding_job(employee_id: int, image_path: str) -> EmbeddingJob:
+        queued_jobs.append({"employee_id": employee_id, "image_path": image_path})
+        return EmbeddingJob(
+            job_id="job-123",
+            type="embedding",
+            employee_id=employee_id,
+            image_path=image_path,
+        )
+
+    monkeypatch.setattr(
+        "app.services.employee_service.enqueue_embedding_job",
+        fake_enqueue_embedding_job,
+    )
+
+    response = client.post(
+        "/employees/1/embedding-jobs",
+        headers=auth_headers,
+        json={"image_path": "/app/storage/uploads/employee_1.jpg"},
+    )
+
+    assert response.status_code == 202
+    body = response.json()
+    assert body["job_id"] == "job-123"
+    assert body["type"] == "embedding"
+    assert body["employee_id"] == 1
+    assert body["image_path"] == "/app/storage/uploads/employee_1.jpg"
+    assert body["queue_name"] == "embedding_jobs"
+    assert queued_jobs == [
+        {
+            "employee_id": 1,
+            "image_path": "/app/storage/uploads/employee_1.jpg",
+        }
+    ]

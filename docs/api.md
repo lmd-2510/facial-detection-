@@ -40,6 +40,7 @@ Tat ca endpoint employees can Bearer token.
 - `GET /employees/{id}`: xem chi tiet employee.
 - `PUT /employees/{id}`: cap nhat employee.
 - `DELETE /employees/{id}`: soft-delete employee bang cach doi `status` thanh `inactive`.
+- `POST /employees/{id}/embedding-jobs`: tao job Redis de worker xu ly embedding cho anh employee.
 
 Request tao employee:
 
@@ -51,6 +52,16 @@ Request tao employee:
   "status": "active"
 }
 ```
+
+Request tao embedding job:
+
+```json
+{
+  "image_path": "/app/storage/uploads/employee_1.jpg"
+}
+```
+
+Response tra ve `job_id`, `type = embedding`, `employee_id`, `image_path` va `queue_name = embedding_jobs`. Giai Doan 4 moi day job vao Redis; worker nhan job va log payload, chua tao embedding that.
 
 ## Cameras
 

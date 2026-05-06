@@ -416,30 +416,13 @@ Truoc khi chuyen sang giai doan tiep theo, tu hoi:
 Neu cau tra loi cho cac cau tren chua ro, nen xu ly truoc khi them tinh nang moi.
 
 ## Thu Tu Hoi Codex Sau Nay
-
-Khi muon lam tiep, co the hoi theo mau:
-
-```text
-Hay bam theo docs/implementation-roadmap.md va lam Giai Doan 1.
-```
-
-Hoac:
-
-```text
-Hay xem Giai Doan 3 trong implementation-roadmap va tao backend API cho employees truoc.
-```
-
 Neu muon review:
 
 ```text
-Hay review hien tai project dang o dau so voi implementation-roadmap.
-```
-Muon ket hop lam viec va review sau moi moc:
-
-```text
-Hay kiem tra Giai Doan 5 trong docs/implementation-roadmap.md.
-So sanh repo hien tai voi roadmap, xem thieu file nao, service nao chua noi duoc, can update docs nao, roi chay test/command kiem tra neu co the, hay kiem tra mot luot giup toi nhe. Ngoai ra, sau khi kiem tra xong het mot luot, hay doc lai ca repo de xem co file quen chua cap nhat khong nhe, tat ca cac file.
-Chi sua cac loi nho ro rang, con loi lon thi bao toi truoc, neu loi nho va chac chan dung huong thi sua truc tiep luon.
+Hay kiem tra Giai Doan 6 trong docs/implementation-roadmap.md.
+So sanh repo hien tai voi roadmap, xem thieu file nao, file nao code chua du function, service nao chua noi duoc, can update docs nao, roi chay test/command kiem tra neu co the, hay kiem tra mot luot giup toi nhe. Ngoai ra, sau khi kiem tra xong het mot luot, hay doc lai ca repo de xem co file quen chua cap nhat khong nhe, tat ca cac file.
+Chu y: chi sua cac loi nho ro rang, con loi lon thi bao toi truoc, neu loi nho va chac chan dung huong thi sua truc tiep luon.
+Sau khi kiem tra xong, co the cho toi biet tu buoc 1 den buoc 6 da du trong repo chua, con thieu file, folder gi nua khong, so rang se co file thieu code hay structure con thieu gi do, hay readme chua duoc cap nhat
 ```
 
 ## Tom Tat Lo Trinh

@@ -1,6 +1,9 @@
 import logging
 from typing import Any
 
+from app.config.database import get_db_session
+from app.services.face_pipeline_service import process_access_check
+
 
 def handle_access_job(payload: dict[str, Any]) -> None:
     job_id = payload.get("job_id")
@@ -18,4 +21,18 @@ def handle_access_job(payload: dict[str, Any]) -> None:
         camera_id,
         image_path,
     )
-    logging.info("Access AI pipeline is not implemented yet; job logged only.")
+    with get_db_session() as db:
+        decision = process_access_check(
+            db,
+            log_id=int(log_id),
+            image_path=str(image_path),
+        )
+
+    logging.info(
+        "Access job completed: job_id=%s log_id=%s status=%s employee_id=%s score=%s",
+        job_id,
+        log_id,
+        decision.status,
+        decision.employee_id,
+        decision.score,
+    )

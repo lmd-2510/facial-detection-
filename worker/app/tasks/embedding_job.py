@@ -1,6 +1,9 @@
 import logging
 from typing import Any
 
+from app.config.database import get_db_session
+from app.services.embedding_service import create_employee_embedding
+
 
 def handle_embedding_job(payload: dict[str, Any]) -> None:
     job_id = payload.get("job_id")
@@ -16,4 +19,17 @@ def handle_embedding_job(payload: dict[str, Any]) -> None:
         employee_id,
         image_path,
     )
-    logging.info("Embedding AI pipeline is not implemented yet; job logged only.")
+    with get_db_session() as db:
+        embedding = create_employee_embedding(
+            db,
+            employee_id=int(employee_id),
+            image_path=str(image_path),
+        )
+
+    logging.info(
+        "Embedding job completed: job_id=%s employee_id=%s embedding_id=%s model=%s",
+        job_id,
+        employee_id,
+        embedding.id,
+        embedding.model_name,
+    )

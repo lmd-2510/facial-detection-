@@ -1,11 +1,10 @@
 from dataclasses import dataclass
-from hashlib import sha256
-from math import sqrt
-from pathlib import Path
+from typing import Any
 
+from app.config.settings import settings
+from app.ml.deepface_client import load_deepface
 
-FAKE_MODEL_NAME = "fake-hash-embedding-v1"
-DEFAULT_EMBEDDING_DIMENSIONS = 16
+DEEPFACE_MODEL_NAME = settings.deepface_model_name
 
 
 @dataclass(frozen=True)
@@ -16,45 +15,49 @@ class FaceEmbeddingResult:
     dimensions: int
 
 
-def _seed_bytes_from_image(image_path: str) -> bytes:
-    path = Path(image_path)
-    if path.is_file():
-        return path.read_bytes()
+def _extract_embedding_vector(represent_result: Any) -> list[float]:
+    if not isinstance(represent_result, list) or not represent_result:
+        raise ValueError("DeepFace did not return any face embedding.")
 
-    return image_path.encode("utf-8")
+    first_face = represent_result[0]
+    if not isinstance(first_face, dict) or "embedding" not in first_face:
+        raise ValueError("DeepFace returned an unexpected embedding format.")
+
+    vector = first_face["embedding"]
+    if not isinstance(vector, list) or not vector:
+        raise ValueError("DeepFace embedding vector is empty.")
+
+    try:
+        return [float(value) for value in vector]
+    except (TypeError, ValueError) as exc:
+        raise ValueError("DeepFace embedding vector contains non-numeric values.") from exc
 
 
-def _expand_digest(seed: bytes, dimensions: int) -> bytes:
-    chunks: list[bytes] = []
-    counter = 0
-    while sum(len(chunk) for chunk in chunks) < dimensions:
-        chunks.append(sha256(seed + counter.to_bytes(4, "big")).digest())
-        counter += 1
-
-    return b"".join(chunks)[:dimensions]
-
-
-def create_fake_embedding(
+def create_face_embedding(
     image_path: str,
-    dimensions: int = DEFAULT_EMBEDDING_DIMENSIONS,
+    *,
+    model_name: str = settings.deepface_model_name,
+    detector_backend: str = settings.deepface_detector_backend,
+    enforce_detection: bool = settings.deepface_enforce_detection,
+    align: bool = settings.deepface_align,
+    normalization: str = settings.deepface_normalization,
 ) -> FaceEmbeddingResult:
     normalized_path = image_path.strip()
     if not normalized_path:
         raise ValueError("Image path is empty.")
 
-    if dimensions <= 0:
-        raise ValueError("Embedding dimensions must be greater than zero.")
-
-    digest = _expand_digest(_seed_bytes_from_image(normalized_path), dimensions)
-    raw_vector = [(byte / 127.5) - 1.0 for byte in digest]
-    magnitude = sqrt(sum(value * value for value in raw_vector))
-    if magnitude == 0:
-        raise ValueError("Generated embedding has zero magnitude.")
-
-    vector = [round(value / magnitude, 6) for value in raw_vector]
+    represent_result = load_deepface().represent(
+        img_path=normalized_path,
+        model_name=model_name,
+        detector_backend=detector_backend,
+        enforce_detection=enforce_detection,
+        align=align,
+        normalization=normalization,
+    )
+    vector = _extract_embedding_vector(represent_result)
     return FaceEmbeddingResult(
         image_path=normalized_path,
         vector=vector,
-        model_name=FAKE_MODEL_NAME,
-        dimensions=dimensions,
+        model_name=model_name,
+        dimensions=len(vector),
     )

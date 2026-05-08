@@ -1,9 +1,11 @@
 from dataclasses import dataclass
-from hashlib import sha256
 from pathlib import PurePath
+from typing import Any
+
+from app.config.settings import settings
+from app.ml.deepface_client import load_deepface
 
 
-NO_FACE_MARKERS = ("no_face", "noface", "empty", "blank")
 SUPPORTED_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".bmp"}
 
 
@@ -24,7 +26,39 @@ class FaceDetectionResult:
     message: str
 
 
-def detect_face(image_path: str) -> FaceDetectionResult:
+def _extract_first_face_area(extract_faces_result: Any) -> tuple[FaceBox, float]:
+    if not isinstance(extract_faces_result, list) or not extract_faces_result:
+        raise ValueError("No face detected by DeepFace.")
+
+    first_face = extract_faces_result[0]
+    if not isinstance(first_face, dict):
+        raise ValueError("DeepFace returned an unexpected face detection format.")
+
+    facial_area = first_face.get("facial_area")
+    if not isinstance(facial_area, dict):
+        raise ValueError("DeepFace result does not include facial area.")
+
+    try:
+        face_box = FaceBox(
+            x=int(facial_area["x"]),
+            y=int(facial_area["y"]),
+            width=int(facial_area["w"]),
+            height=int(facial_area["h"]),
+        )
+    except (KeyError, TypeError, ValueError) as exc:
+        raise ValueError("DeepFace facial area is incomplete.") from exc
+
+    confidence = first_face.get("face_confidence", first_face.get("confidence", 0.0))
+    return face_box, float(confidence or 0.0)
+
+
+def detect_face(
+    image_path: str,
+    *,
+    detector_backend: str = settings.deepface_detector_backend,
+    enforce_detection: bool = settings.deepface_enforce_detection,
+    align: bool = settings.deepface_align,
+) -> FaceDetectionResult:
     normalized_path = image_path.strip()
     if not normalized_path:
         return FaceDetectionResult(
@@ -35,7 +69,6 @@ def detect_face(image_path: str) -> FaceDetectionResult:
             message="Image path is empty.",
         )
 
-    file_name = PurePath(normalized_path).name.lower()
     extension = PurePath(normalized_path).suffix.lower()
     if extension and extension not in SUPPORTED_IMAGE_EXTENSIONS:
         return FaceDetectionResult(
@@ -46,30 +79,30 @@ def detect_face(image_path: str) -> FaceDetectionResult:
             message=f"Unsupported image extension: {extension}",
         )
 
-    if any(marker in file_name for marker in NO_FACE_MARKERS):
+    try:
+        faces = load_deepface().extract_faces(
+            img_path=normalized_path,
+            detector_backend=detector_backend,
+            enforce_detection=enforce_detection,
+            align=align,
+            anti_spoofing=False,
+        )
+        face_box, confidence = _extract_first_face_area(faces)
+    except Exception as exc:
         return FaceDetectionResult(
             detected=False,
             image_path=normalized_path,
             face_box=None,
             confidence=0.0,
-            message="No face detected by fake detector.",
+            message=str(exc),
         )
-
-    digest = sha256(normalized_path.encode("utf-8")).digest()
-    face_box = FaceBox(
-        x=20 + digest[0] % 40,
-        y=20 + digest[1] % 40,
-        width=96 + digest[2] % 64,
-        height=96 + digest[3] % 64,
-    )
-    confidence = round(0.8 + (digest[4] / 255) * 0.19, 4)
 
     return FaceDetectionResult(
         detected=True,
         image_path=normalized_path,
         face_box=face_box,
         confidence=confidence,
-        message="Face detected by fake detector.",
+        message="Face detected by DeepFace.",
     )
 
 

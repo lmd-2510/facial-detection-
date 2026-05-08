@@ -2,8 +2,9 @@ from dataclasses import dataclass
 from math import sqrt
 from typing import Sequence
 
+from app.config.settings import settings
 
-DEFAULT_MATCH_THRESHOLD = 0.85
+DEFAULT_MATCH_THRESHOLD = settings.deepface_match_threshold
 
 
 @dataclass(frozen=True)
@@ -72,7 +73,7 @@ def find_best_match(
             employee_id=best_candidate.employee_id,
             score=best_score,
             threshold=threshold,
-            message="Face matched fake embedding.",
+            message="Face matched embedding.",
         )
 
     return MatchResult(

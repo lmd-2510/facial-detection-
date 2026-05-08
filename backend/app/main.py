@@ -1,4 +1,5 @@
 from fastapi import FastAPI, status
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.access import router as access_router
@@ -10,6 +11,18 @@ from app.db.health import check_database_connection
 
 
 app = FastAPI(title="DeepFace Access Control API")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5174",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.include_router(auth_router)
 app.include_router(employees_router)
 app.include_router(cameras_router)

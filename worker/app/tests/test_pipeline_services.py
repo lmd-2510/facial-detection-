@@ -4,6 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app.db.schema import access_logs, employees, face_embeddings, metadata
+from app.ml.embedder import FaceEmbeddingResult
 from app.services.embedding_service import (
     EmployeeNotFoundError,
     create_employee_embedding,
@@ -72,7 +73,52 @@ def get_access_log(db_session, log_id: int):
     ).first()
 
 
-def test_create_employee_embedding_stores_fake_embedding(db_session):
+@pytest.fixture()
+def deepface_embedding_stub(monkeypatch):
+    class DetectionResult:
+        detected = True
+
+    class LivenessResult:
+        passed = True
+
+    def fake_create_face_embedding(image_path: str) -> FaceEmbeddingResult:
+        return FaceEmbeddingResult(
+            image_path=image_path,
+            vector=[1.0, 0.0, 0.0],
+            model_name="Facenet512",
+            dimensions=3,
+        )
+
+    monkeypatch.setattr(
+        "app.services.embedding_service.create_face_embedding",
+        fake_create_face_embedding,
+    )
+    monkeypatch.setattr(
+        "app.services.face_pipeline_service.create_face_embedding",
+        fake_create_face_embedding,
+    )
+    monkeypatch.setattr(
+        "app.services.embedding_service.require_face",
+        lambda image_path: DetectionResult(),
+    )
+    monkeypatch.setattr(
+        "app.services.embedding_service.require_live_face",
+        lambda image_path: LivenessResult(),
+    )
+    monkeypatch.setattr(
+        "app.services.face_pipeline_service.require_face",
+        lambda image_path: DetectionResult(),
+    )
+    monkeypatch.setattr(
+        "app.services.face_pipeline_service.require_live_face",
+        lambda image_path: LivenessResult(),
+    )
+
+
+def test_create_employee_embedding_stores_deepface_embedding(
+    db_session,
+    deepface_embedding_stub,
+):
     seed_employee(db_session)
 
     stored_embedding = create_employee_embedding(
@@ -83,8 +129,8 @@ def test_create_employee_embedding_stores_fake_embedding(db_session):
 
     assert stored_embedding.id == 1
     assert stored_embedding.employee_id == 1
-    assert stored_embedding.model_name == "fake-hash-embedding-v1"
-    assert len(stored_embedding.vector) == 16
+    assert stored_embedding.model_name == "Facenet512"
+    assert len(stored_embedding.vector) == 3
 
     row = db_session.execute(select(face_embeddings)).first()
     assert row is not None
@@ -101,7 +147,10 @@ def test_create_employee_embedding_rejects_missing_employee(db_session):
         )
 
 
-def test_process_access_check_grants_matching_active_employee(db_session):
+def test_process_access_check_grants_matching_active_employee(
+    db_session,
+    deepface_embedding_stub,
+):
     seed_employee(db_session)
     create_employee_embedding(
         db_session,
@@ -130,7 +179,10 @@ def test_process_access_check_grants_matching_active_employee(db_session):
     assert row.score == 1.0
 
 
-def test_process_access_check_denies_when_no_embeddings_exist(db_session):
+def test_process_access_check_denies_when_no_embeddings_exist(
+    db_session,
+    deepface_embedding_stub,
+):
     seed_access_log(db_session, log_id=1)
 
     decision = process_access_check(
@@ -149,7 +201,14 @@ def test_process_access_check_denies_when_no_embeddings_exist(db_session):
     assert row.score is None
 
 
-def test_process_access_check_marks_log_error_when_pipeline_fails(db_session):
+def test_process_access_check_marks_log_error_when_pipeline_fails(db_session, monkeypatch):
+    def raise_no_face(image_path: str):
+        raise ValueError("No face detected by DeepFace.")
+
+    monkeypatch.setattr(
+        "app.services.face_pipeline_service.require_face",
+        raise_no_face,
+    )
     seed_access_log(
         db_session,
         log_id=1,

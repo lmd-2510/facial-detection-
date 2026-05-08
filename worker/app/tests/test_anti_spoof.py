@@ -1,15 +1,63 @@
 import pytest
 
+from app.ml import anti_spoof
 from app.ml.anti_spoof import check_liveness, require_live_face
 
 
-def test_check_liveness_passes_for_supported_fake_flow():
+class LiveDeepFace:
+    calls = []
+
+    @staticmethod
+    def extract_faces(**kwargs):
+        LiveDeepFace.calls.append(kwargs)
+        return [{"is_real": True, "antispoof_score": 0.94}]
+
+
+def test_check_liveness_uses_deepface_anti_spoofing(monkeypatch):
+    LiveDeepFace.calls = []
+    monkeypatch.setattr(anti_spoof, "load_deepface", lambda: LiveDeepFace)
+
     result = check_liveness("/app/storage/uploads/employee_1.jpg")
 
     assert result.passed is True
     assert result.image_path == "/app/storage/uploads/employee_1.jpg"
-    assert result.confidence == 1.0
-    assert result.message == "Fake anti-spoof check passed."
+    assert result.confidence == 0.94
+    assert result.message == "Live face verified by DeepFace."
+    assert LiveDeepFace.calls == [
+        {
+            "img_path": "/app/storage/uploads/employee_1.jpg",
+            "detector_backend": "opencv",
+            "enforce_detection": True,
+            "align": True,
+            "anti_spoofing": True,
+        }
+    ]
+
+
+def test_check_liveness_fails_for_spoof(monkeypatch):
+    class SpoofDeepFace:
+        @staticmethod
+        def extract_faces(**kwargs):
+            return [{"is_real": False, "antispoof_score": 0.88}]
+
+    monkeypatch.setattr(anti_spoof, "load_deepface", lambda: SpoofDeepFace)
+
+    result = check_liveness("/app/storage/uploads/spoof.jpg")
+
+    assert result.passed is False
+    assert result.confidence == 0.88
+    assert result.message == "Spoof face detected by DeepFace."
+
+
+def test_check_liveness_can_be_disabled_without_claiming_anti_spoofing(monkeypatch):
+    result = check_liveness(
+        "/app/storage/uploads/employee_1.jpg",
+        anti_spoofing_enabled=False,
+    )
+
+    assert result.passed is True
+    assert result.confidence == 0.0
+    assert result.message == "DeepFace anti-spoofing is disabled by configuration."
 
 
 def test_check_liveness_rejects_empty_image_path():
@@ -20,12 +68,35 @@ def test_check_liveness_rejects_empty_image_path():
     assert result.message == "Image path is empty."
 
 
-def test_require_live_face_returns_passed_result():
+def test_check_liveness_rejects_unexpected_deepface_format(monkeypatch):
+    class BadDeepFace:
+        @staticmethod
+        def extract_faces(**kwargs):
+            return [{"missing_is_real": True}]
+
+    monkeypatch.setattr(anti_spoof, "load_deepface", lambda: BadDeepFace)
+
+    result = check_liveness("/app/storage/uploads/employee_1.jpg")
+
+    assert result.passed is False
+    assert "does not include is_real" in result.message
+
+
+def test_require_live_face_returns_passed_result(monkeypatch):
+    monkeypatch.setattr(anti_spoof, "load_deepface", lambda: LiveDeepFace)
+
     result = require_live_face("/app/storage/uploads/employee_1.jpg")
 
     assert result.passed is True
 
 
-def test_require_live_face_raises_for_empty_image_path():
-    with pytest.raises(ValueError, match="Image path is empty"):
-        require_live_face("")
+def test_require_live_face_raises_for_spoof(monkeypatch):
+    class SpoofDeepFace:
+        @staticmethod
+        def extract_faces(**kwargs):
+            return [{"is_real": False, "antispoof_score": 0.88}]
+
+    monkeypatch.setattr(anti_spoof, "load_deepface", lambda: SpoofDeepFace)
+
+    with pytest.raises(ValueError, match="Spoof face detected"):
+        require_live_face("/app/storage/uploads/spoof.jpg")

@@ -1,57 +1,99 @@
-import math
-
 import pytest
 
-from app.ml.embedder import (
-    DEFAULT_EMBEDDING_DIMENSIONS,
-    FAKE_MODEL_NAME,
-    create_fake_embedding,
-)
+from app.ml import embedder
+from app.ml.embedder import create_face_embedding
 
 
-def test_create_fake_embedding_returns_expected_shape():
-    result = create_fake_embedding("/app/storage/uploads/employee_1.jpg")
+class FakeDeepFace:
+    calls = []
+
+    @staticmethod
+    def represent(**kwargs):
+        FakeDeepFace.calls.append(kwargs)
+        return [
+            {
+                "embedding": [0.1, 0.2, 0.3],
+                "facial_area": {"x": 1, "y": 2, "w": 10, "h": 10},
+            }
+        ]
+
+
+def test_create_face_embedding_calls_deepface_represent(monkeypatch):
+    FakeDeepFace.calls = []
+    monkeypatch.setattr(embedder, "load_deepface", lambda: FakeDeepFace)
+
+    result = create_face_embedding("/app/storage/uploads/employee_1.jpg")
 
     assert result.image_path == "/app/storage/uploads/employee_1.jpg"
-    assert result.model_name == FAKE_MODEL_NAME
-    assert result.dimensions == DEFAULT_EMBEDDING_DIMENSIONS
-    assert len(result.vector) == DEFAULT_EMBEDDING_DIMENSIONS
-    assert all(-1 <= value <= 1 for value in result.vector)
+    assert result.model_name == "Facenet512"
+    assert result.dimensions == 3
+    assert result.vector == [0.1, 0.2, 0.3]
+    assert FakeDeepFace.calls == [
+        {
+            "img_path": "/app/storage/uploads/employee_1.jpg",
+            "model_name": "Facenet512",
+            "detector_backend": "opencv",
+            "enforce_detection": True,
+            "align": True,
+            "normalization": "base",
+        }
+    ]
 
 
-def test_create_fake_embedding_is_deterministic_for_same_image_path():
-    first_result = create_fake_embedding("/app/storage/uploads/employee_1.jpg")
-    second_result = create_fake_embedding("/app/storage/uploads/employee_1.jpg")
+def test_create_face_embedding_accepts_model_options(monkeypatch):
+    FakeDeepFace.calls = []
+    monkeypatch.setattr(embedder, "load_deepface", lambda: FakeDeepFace)
 
-    assert first_result == second_result
+    result = create_face_embedding(
+        "/app/storage/uploads/employee_1.jpg",
+        model_name="ArcFace",
+        detector_backend="retinaface",
+        enforce_detection=False,
+        align=False,
+        normalization="ArcFace",
+    )
 
-
-def test_create_fake_embedding_changes_for_different_image_path():
-    first_result = create_fake_embedding("/app/storage/uploads/employee_1.jpg")
-    second_result = create_fake_embedding("/app/storage/uploads/employee_2.jpg")
-
-    assert first_result.vector != second_result.vector
-
-
-def test_create_fake_embedding_returns_normalized_vector():
-    result = create_fake_embedding("/app/storage/uploads/employee_1.jpg")
-    magnitude = math.sqrt(sum(value * value for value in result.vector))
-
-    assert magnitude == pytest.approx(1.0, abs=0.00001)
-
-
-def test_create_fake_embedding_accepts_custom_dimensions():
-    result = create_fake_embedding("/app/storage/uploads/employee_1.jpg", dimensions=8)
-
-    assert result.dimensions == 8
-    assert len(result.vector) == 8
+    assert result.model_name == "ArcFace"
+    assert FakeDeepFace.calls[0]["detector_backend"] == "retinaface"
+    assert FakeDeepFace.calls[0]["enforce_detection"] is False
+    assert FakeDeepFace.calls[0]["align"] is False
+    assert FakeDeepFace.calls[0]["normalization"] == "ArcFace"
 
 
-def test_create_fake_embedding_rejects_empty_image_path():
+def test_create_face_embedding_rejects_empty_image_path():
     with pytest.raises(ValueError, match="Image path is empty"):
-        create_fake_embedding("")
+        create_face_embedding("")
 
 
-def test_create_fake_embedding_rejects_invalid_dimensions():
-    with pytest.raises(ValueError, match="greater than zero"):
-        create_fake_embedding("/app/storage/uploads/employee_1.jpg", dimensions=0)
+def test_create_face_embedding_rejects_empty_deepface_result(monkeypatch):
+    class EmptyDeepFace:
+        @staticmethod
+        def represent(**kwargs):
+            return []
+
+    monkeypatch.setattr(embedder, "load_deepface", lambda: EmptyDeepFace)
+
+    with pytest.raises(ValueError, match="did not return any face embedding"):
+        create_face_embedding("/app/storage/uploads/employee_1.jpg")
+
+
+def test_create_face_embedding_rejects_unexpected_deepface_format(monkeypatch):
+    class BadDeepFace:
+        @staticmethod
+        def represent(**kwargs):
+            return [{"not_embedding": [0.1]}]
+
+    monkeypatch.setattr(embedder, "load_deepface", lambda: BadDeepFace)
+
+    with pytest.raises(ValueError, match="unexpected embedding format"):
+        create_face_embedding("/app/storage/uploads/employee_1.jpg")
+
+
+def test_create_face_embedding_reports_missing_dependency(monkeypatch):
+    def raise_import_error():
+        raise RuntimeError("DeepFace is not installed.")
+
+    monkeypatch.setattr(embedder, "load_deepface", raise_import_error)
+
+    with pytest.raises(RuntimeError, match="DeepFace is not installed"):
+        create_face_embedding("/app/storage/uploads/employee_1.jpg")

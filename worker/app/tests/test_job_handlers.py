@@ -14,7 +14,7 @@ def test_handle_embedding_job_calls_embedding_service(monkeypatch):
 
     class FakeEmbedding:
         id = 10
-        model_name = "fake-hash-embedding-v1"
+        model_name = "Facenet512"
 
     def fake_create_employee_embedding(db, *, employee_id: int, image_path: str):
         calls.append(

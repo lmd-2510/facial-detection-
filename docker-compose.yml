@@ -21,6 +21,8 @@ services:
     environment:
       DATABASE_URL: postgresql://deepface:deepface@database:5432/deepface_access
       REDIS_URL: redis://redis:6379/0
+    volumes:
+      - ./data/smoke:/app/data/smoke
     ports:
       - "8000:8000"
     depends_on:
@@ -56,6 +58,15 @@ services:
     environment:
       DATABASE_URL: postgresql://deepface:deepface@database:5432/deepface_access
       REDIS_URL: redis://redis:6379/0
+      DEEPFACE_MODEL_NAME: Facenet512
+      DEEPFACE_DETECTOR_BACKEND: opencv
+      DEEPFACE_ENFORCE_DETECTION: "true"
+      DEEPFACE_ALIGN: "true"
+      DEEPFACE_NORMALIZATION: base
+      DEEPFACE_MATCH_THRESHOLD: "0.70"
+      DEEPFACE_ANTI_SPOOFING: "false"
+    volumes:
+      - ./data/smoke:/app/data/smoke
     depends_on:
       - database
       - redis

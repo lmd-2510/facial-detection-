@@ -84,13 +84,13 @@ Luu vector khuon mat cua employee. Trong MVP, mot employee co the co nhieu embed
 | `id` | integer | yes | Primary key |
 | `employee_id` | integer | yes | Foreign key den `employees.id` |
 | `vector` | jsonb | yes | Mang so thuc, vi du `[0.12, 0.34, ...]` |
-| `model_name` | varchar(100) | yes | Ten model/fake embedder da tao vector |
+| `model_name` | varchar(100) | yes | Ten model da tao vector |
 | `created_at` | timestamptz | yes | Thoi diem tao embedding |
 
 Ghi chu:
 
-- Giai doan fake AI co the dung vector kich thuoc nho va deterministic.
-- Khi thay bang DeepFace that, can ghi ro `model_name` de tranh tron embedding cua nhieu model.
+- Giai Doan 7 da dung DeepFace that, mac dinh `Facenet512`.
+- Can ghi ro `model_name` de tranh tron embedding cua nhieu model.
 - Khi tich hop Qdrant, bang nay van co the giu metadata va id tham chieu vector.
 
 ## Bang `access_logs`

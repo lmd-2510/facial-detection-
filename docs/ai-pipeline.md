@@ -1,53 +1,66 @@
 # AI Pipeline
 
 Tai lieu nay ghi trang thai pipeline AI cho DeepFace Access Control MVP.
-Hien tai project da co core fake AI pipeline cua Giai Doan 5 theo
-`docs/implementation-roadmap.md`, truoc khi tich hop DeepFace that.
+Sau Giai Doan 7, worker da thay cac phan fake AI trong flow chinh bang DeepFace.
 
-## Muc Tieu Giai Doan 5
-
-Muc tieu la test duoc flow end-to-end:
+## Flow Hien Tai
 
 ```text
 image_path
--> detector
--> anti_spoof
--> embedder
--> matcher
+-> DeepFace.extract_faces() de detect mat
+-> DeepFace.extract_faces(anti_spoofing=True) de check liveness
+-> DeepFace.represent()
+-> cosine matching
 -> decision
 -> access_log
 ```
 
-Pipeline fake can deterministic: cung mot anh hoac cung mot duong dan anh thi tao cung mot vector.
-Do chinh xac AI chua quan trong o giai doan nay; muc tieu la kiem tra queue, worker va database update.
+`detector.py`, `anti_spoof.py` va `embedder.py` deu wrap DeepFace de giu contract noi bo on dinh cho worker.
+
+## Cau Hinh DeepFace
+
+Worker doc cac bien moi truong sau:
+
+| Bien | Mac dinh | Ghi chu |
+| --- | --- | --- |
+| `DEEPFACE_MODEL_NAME` | `Facenet512` | Model dung de tao embedding |
+| `DEEPFACE_DETECTOR_BACKEND` | `opencv` | Detector backend cua DeepFace |
+| `DEEPFACE_ENFORCE_DETECTION` | `true` | Loi neu DeepFace khong thay mat |
+| `DEEPFACE_ALIGN` | `true` | Can chinh mat truoc khi tao vector |
+| `DEEPFACE_NORMALIZATION` | `base` | Chuan hoa anh dau vao theo DeepFace |
+| `DEEPFACE_MATCH_THRESHOLD` | `0.70` | Nguong cosine similarity de grant access |
+| `DEEPFACE_ANTI_SPOOFING` | `false` | Bat/tat anti-spoofing cua DeepFace |
+
+Nguong `0.70` la moc ban dau cho cosine similarity khi dung `Facenet512`. Can smoke test voi bo anh that cua du an de tinh chinh nguong nay.
+Mac dinh smoke test local nen tat `DEEPFACE_ANTI_SPOOFING` de tranh blocker dependency `torch`; khi muon test liveness that thi bat lai va bo sung dependency phu hop.
 
 ## Module ML Hien Co
 
 ### `worker/app/ml/detector.py`
 
-Gia lap phat hien khuon mat.
+Detect mat bang `DeepFace.extract_faces()`.
 
 - Reject `image_path` rong.
 - Reject extension khong nam trong danh sach anh ho tro.
-- Neu ten file chua marker nhu `no_face`, `noface`, `empty`, `blank` thi gia lap khong thay mat.
-- Cac truong hop con lai tra ve `FaceDetectionResult` co bounding box va confidence deterministic.
+- Tra ve `FaceDetectionResult` voi bounding box va confidence tu DeepFace.
+- Khong con logic fake dua tren ten file.
 
 ### `worker/app/ml/anti_spoof.py`
 
-Gia lap anti-spoof/liveness.
+Check liveness bang `DeepFace.extract_faces(anti_spoofing=True)`.
 
-- Ban dau pass voi `image_path` hop le.
 - Reject `image_path` rong.
-- Co helper `require_live_face()` de pipeline co the dung kieu fail-fast.
+- Tra ve fail neu DeepFace bao `is_real = false`.
+- Neu `DEEPFACE_ANTI_SPOOFING=false`, module tra ve pass voi message noi ro anti-spoofing dang tat theo cau hinh.
 
 ### `worker/app/ml/embedder.py`
 
-Tao fake embedding.
+Tao embedding that bang DeepFace.
 
-- Dung hash tu noi dung file neu file ton tai.
-- Neu file chua ton tai trong local environment, dung chinh `image_path` lam seed.
-- Vector deterministic va duoc normalize.
-- Model name hien tai: `fake-hash-embedding-v1`.
+- Goi `DeepFace.represent()` bang config tu bien moi truong.
+- Lay embedding cua face dau tien trong ket qua.
+- Validate vector khong rong va toan so.
+- Luu `model_name` vao database de tranh match nham voi embedding cua model khac.
 
 ### `worker/app/ml/matcher.py`
 
@@ -55,49 +68,40 @@ So sanh vector bang cosine similarity.
 
 - Co `cosine_similarity()`.
 - Co `find_best_match()` de tim candidate co score cao nhat.
-- Threshold mac dinh hien tai la `0.85`.
+- Threshold mac dinh hien tai doc tu `DEEPFACE_MATCH_THRESHOLD`.
 
 ## Trang Thai Tich Hop
 
 Da co:
 
-- Cac module ML fake trong `worker/app/ml/`.
-- Unit test trong `worker/app/tests/`.
 - Worker queue o `worker/app/tasks/queue_worker.py` lay job tu Redis va dispatch sang job handler.
 - Ket noi PostgreSQL rieng cho worker trong `worker/app/config/database.py`.
 - Schema SQLAlchemy Core toi thieu cho worker trong `worker/app/db/schema.py`.
-- `embedding_job.py` goi fake detector/anti-spoof/embedder va luu vao `face_embeddings`.
-- `access_job.py` goi fake pipeline, match voi embedding cua employee active, va cap nhat `access_logs`.
+- `embedding_job.py` goi detector/liveness/embedder va luu vector DeepFace vao `face_embeddings`.
+- `access_job.py` goi pipeline, chi match voi embedding cua employee active va cung `model_name`, roi cap nhat `access_logs`.
+- `storage_service.py` normalize va validate `image_path` local truoc khi worker goi DeepFace.
+- `reindex_service.py` hien chi co readiness check vi DB chua luu source `image_path` de tao lai embedding khi doi model.
 
 Trang thai access log sau worker:
 
 - `granted`: match duoc employee active vuot threshold.
 - `denied`: khong co candidate hoac score khong dat threshold.
-- `error`: pipeline loi, vi du anh co marker `no_face`.
+- `error`: pipeline loi, vi du input khong hop le hoac DeepFace khong tao duoc embedding.
 
 ## Test
 
-Chay test worker ML:
+Chay test worker:
 
 ```powershell
 $env:PYTHONPATH='worker'; python -m pytest worker\app\tests
 ```
 
-Hien test cover:
-
-- detector
-- anti-spoof
-- fake embedder
-- matcher cosine similarity
-- embedding service ghi `face_embeddings`
-- access pipeline cap nhat `access_logs`
-- job handlers goi dung service
+Unit test mock DeepFace de test nhanh contract cua detector, anti-spoof, embedder va service. Smoke test voi anh that nen chay qua Docker Compose sau khi rebuild worker de cai dependency va tai model weight.
 
 ## Buoc Tiep Theo
 
-Sau Giai Doan 5, cac viec tiep theo nen lam:
-
-1. Lam frontend theo API de thao tac flow chinh.
-2. Bo sung upload file that thay vi nhap `image_path`.
-3. Chay smoke test bang Docker Compose voi Redis/PostgreSQL that.
-4. Sau khi flow fake on dinh, thay fake embedder bang DeepFace that.
+1. Chuan bi bo anh test nho gom cung nguoi/khac nguoi/anh loi/spoof neu co.
+2. Chay embedding job va access job that voi Docker Compose.
+3. Dieu chinh `DEEPFACE_MATCH_THRESHOLD` theo ket qua thuc te.
+4. Luu them source `image_path` cho embedding neu muon reindex model ve sau.
+5. Khi volume embedding lon hon, tich hop Qdrant de search vector tot hon.

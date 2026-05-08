@@ -65,7 +65,7 @@ Flow chinh cua MVP:
 7. Worker so sanh embedding cua snapshot voi embedding da dang ky.
 8. He thong ghi access log voi ket qua `granted`, `denied` hoac `error`.
 
-Hien tai project da hoan thanh core flow cua Giai Doan 5 va da co frontend MVP cho Giai Doan 6. Backend co API cot loi cho auth, employees, cameras, logs, va day duoc `embedding_jobs` / `access_jobs` vao Redis. Worker nghe Redis queue, chay fake AI pipeline deterministic, luu fake embedding vao `face_embeddings`, va cap nhat `access_logs` thanh `granted`, `denied` hoac `error`. Admin/user frontend da co login, thao tac flow chinh theo API, hien thi loading/error/empty state co ban.
+Hien tai project da hoan thanh phan code cot loi cua Giai Doan 7. Backend co API cot loi cho auth, employees, cameras, logs, va day duoc `embedding_jobs` / `access_jobs` vao Redis. Worker nghe Redis queue, dung DeepFace cho face detection, anti-spoofing/liveness, embedding va cosine matching, luu vector vao `face_embeddings`, va cap nhat `access_logs` thanh `granted`, `denied` hoac `error`. Admin/user frontend da co login, thao tac flow chinh theo API, hien thi loading/error/empty state co ban.
 
 ## Cau Truc Thu Muc Nen Doc Truoc
 
@@ -132,5 +132,5 @@ Nhung phan nen uu tien sau khi da nam tong quan:
 - Bo sung upload file that thay vi nhap `image_path` thu cong.
 - Bo sung Playwright end-to-end test khi muon test UI tren browser that.
 - Hoan thien `docs/architecture.md` de mo ta kien truc ro hon.
-- Sau khi fake pipeline on dinh, thay fake embedding bang DeepFace that trong worker.
+- Smoke test DeepFace voi bo anh that nho, roi tinh chinh `DEEPFACE_MATCH_THRESHOLD`.
 - Dua embedding search sang Qdrant khi pipeline AI da on dinh.

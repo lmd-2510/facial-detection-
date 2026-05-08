@@ -33,7 +33,7 @@ Chay script:
 Script nay chay:
 
 - Backend API tests trong `backend/app/tests`.
-- Worker fake AI pipeline tests trong `worker/app/tests`.
+- Worker pipeline tests trong `worker/app/tests`.
 - Admin frontend build bang `npm run build` neu may co `npm`.
 - User frontend build bang `npm run build` neu may co `npm`.
 

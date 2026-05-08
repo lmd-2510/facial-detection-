@@ -2,4 +2,9 @@ node_modules/
 dist/
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.Python
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/

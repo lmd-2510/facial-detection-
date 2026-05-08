@@ -313,6 +313,15 @@ image_path
 
 Muc tieu: nguoi dung thao tac duoc flow chinh bang UI.
 
+Trang thai hien tai:
+
+- Admin app da co login, dashboard, employee management, camera management, access logs va settings.
+- User app da co login, access check, history va profile.
+- UI da luu Bearer token trong localStorage va gui token kem request API.
+- Da co loading, error va empty state co ban cho cac flow chinh.
+- Da co `scripts/test.ps1` de chay backend/worker tests va frontend build neu may co `npm`.
+- Gioi han con lai: chua upload file that, van nhap `image_path` thu cong; chua co Playwright end-to-end test tren browser.
+
 Nguyen tac frontend:
 
 - Lam theo API da on dinh, khong tu che flow rieng.
@@ -422,7 +431,7 @@ Neu muon review:
 Hay kiem tra Giai Doan 6 trong docs/implementation-roadmap.md.
 So sanh repo hien tai voi roadmap, xem thieu file nao, file nao code chua du function, service nao chua noi duoc, can update docs nao, roi chay test/command kiem tra neu co the, hay kiem tra mot luot giup toi nhe. Ngoai ra, sau khi kiem tra xong het mot luot, hay doc lai ca repo de xem co file quen chua cap nhat khong nhe, tat ca cac file.
 Chu y: chi sua cac loi nho ro rang, con loi lon thi bao toi truoc, neu loi nho va chac chan dung huong thi sua truc tiep luon.
-Sau khi kiem tra xong, co the cho toi biet tu buoc 1 den buoc 6 da du trong repo chua, con thieu file, folder gi nua khong, so rang se co file thieu code hay structure con thieu gi do, hay readme chua duoc cap nhat
+Sau khi kiem tra xong, co the cho toi biet tu buoc 1 den buoc 6 da du trong repo chua, con thieu file, folder gi nua khong, so rang se co file thieu code hay structure con thieu gi do, hay readme chua duoc cap nhat. Sau do, cho toi biet tat ca nhung thay doi cua ban va noi tong quan nhung thay doi do
 ```
 
 ## Tom Tat Lo Trinh
@@ -439,3 +448,6 @@ Sau khi kiem tra xong, co the cho toi biet tu buoc 1 den buoc 6 da du trong repo
 9. DeepFace that
 10. deploy / monitoring / backup
 ```
+
+## Context con thieu can duoc bo sung sau khi 8 giai doan hoan thanh
+giai doan 6: thieu update/delete o camera, nen check ki va nen them sau nay

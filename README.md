@@ -11,11 +11,10 @@ He thong co the hieu theo cac khoi lon sau:
 - `frontend/`: giao dien nguoi dung va giao dien admin.
 - `backend/`: FastAPI backend, nhan request tu frontend va dieu phoi nghiep vu.
 - `worker/`: tien trinh nen xu ly anh, embedding va matching khuon mat.
-- `database/`: du lieu khoi tao va ghi chu schema.
 - `data/`: noi luu tru file local duoc mount vao container.
 - `nginx/`: cau hinh reverse proxy/web server.
 - `monitoring/`: cau hinh theo doi he thong.
-- `backup/`: tai lieu va cau hinh lien quan den backup.
+- `backup/`: noi mac dinh de script luu output backup local.
 - `helm/`: cau hinh deploy len Kubernetes.
 - `scripts/`: cac script ho tro dev, test, seed data va backup.
 - `docs/`: tai lieu giai thich kien truc, API, database, AI pipeline, CI/CD va van hanh.
@@ -30,8 +29,10 @@ Trong `docker-compose.yml`, he thong duoc chay bang cac service chinh:
 - `worker`: background worker xu ly cac job AI.
 - `database`: PostgreSQL, luu user, employee, camera, access log va embedding.
 - `redis`: queue trung gian giua backend va worker.
-
-MinIO va Qdrant chua nam trong compose toi thieu cua Giai Doan 1. Hai service nay se duoc them sau khi core flow da on dinh.
+- `nginx`: reverse proxy prod-like cho frontend/backend.
+- `prometheus`: scrape metric toi thieu cua backend.
+- `minio`: object storage da co service/config cho Giai Doan 8, nhung flow upload that chua bat buoc dung.
+- `qdrant`: vector database da co service/config cho Giai Doan 8, nhung matching hien van dung PostgreSQL JSONB.
 
 Co the hinh dung luong tong quat nhu sau:
 
@@ -90,12 +91,22 @@ Chay toan bo he thong:
 docker compose up --build
 ```
 
+Hoac dung script dev:
+
+```powershell
+.\scripts\dev.ps1 -Build
+```
+
 Sau khi chay, co the mo:
 
 - Backend health: http://localhost:8000/health
 - Backend API docs: http://localhost:8000/docs
 - User app: http://localhost:5173
 - Admin app: http://localhost:5174
+- Nginx entrypoint: http://localhost:8080
+- Prometheus: http://localhost:9090
+- MinIO console: http://localhost:9001
+- Qdrant HTTP: http://localhost:6333
 
 Tao bang va seed tai khoan demo:
 
@@ -116,14 +127,29 @@ Chay test tong hop:
 
 Ghi chu test va smoke test Giai Doan 6 nam trong `docs/phase6-testing.md`.
 
+Backup toi thieu database va thu muc `data/`:
+
+```powershell
+.\scripts\backup.ps1
+```
+
 ## File Cau Hinh Quan Trong
 
 - `.env.example`: danh sach bien moi truong mau.
 - `docker-compose.yml`: khai bao service local.
+- `nginx/nginx.conf`: reverse proxy local/prod-like.
+- `monitoring/prometheus/prometheus.yml`: Prometheus scrape config.
 - `backend/Dockerfile`: cach build backend image.
 - `worker/Dockerfile`: cach build worker image.
 - `frontend/user/Dockerfile`: cach build user frontend.
 - `frontend/admin/Dockerfile`: cach build admin frontend.
+
+## Ghi Chu Ve Database
+
+- Schema va mo ta bang du lieu nen doc trong `docs/db-schema.md`.
+- Logic model/database cua backend nam trong `backend/app/models/` va `backend/app/db/`.
+- Worker giu schema/doc DB toi thieu rieng phuc vu xu ly job trong `worker/app/db/schema.py`.
+- Seed tai khoan demo hien duoc thuc hien qua `backend/app/db/seed.py` va `scripts/seed.ps1`.
 
 ## Huong Phat Trien Tiep Theo
 
@@ -131,6 +157,7 @@ Nhung phan nen uu tien sau khi da nam tong quan:
 
 - Bo sung upload file that thay vi nhap `image_path` thu cong.
 - Bo sung Playwright end-to-end test khi muon test UI tren browser that.
-- Hoan thien `docs/architecture.md` de mo ta kien truc ro hon.
 - Smoke test DeepFace voi bo anh that nho, roi tinh chinh `DEEPFACE_MATCH_THRESHOLD`.
-- Dua embedding search sang Qdrant khi pipeline AI da on dinh.
+- Noi MinIO vao upload flow that.
+- Dua embedding search sang Qdrant khi volume vector lon hon.
+- Hoan thien Grafana dashboard va alerting.

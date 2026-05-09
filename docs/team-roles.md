@@ -27,7 +27,7 @@ Tai lieu nay goi y cach chia viec khi tiep tuc phat trien DeepFace Access Contro
 
 - Docker Compose, nginx, healthcheck.
 - CI/CD workflow.
-- Monitoring Prometheus/Grafana.
+- Monitoring Prometheus/Alertmanager/Grafana.
 - Backup/restore.
 - Helm/Kubernetes deployment.
 

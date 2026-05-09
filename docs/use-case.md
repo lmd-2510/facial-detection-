@@ -22,6 +22,7 @@ Tai lieu nay tom tat cac use case chinh cua DeepFace Access Control MVP.
 
 - Chay local stack bang Docker Compose.
 - Kiem tra health/metrics.
+- Xem dashboard Grafana va alert local qua Alertmanager.
 - Chay test tong hop.
 - Backup PostgreSQL va thu muc `data/`.
 - Render/lint Helm chart truoc khi deploy.

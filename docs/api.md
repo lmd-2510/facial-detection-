@@ -1,6 +1,6 @@
 # Backend API
 
-Tai lieu nay tom tat API backend hien co den Giai Doan 7. Swagger chi tiet co tai:
+Tai lieu nay tom tat API backend hien co sau Giai Doan 8. Swagger chi tiet co tai:
 
 ```text
 http://localhost:8000/docs

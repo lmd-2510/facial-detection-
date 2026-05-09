@@ -115,3 +115,22 @@ Response ban dau co `status` mac dinh la `processing`, `employee_id` la `null`, 
 - `error`: pipeline loi, vi du khong detect duoc mat hoac DeepFace khong tao duoc embedding.
 
 Co the goi `GET /logs` de xem ket qua sau khi worker xu ly.
+
+## Admin / Operations
+
+### `GET /admin/status`
+
+Can Bearer token. Tra ve trang thai van hanh toi thieu:
+
+- database ok/error
+- Redis ok/error
+- queue length cua `embedding_jobs`
+- queue length cua `access_jobs`
+
+### `GET /health`
+
+Khong can token. Dung cho Docker/Kubernetes health check. Kiem tra backend, database va Redis.
+
+### `GET /metrics`
+
+Khong can token. Tra ve metric dang Prometheus text format cho monitoring toi thieu.

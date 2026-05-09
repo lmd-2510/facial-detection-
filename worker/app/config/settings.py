@@ -20,6 +20,7 @@ def _get_float(name: str, default: float) -> float:
 
 @dataclass(frozen=True)
 class Settings:
+    app_env: str = getenv("APP_ENV", "dev")
     redis_url: str = getenv("REDIS_URL", "redis://localhost:6379/0")
     database_url: str = getenv(
         "DATABASE_URL",

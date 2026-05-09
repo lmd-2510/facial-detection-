@@ -17,7 +17,10 @@ def test_check_liveness_uses_deepface_anti_spoofing(monkeypatch):
     LiveDeepFace.calls = []
     monkeypatch.setattr(anti_spoof, "load_deepface", lambda: LiveDeepFace)
 
-    result = check_liveness("/app/storage/uploads/employee_1.jpg")
+    result = check_liveness(
+        "/app/storage/uploads/employee_1.jpg",
+        anti_spoofing_enabled=True,
+    )
 
     assert result.passed is True
     assert result.image_path == "/app/storage/uploads/employee_1.jpg"
@@ -42,7 +45,10 @@ def test_check_liveness_fails_for_spoof(monkeypatch):
 
     monkeypatch.setattr(anti_spoof, "load_deepface", lambda: SpoofDeepFace)
 
-    result = check_liveness("/app/storage/uploads/spoof.jpg")
+    result = check_liveness(
+        "/app/storage/uploads/spoof.jpg",
+        anti_spoofing_enabled=True,
+    )
 
     assert result.passed is False
     assert result.confidence == 0.88
@@ -76,7 +82,10 @@ def test_check_liveness_rejects_unexpected_deepface_format(monkeypatch):
 
     monkeypatch.setattr(anti_spoof, "load_deepface", lambda: BadDeepFace)
 
-    result = check_liveness("/app/storage/uploads/employee_1.jpg")
+    result = check_liveness(
+        "/app/storage/uploads/employee_1.jpg",
+        anti_spoofing_enabled=True,
+    )
 
     assert result.passed is False
     assert "does not include is_real" in result.message
@@ -85,7 +94,10 @@ def test_check_liveness_rejects_unexpected_deepface_format(monkeypatch):
 def test_require_live_face_returns_passed_result(monkeypatch):
     monkeypatch.setattr(anti_spoof, "load_deepface", lambda: LiveDeepFace)
 
-    result = require_live_face("/app/storage/uploads/employee_1.jpg")
+    result = require_live_face(
+        "/app/storage/uploads/employee_1.jpg",
+        anti_spoofing_enabled=True,
+    )
 
     assert result.passed is True
 
@@ -99,4 +111,7 @@ def test_require_live_face_raises_for_spoof(monkeypatch):
     monkeypatch.setattr(anti_spoof, "load_deepface", lambda: SpoofDeepFace)
 
     with pytest.raises(ValueError, match="Spoof face detected"):
-        require_live_face("/app/storage/uploads/spoof.jpg")
+        require_live_face(
+            "/app/storage/uploads/spoof.jpg",
+            anti_spoofing_enabled=True,
+        )

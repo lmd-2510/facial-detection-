@@ -78,8 +78,15 @@ def check_liveness(
     )
 
 
-def require_live_face(image_path: str) -> AntiSpoofResult:
-    result = check_liveness(image_path)
+def require_live_face(
+    image_path: str,
+    *,
+    anti_spoofing_enabled: bool = settings.deepface_anti_spoofing,
+) -> AntiSpoofResult:
+    result = check_liveness(
+        image_path,
+        anti_spoofing_enabled=anti_spoofing_enabled,
+    )
     if not result.passed:
         raise ValueError(result.message)
 

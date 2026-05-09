@@ -603,7 +603,6 @@ scripts/dev.ps1
 scripts/test.ps1
 scripts/seed.ps1
 scripts/backup.ps1
-backup/README.md
 docs/backup.md
 ```
 
@@ -747,7 +746,6 @@ File/folder can sua:
 
 ```text
 scripts/backup.ps1
-backup/README.md
 docs/backup.md
 docker-compose.yml
 ```

@@ -2,6 +2,8 @@
 
 Giai Doan 8 co backup toi thieu cho PostgreSQL va thu muc `data/` local.
 
+Tai lieu nay la nguon huong dan backup/restore chinh cua repo. Thu muc `backup/` duoc dung de chua output backup local do script tao ra, khong can them mot file README rieng trong thu muc do.
+
 ## Tao Backup
 
 Chay:
@@ -21,6 +23,11 @@ Ben trong co:
 - `postgres.sql`: dump PostgreSQL bang `pg_dump`.
 - `data.zip`: archive thu muc `data/` neu ton tai.
 - `manifest.txt`: thong tin backup va goi y restore.
+
+Ghi chu:
+
+- Thu muc `backup/` co the chua cac ban backup timestamp do script tao ra.
+- Co the an toan xoa cac file tai lieu placeholder trong `backup/` neu docs da duoc giu tai day.
 
 Mac dinh script giu 10 backup moi nhat. Doi so luong:
 

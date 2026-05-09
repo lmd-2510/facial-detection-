@@ -30,6 +30,8 @@ URL mac dinh:
 - Admin app: `http://localhost:5174`
 - Nginx entrypoint: `http://localhost:8080`
 - Prometheus: `http://localhost:9090`
+- Alertmanager: `http://localhost:9093`
+- Grafana: `http://localhost:3000`
 - MinIO console: `http://localhost:9001`
 - Qdrant HTTP: `http://localhost:6333`
 
@@ -45,6 +47,8 @@ URL mac dinh:
 - `frontend-admin`: admin UI.
 - `nginx`: reverse proxy.
 - `prometheus`: scrape backend metrics.
+- `alertmanager`: nhan alert tu Prometheus trong local monitoring.
+- `grafana`: dashboard doc metric tu Prometheus.
 - `minio`: object storage, da co service/config nhung chua noi vao upload flow that.
 - `qdrant`: vector database, da co service/config nhung access matching hien van dung PostgreSQL JSONB.
 

@@ -1,6 +1,6 @@
 # Monitoring
 
-Sau Giai Doan 8, monitoring toi thieu gom backend `/health`, backend `/metrics`, Docker healthcheck va Prometheus.
+Sau Giai Doan 8, monitoring toi thieu gom backend `/health`, backend `/metrics`, Docker healthcheck, Prometheus, Alertmanager va Grafana dashboard.
 
 ## Backend Health
 
@@ -42,6 +42,7 @@ Config nam o:
 
 ```text
 monitoring/prometheus/prometheus.yml
+monitoring/prometheus/rules/deepface-alerts.yml
 ```
 
 Prometheus scrape:
@@ -61,6 +62,83 @@ Mo UI:
 ```text
 http://localhost:9090
 ```
+
+Alert rules hien co:
+
+- `BackendMetricsDown`: Prometheus khong scrape duoc backend `/metrics`.
+- `DatabaseUnavailable`: backend bao PostgreSQL down.
+- `RedisUnavailable`: backend bao Redis down.
+- `QueueBacklogHigh`: tong queue Redis lon hon 20 trong 5 phut.
+- `AccessProcessingBacklog`: access logs status `processing` lon hon 10 trong 5 phut.
+- `AccessErrorsPresent`: co access log status `error`.
+
+## Alertmanager
+
+Alertmanager nhan alert tu Prometheus va hien thi alert firing/resolved trong local UI.
+
+Config nam o:
+
+```text
+monitoring/alertmanager/alertmanager.yml
+```
+
+Chay local:
+
+```powershell
+docker compose up -d alertmanager prometheus
+```
+
+Mo UI:
+
+```text
+http://localhost:9093
+```
+
+Hien tai Alertmanager dung receiver local de xem alert trong UI. Chua cau hinh kenh gui email, Slack hoac webhook that.
+
+## Grafana
+
+Grafana duoc cau hinh trong Docker Compose va tu dong nap datasource/dashboard tu:
+
+```text
+monitoring/grafana/provisioning/
+monitoring/grafana/dashboards/
+```
+
+Chay local:
+
+```powershell
+docker compose up -d grafana
+```
+
+Mo UI:
+
+```text
+http://localhost:3000
+```
+
+Tai khoan mac dinh trong local dev:
+
+```text
+admin / admin
+```
+
+Co the doi bang cac bien:
+
+- `GRAFANA_PORT`
+- `GRAFANA_ADMIN_USER`
+- `GRAFANA_ADMIN_PASSWORD`
+
+Dashboard mac dinh:
+
+- `DeepFace Access Overview`
+
+Dashboard hien thi:
+
+- trang thai backend, database va Redis;
+- do dai queue `embedding_jobs` va `access_jobs`;
+- tong access logs theo status;
+- tong so job dang cho xu ly.
 
 ## Logging
 
@@ -84,6 +162,5 @@ Khong nen log token, password, secret hoac anh raw.
 
 ## Gioi Han Con Lai
 
-- Chua co Grafana dashboard.
 - Worker chua expose `/metrics` rieng; hien theo doi worker qua logs va Redis queue length.
-- Chua co alert rule.
+- Chua co kenh gui alert ra email, Slack hoac webhook production.

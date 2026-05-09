@@ -30,5 +30,5 @@ Tai lieu nay tom tat cac use case chinh cua DeepFace Access Control MVP.
 
 - Upload file that qua UI/API.
 - Matching vector bang Qdrant trong flow chinh.
-- Dashboard Grafana va alerting.
+- Kenh gui alert production nhu email/Slack.
 - Playwright E2E tren browser that.

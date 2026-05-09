@@ -33,6 +33,8 @@ PostgreSQL Redis Queue
 - `redis`: queue `embedding_jobs` va `access_jobs`.
 - `worker`: xu ly job DeepFace, tao embedding, match vector va cap nhat access log.
 - `prometheus`: scrape backend `/metrics`.
+- `alertmanager`: nhan alert tu Prometheus trong local monitoring.
+- `grafana`: dashboard doc metric tu Prometheus.
 - `minio`: object storage da san sang ve service/config, chua noi vao upload flow that.
 - `qdrant`: vector database da san sang ve service/config, chua noi vao access matching that.
 
@@ -75,5 +77,5 @@ User UI
 
 - Chua co upload file that qua MinIO.
 - Chua dung Qdrant trong matching production.
-- Chua co Grafana dashboard/alert rule.
+- Chua co kenh gui alert ra email/Slack/webhook production.
 - Helm chart da render/lint duoc, nhung chua xac nhan tren cluster production.

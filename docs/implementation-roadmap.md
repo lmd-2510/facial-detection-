@@ -503,11 +503,11 @@ Y nghia cua "xong Giai Doan 8":
 
 Trang thai repo sau khi code lop van hanh Giai Doan 8:
 
-- `docker-compose.yml` da co `database`, `redis`, `backend`, `worker`, `frontend-user`, `frontend-admin`, `nginx`, `prometheus`, `minio`, `qdrant`.
+- `docker-compose.yml` da co `database`, `redis`, `backend`, `worker`, `frontend-user`, `frontend-admin`, `nginx`, `prometheus`, `alertmanager`, `grafana`, `minio`, `qdrant`.
 - `backend` da co `/health` kiem tra database/Redis va `/metrics` cho Prometheus.
 - `scripts/test.ps1` da chay backend tests, worker tests va frontend build neu co `npm`.
 - `.github/workflows/ci.yml` da chay backend tests, worker tests, frontend builds va Docker build checks.
-- `nginx/nginx.conf`, `monitoring/prometheus/prometheus.yml`, `scripts/dev.ps1`, `scripts/backup.ps1`, `docs/deployment.md`, `docs/monitoring.md`, `docs/backup.md`, `docs/cicd.md` da co noi dung van hanh toi thieu.
+- `nginx/nginx.conf`, `monitoring/prometheus/prometheus.yml`, `monitoring/prometheus/rules/`, `monitoring/alertmanager/`, `monitoring/grafana/`, `scripts/dev.ps1`, `scripts/backup.ps1`, `docs/deployment.md`, `docs/monitoring.md`, `docs/backup.md`, `docs/cicd.md` da co noi dung van hanh toi thieu.
 - Helm chart `helm/deepface-access` da co `Chart.yaml`, `values.yaml`, configmap, deployments/services, optional MinIO/Qdrant va ingress.
 - `backend/app/config/minio.py`, `backend/app/config/qdrant.py`, `worker/app/config/minio.py`, `worker/app/config/qdrant.py` da co config toi thieu.
 - MinIO va Qdrant da co service/config, nhung upload flow that va vector search Qdrant chua noi vao flow chinh.
@@ -698,7 +698,7 @@ Viec can lam:
   - so access log theo status
   - queue length cua `embedding_jobs` va `access_jobs`
   - worker job success/error count neu co cach expose
-- Neu chua lam Grafana, docs phai ghi ro Giai Doan 8 moi co Prometheus config truoc.
+- Grafana co dashboard toi thieu doc metric tu Prometheus; Prometheus co alert rules va Alertmanager local.
 - Chuan hoa logging:
   - backend log request/error
   - worker log job_id, queue_name, log_id/employee_id, status
@@ -711,6 +711,9 @@ backend/requirements.txt
 backend/app/main.py
 backend/app/api/admin.py
 monitoring/prometheus/prometheus.yml
+monitoring/prometheus/rules/
+monitoring/alertmanager/
+monitoring/grafana/
 docker-compose.yml
 docs/monitoring.md
 ```
@@ -718,7 +721,7 @@ docs/monitoring.md
 Moc hoan thanh:
 
 - Prometheus container chay duoc neu duoc them vao compose.
-- Truy cap duoc Prometheus UI hoac endpoint metrics.
+- Truy cap duoc Prometheus UI, Alertmanager UI, Grafana dashboard hoac endpoint metrics.
 - Co cach xem queue length va loi worker khi debug.
 
 ### 8.6 Backup Va Restore
@@ -957,11 +960,12 @@ Nhung phan duoi day khong con la blocker cho lop van hanh co ban, nhung nen duoc
      - thoi gian xu ly embedding/access job
      - so lan queue retry hoac poison job neu ve sau co retry
 
-2. Prometheus da co, nhung Grafana va alerting chua co
-   - Hien docs da ghi ro chua co Grafana dashboard va alert rule.
+2. Prometheus, Alertmanager va Grafana da co, nhung kenh gui alert production chua co
+   - Hien Grafana co dashboard toi thieu cho backend/database/Redis/queue/access logs.
+   - Hien Prometheus co alert rules va Alertmanager UI local.
    - Ve sau nen bo sung:
      - dashboard backend health/request/queue length
-     - canh bao backend 5xx, Redis down, database down, queue tang bat thuong
+     - receiver email/Slack/webhook cho backend 5xx, Redis down, database down, queue tang bat thuong
 
 3. MinIO moi o muc service/config, chua noi vao flow that
    - Backend van nhan `image_path` thay vi upload file.

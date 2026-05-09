@@ -30,6 +30,8 @@ Mo nhanh:
 - Admin app: `http://localhost:5174`
 - Nginx: `http://localhost:8080`
 - Prometheus: `http://localhost:9090`
+- Alertmanager: `http://localhost:9093`
+- Grafana: `http://localhost:3000`
 
 ## Chay Test
 

@@ -31,6 +31,8 @@ Trong `docker-compose.yml`, he thong duoc chay bang cac service chinh:
 - `redis`: queue trung gian giua backend va worker.
 - `nginx`: reverse proxy prod-like cho frontend/backend.
 - `prometheus`: scrape metric toi thieu cua backend.
+- `alertmanager`: nhan alert tu Prometheus trong local monitoring.
+- `grafana`: dashboard truc quan hoa metric Prometheus.
 - `minio`: object storage da co service/config cho Giai Doan 8, nhung flow upload that chua bat buoc dung.
 - `qdrant`: vector database da co service/config cho Giai Doan 8, nhung matching hien van dung PostgreSQL JSONB.
 
@@ -105,6 +107,8 @@ Sau khi chay, co the mo:
 - Admin app: http://localhost:5174
 - Nginx entrypoint: http://localhost:8080
 - Prometheus: http://localhost:9090
+- Alertmanager: http://localhost:9093
+- Grafana: http://localhost:3000
 - MinIO console: http://localhost:9001
 - Qdrant HTTP: http://localhost:6333
 
@@ -139,6 +143,10 @@ Backup toi thieu database va thu muc `data/`:
 - `docker-compose.yml`: khai bao service local.
 - `nginx/nginx.conf`: reverse proxy local/prod-like.
 - `monitoring/prometheus/prometheus.yml`: Prometheus scrape config.
+- `monitoring/prometheus/rules/`: Prometheus alert rules.
+- `monitoring/alertmanager/alertmanager.yml`: Alertmanager local routing config.
+- `monitoring/grafana/`: Grafana datasource provisioning va dashboard.
+- `.github/workflows/ci.yml`: GitHub Actions test/build va publish Docker images len GHCR.
 - `backend/Dockerfile`: cach build backend image.
 - `worker/Dockerfile`: cach build worker image.
 - `frontend/user/Dockerfile`: cach build user frontend.
@@ -160,4 +168,4 @@ Nhung phan nen uu tien sau khi da nam tong quan:
 - Smoke test DeepFace voi bo anh that nho, roi tinh chinh `DEEPFACE_MATCH_THRESHOLD`.
 - Noi MinIO vao upload flow that.
 - Dua embedding search sang Qdrant khi volume vector lon hon.
-- Hoan thien Grafana dashboard va alerting.
+- Hoan thien kenh gui alert ra email/Slack neu can.

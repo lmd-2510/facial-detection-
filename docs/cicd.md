@@ -6,6 +6,8 @@ GitHub Actions workflow nam o:
 .github/workflows/ci.yml
 ```
 
+Pipeline hien tai la CI + publish Docker images. Workflow tu dong test/build tren moi `push` va `pull_request`; rieng khi `push` vao `main`, workflow se publish Docker images len GitHub Container Registry (GHCR).
+
 ## Jobs
 
 CI hien co 4 job:
@@ -13,7 +15,7 @@ CI hien co 4 job:
 - `backend-tests`: cai `backend/requirements.txt` va chay `python -m pytest backend/app/tests`.
 - `worker-tests`: cai `worker/requirements.txt` va chay `python -m pytest worker/app/tests`.
 - `frontend-builds`: chay `npm ci` va `npm run build` cho user/admin frontend.
-- `docker-builds`: build Docker image cho backend, worker, user frontend va admin frontend.
+- `docker-builds`: build Docker image cho backend, worker, user frontend va admin frontend; khi push vao `main` thi publish image len GHCR.
 
 ## Dieu CI Dang Bat Loi
 
@@ -22,10 +24,26 @@ CI hien co 4 job:
 - TypeScript/frontend build bi loi.
 - Dockerfile khong build duoc.
 
-## Dieu CI Chua Lam
+## Docker Images
 
-- Chua push image len registry.
-- Chua deploy tu dong.
+Images duoc publish len GHCR theo format:
+
+```text
+ghcr.io/<owner>/<repo>/backend:<commit-sha>
+ghcr.io/<owner>/<repo>/backend:latest
+ghcr.io/<owner>/<repo>/worker:<commit-sha>
+ghcr.io/<owner>/<repo>/worker:latest
+ghcr.io/<owner>/<repo>/frontend-user:<commit-sha>
+ghcr.io/<owner>/<repo>/frontend-user:latest
+ghcr.io/<owner>/<repo>/frontend-admin:<commit-sha>
+ghcr.io/<owner>/<repo>/frontend-admin:latest
+```
+
+Workflow dung `GITHUB_TOKEN` de login GHCR, nen khong can them Docker Hub secret. Can dam bao repository cho phep GitHub Actions ghi package voi quyen `packages: write`.
+
+## Dieu Pipeline Chua Lam
+
+- Chua deploy tu dong len server, Kubernetes hoac staging.
 - Chua chay smoke test DeepFace that voi model weight trong container.
 - Chua chay browser E2E bang Playwright.
 
@@ -37,3 +55,13 @@ docker compose build backend worker frontend-user frontend-admin
 ```
 
 Neu worker dependency DeepFace qua nang cho may CI, co the tach Docker build worker sang workflow nightly sau, nhung khong nen bo worker tests.
+
+## Cach Trinh Bay
+
+Co the mo ta pipeline hien tai la:
+
+```text
+test backend/worker -> build frontend -> build Docker images -> publish images to GHCR on main
+```
+
+Day la muc CI + artifact publishing. De thanh CD day du hon, buoc tiep theo se la tu dong deploy image vua publish len staging/server.

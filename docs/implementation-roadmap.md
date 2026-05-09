@@ -506,7 +506,7 @@ Trang thai repo sau khi code lop van hanh Giai Doan 8:
 - `docker-compose.yml` da co `database`, `redis`, `backend`, `worker`, `frontend-user`, `frontend-admin`, `nginx`, `prometheus`, `alertmanager`, `grafana`, `minio`, `qdrant`.
 - `backend` da co `/health` kiem tra database/Redis va `/metrics` cho Prometheus.
 - `scripts/test.ps1` da chay backend tests, worker tests va frontend build neu co `npm`.
-- `.github/workflows/ci.yml` da chay backend tests, worker tests, frontend builds va Docker build checks.
+- `.github/workflows/ci.yml` da chay backend tests, worker tests, frontend builds, Docker build checks va publish Docker images len GHCR khi push vao `main`.
 - `nginx/nginx.conf`, `monitoring/prometheus/prometheus.yml`, `monitoring/prometheus/rules/`, `monitoring/alertmanager/`, `monitoring/grafana/`, `scripts/dev.ps1`, `scripts/backup.ps1`, `docs/deployment.md`, `docs/monitoring.md`, `docs/backup.md`, `docs/cicd.md` da co noi dung van hanh toi thieu.
 - Helm chart `helm/deepface-access` da co `Chart.yaml`, `values.yaml`, configmap, deployments/services, optional MinIO/Qdrant va ingress.
 - `backend/app/config/minio.py`, `backend/app/config/qdrant.py`, `worker/app/config/minio.py`, `worker/app/config/qdrant.py` da co config toi thieu.
@@ -666,6 +666,10 @@ Viec can lam:
   - build backend image
   - build worker image
   - build frontend images
+- Publish image len GHCR khi push vao `main`:
+  - tag theo commit SHA
+  - tag `latest`
+  - dung `GITHUB_TOKEN` voi quyen `packages: write`
 - Neu DeepFace dependency qua nang cho CI, co the giu unit test mock DeepFace va chi build image worker; smoke test DeepFace that de manual hoac nightly sau.
 - Them cache pip/npm neu can tang toc.
 
@@ -681,6 +685,7 @@ Moc hoan thanh:
 
 - CI khong con job placeholder.
 - Pull request fail neu backend/worker test fail hoac frontend build fail.
+- Push vao `main` tao Docker images co the deploy tu GHCR.
 - Docs ghi ro CI dang test cai gi va chua test cai gi.
 
 ### 8.5 Monitoring Va Logging

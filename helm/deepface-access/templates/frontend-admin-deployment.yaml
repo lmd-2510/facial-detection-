@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-frontend-admin
+spec:
+  replicas: {{ .Values.frontendAdmin.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-frontend-admin
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-frontend-admin
+    spec:
+      containers:
+        - name: frontend-admin
+          image: {{ .Values.frontendAdmin.image | quote }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          ports:
+            - containerPort: {{ .Values.frontendAdmin.port }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-frontend-admin
+spec:
+  selector:
+    app: {{ .Release.Name }}-frontend-admin
+  ports:
+    - port: 5174
+      targetPort: {{ .Values.frontendAdmin.port }}

@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-frontend-user
+spec:
+  replicas: {{ .Values.frontendUser.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-frontend-user
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-frontend-user
+    spec:
+      containers:
+        - name: frontend-user
+          image: {{ .Values.frontendUser.image | quote }}
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          ports:
+            - containerPort: {{ .Values.frontendUser.port }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-frontend-user
+spec:
+  selector:
+    app: {{ .Release.Name }}-frontend-user
+  ports:
+    - port: 5173
+      targetPort: {{ .Values.frontendUser.port }}

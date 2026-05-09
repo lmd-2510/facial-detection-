@@ -1,0 +1,65 @@
+imagePullPolicy: IfNotPresent
+
+backend:
+  image: deepface-backend:latest
+  replicas: 1
+  port: 8000
+
+worker:
+  image: deepface-worker:latest
+  replicas: 1
+
+frontendUser:
+  image: deepface-frontend-user:latest
+  replicas: 1
+  port: 5173
+
+frontendAdmin:
+  image: deepface-frontend-admin:latest
+  replicas: 1
+  port: 5174
+
+config:
+  appEnv: prod
+  databaseUrl: postgresql://deepface:deepface@deepface-access-database:5432/deepface_access
+  redisUrl: redis://deepface-access-redis:6379/0
+  corsOrigins: https://deepface.example.local
+  viteApiBaseUrl: /api
+  viteUserBasePath: /
+  viteAdminBasePath: /admin/
+  deepfaceModelName: Facenet512
+  deepfaceDetectorBackend: opencv
+  deepfaceEnforceDetection: "true"
+  deepfaceAlign: "true"
+  deepfaceNormalization: base
+  deepfaceMatchThreshold: "0.70"
+  deepfaceAntiSpoofing: "false"
+  minioEndpoint: deepface-access-minio:9000
+  minioBucket: deepface-images
+  minioSecure: "false"
+  qdrantUrl: http://deepface-access-qdrant:6333
+  qdrantCollection: deepface_embeddings
+
+database:
+  enabled: true
+  image: postgres:16-alpine
+  storageSize: 5Gi
+
+redis:
+  enabled: true
+  image: redis:7-alpine
+
+minio:
+  enabled: false
+  image: minio/minio:RELEASE.2025-04-22T22-12-26Z
+  storageSize: 10Gi
+
+qdrant:
+  enabled: false
+  image: qdrant/qdrant:v1.13.4
+  storageSize: 10Gi
+
+ingress:
+  enabled: false
+  className: nginx
+  host: deepface.example.local

@@ -100,6 +100,8 @@ helm lint helm/deepface-access
 helm template deepface-access helm/deepface-access
 ```
 
+Chart hien tai khong tu tao Kubernetes Secret that. Cac template backend/worker/database/minio se doc secret co san ten `deepface-access-secrets`, vi vay secret nay can duoc tao truoc khi deploy that.
+
 Secret that nen tao ngoai chart:
 
 ```powershell
@@ -109,6 +111,20 @@ kubectl create secret generic deepface-access-secrets `
   --from-literal=POSTGRES_USER='deepface' `
   --from-literal=POSTGRES_PASSWORD='replace-me'
 ```
+
+Neu bat MinIO trong chart, bo sung them:
+
+```powershell
+kubectl create secret generic deepface-access-secrets `
+  --from-literal=AUTH_SECRET_KEY='replace-me' `
+  --from-literal=POSTGRES_DB='deepface_access' `
+  --from-literal=POSTGRES_USER='deepface' `
+  --from-literal=POSTGRES_PASSWORD='replace-me' `
+  --from-literal=MINIO_ROOT_USER='replace-me' `
+  --from-literal=MINIO_ROOT_PASSWORD='replace-me'
+```
+
+Neu secret nay chua ton tai, chart van render duoc nhung pod co the thieu bien moi truong quan trong luc start.
 
 Gioi han hien tai:
 

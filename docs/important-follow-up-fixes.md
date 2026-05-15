@@ -124,6 +124,8 @@ Huong mo rong tiep theo la noi upload vao MinIO va matching vao Qdrant.
 
 ## 2. Upload Anh That Thay Vi Nhap `image_path`
 
+Trang thai: da hoan thanh. Admin upload employee face image qua `POST /employees/{id}/face-image` va endpoint nay queue embedding job. User upload snapshot qua `POST /access/check-image` va endpoint nay queue access job. Cac endpoint JSON nhan `image_key`/`image_path` van duoc giu cho smoke test/dev.
+
 ### Van De
 
 Hien tai admin/user phai nhap duong dan anh thu cong, vi du:

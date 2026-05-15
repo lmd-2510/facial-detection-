@@ -45,7 +45,6 @@ Admin UI
 -> Backend /employees
 -> Backend /employees/{id}/face-image
 -> MinIO/S3 object key
--> Backend /employees/{id}/embedding-jobs
 -> Redis embedding_jobs
 -> Worker
 -> download object ve temp file
@@ -59,9 +58,8 @@ Flow moi uu tien object key tu MinIO/S3. Cac endpoint JSON van chap nhan `image_
 
 ```text
 User UI
--> Backend /access/snapshots
+-> Backend /access/check-image
 -> MinIO/S3 object key
--> Backend /access/check
 -> PostgreSQL access_logs status=processing
 -> Redis access_jobs
 -> Worker

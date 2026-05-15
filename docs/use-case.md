@@ -14,7 +14,7 @@ Tai lieu nay tom tat cac use case chinh cua DeepFace Access Control MVP.
 ## User
 
 - Dang nhap bang tai khoan user.
-- Upload snapshot len MinIO/S3 va gui yeu cau check access bang `camera_id` va `image_key`.
+- Upload snapshot len MinIO/S3 va gui yeu cau check access bang `camera_id` qua endpoint `POST /access/check-image`.
 - Xem lich su access logs.
 - Xem thong tin profile dang nhap.
 

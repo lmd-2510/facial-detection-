@@ -40,7 +40,7 @@ Tat ca endpoint employees can Bearer token.
 - `GET /employees/{id}`: xem chi tiet employee.
 - `PUT /employees/{id}`: cap nhat employee.
 - `DELETE /employees/{id}`: soft-delete employee bang cach doi `status` thanh `inactive`.
-- `POST /employees/{id}/face-image`: upload anh khuon mat employee len MinIO/S3, tra ve `object_key`.
+- `POST /employees/{id}/face-image`: upload anh khuon mat employee len MinIO/S3, tra ve `object_key` va queue embedding job.
 - `POST /employees/{id}/embedding-jobs`: tao job Redis de worker xu ly embedding cho anh employee.
 
 Request tao employee:
@@ -110,6 +110,12 @@ Response:
   "size": 12345
 }
 ```
+
+### `POST /access/check-image`
+
+Can Bearer token. Nhan `multipart/form-data` gom `camera_id` va file anh snapshot. Backend upload anh len MinIO/S3, tao `access_log` trang thai `processing`, day job vao Redis queue `access_jobs`, roi tra response `202 Accepted`.
+
+Endpoint nay la flow UI chinh sau buoc upload that.
 
 ### `POST /access/check`
 

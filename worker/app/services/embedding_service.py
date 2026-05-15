@@ -7,7 +7,7 @@ from app.db.schema import employees, face_embeddings
 from app.ml.anti_spoof import require_live_face
 from app.ml.detector import require_face
 from app.ml.embedder import create_face_embedding
-from app.services.storage_service import resolve_image_path
+from app.services.storage_service import resolved_image_file
 
 
 class EmployeeNotFoundError(Exception):
@@ -35,10 +35,10 @@ def create_employee_embedding(
     if employee is None:
         raise EmployeeNotFoundError(f"Employee not found: {employee_id}")
 
-    resolved_image = resolve_image_path(image_path)
-    require_face(resolved_image.normalized_path)
-    require_live_face(resolved_image.normalized_path)
-    embedding = create_face_embedding(resolved_image.normalized_path)
+    with resolved_image_file(image_path) as resolved_image:
+        require_face(resolved_image.normalized_path)
+        require_live_face(resolved_image.normalized_path)
+        embedding = create_face_embedding(resolved_image.normalized_path)
 
     result = db.execute(
         insert(face_embeddings).values(
@@ -54,5 +54,5 @@ def create_employee_embedding(
         employee_id=employee_id,
         vector=embedding.vector,
         model_name=embedding.model_name,
-        image_path=embedding.image_path,
+        image_path=image_path,
     )

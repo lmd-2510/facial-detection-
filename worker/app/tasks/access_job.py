@@ -9,7 +9,7 @@ def handle_access_job(payload: dict[str, Any]) -> None:
     job_id = payload.get("job_id")
     log_id = payload.get("log_id")
     camera_id = payload.get("camera_id")
-    image_path = payload.get("image_path")
+    image_path = payload.get("image_key") or payload.get("image_path")
 
     if not job_id or not log_id or not camera_id or not image_path:
         raise ValueError(f"Invalid access job payload: {payload}")

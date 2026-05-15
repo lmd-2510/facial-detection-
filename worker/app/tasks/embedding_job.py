@@ -8,7 +8,7 @@ from app.services.embedding_service import create_employee_embedding
 def handle_embedding_job(payload: dict[str, Any]) -> None:
     job_id = payload.get("job_id")
     employee_id = payload.get("employee_id")
-    image_path = payload.get("image_path")
+    image_path = payload.get("image_key") or payload.get("image_path")
 
     if not job_id or not employee_id or not image_path:
         raise ValueError(f"Invalid embedding job payload: {payload}")

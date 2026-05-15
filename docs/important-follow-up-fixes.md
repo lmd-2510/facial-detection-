@@ -100,16 +100,16 @@ Trong pipeline nay:
 Lam theo cac buoc nho:
 
 ```text
-[ ] Backend storage service upload file vao MinIO/S3
-[ ] Backend upload API cho employee face image
-[ ] Backend upload API cho access snapshot
-[ ] DB luu object_key thay vi local image_path
-[ ] Redis job dung image_key/object_key
-[ ] Worker tai anh tu MinIO/S3 ve temp file
-[ ] Worker cleanup temp file sau khi DeepFace xu ly
-[ ] Frontend doi input path thanh file upload
-[ ] Docs ghi ro MinIO/S3 la noi luu anh that
-[ ] Backup docs bo sung backup MinIO bucket neu self-host MinIO
+[x] Backend storage service upload file vao MinIO/S3
+[x] Backend upload API cho employee face image
+[x] Backend upload API cho access snapshot
+[x] DB luu object_key thay vi local image_path
+[x] Redis job dung image_key/object_key
+[x] Worker tai anh tu MinIO/S3 ve temp file
+[x] Worker cleanup temp file sau khi DeepFace xu ly
+[x] Frontend doi input path thanh file upload
+[x] Docs ghi ro MinIO/S3 la noi luu anh that
+[x] Backup docs bo sung backup MinIO bucket neu self-host MinIO
 ```
 
 ### Ghi Chu

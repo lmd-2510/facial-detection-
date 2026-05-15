@@ -8,7 +8,7 @@ from app.ml.anti_spoof import require_live_face
 from app.ml.detector import require_face
 from app.ml.embedder import create_face_embedding
 from app.ml.matcher import DEFAULT_MATCH_THRESHOLD, MatchCandidate, find_best_match
-from app.services.storage_service import resolve_image_path
+from app.services.storage_service import resolved_image_file
 
 
 class AccessLogNotFoundError(Exception):
@@ -85,15 +85,15 @@ def process_access_check(
         raise AccessLogNotFoundError(f"Access log not found: {log_id}")
 
     try:
-        resolved_image = resolve_image_path(image_path)
-        require_face(resolved_image.normalized_path)
-        require_live_face(resolved_image.normalized_path)
-        embedding = create_face_embedding(resolved_image.normalized_path)
-        match = find_best_match(
-            embedding.vector,
-            _load_active_embedding_candidates(db, model_name=embedding.model_name),
-            threshold=threshold,
-        )
+        with resolved_image_file(image_path) as resolved_image:
+            require_face(resolved_image.normalized_path)
+            require_live_face(resolved_image.normalized_path)
+            embedding = create_face_embedding(resolved_image.normalized_path)
+            match = find_best_match(
+                embedding.vector,
+                _load_active_embedding_candidates(db, model_name=embedding.model_name),
+                threshold=threshold,
+            )
 
         if match.matched:
             status = "granted"

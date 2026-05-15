@@ -30,5 +30,5 @@ spec:
   selector:
     app: {{ .Release.Name }}-frontend-admin
   ports:
-    - port: 5174
+    - port: {{ .Values.frontendAdmin.port }}
       targetPort: {{ .Values.frontendAdmin.port }}

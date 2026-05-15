@@ -603,9 +603,11 @@ POST https://host/api/auth/login
 
 ## 10. Frontend Dockerfile Dang Chay Dev Server
 
+Trang thai: da hoan thanh. `frontend/user` va `frontend/admin` da dung multi-stage Dockerfile: Node build stage chay `npm ci && npm run build`, nginx runtime stage serve static `dist`. Docker Compose va Helm da doi frontend container sang port 80.
+
 ### Van De
 
-`frontend/user/Dockerfile` va `frontend/admin/Dockerfile` hien chay:
+Truoc day `frontend/user/Dockerfile` va `frontend/admin/Dockerfile` chay:
 
 ```text
 npm run dev
@@ -621,15 +623,15 @@ Dieu nay on cho local demo, nhung production image nen build static va serve ban
 - `.github/workflows/ci.yml`
 - `docs/deployment.md`
 
-### Nen Sua Nhu The Nao
+### Cach Da Sua
 
-Dung multi-stage Dockerfile:
+Da dung multi-stage Dockerfile:
 
 ```text
 node build stage -> nginx runtime stage
 ```
 
-Neu chua lam, docs nen ghi ro frontend container hien la dev/prod-like local, khong phai production-hardened image.
+Frontend image khong con chay Vite dev server. Luu y `VITE_API_BASE_URL` va `VITE_BASE_PATH` la build-time config, nen Docker Compose truyen chung bang build args.
 
 ## 11. Can Smoke Test DeepFace That Trong Container
 

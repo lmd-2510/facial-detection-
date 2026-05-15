@@ -30,5 +30,5 @@ spec:
   selector:
     app: {{ .Release.Name }}-frontend-user
   ports:
-    - port: 5173
+    - port: {{ .Values.frontendUser.port }}
       targetPort: {{ .Values.frontendUser.port }}

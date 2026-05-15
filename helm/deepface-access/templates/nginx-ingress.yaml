@@ -50,12 +50,12 @@ spec:
               service:
                 name: {{ .Release.Name }}-frontend-admin
                 port:
-                  number: 5174
+                  number: {{ .Values.frontendAdmin.port }}
           - path: /
             pathType: Prefix
             backend:
               service:
                 name: {{ .Release.Name }}-frontend-user
                 port:
-                  number: 5173
+                  number: {{ .Values.frontendUser.port }}
 {{- end }}

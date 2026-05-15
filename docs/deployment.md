@@ -43,8 +43,8 @@ URL mac dinh:
 - `redis`: queue cho embedding/access jobs.
 - `backend`: FastAPI API.
 - `worker`: DeepFace background worker.
-- `frontend-user`: user UI.
-- `frontend-admin`: admin UI.
+- `frontend-user`: static user UI served by nginx.
+- `frontend-admin`: static admin UI served by nginx.
 - `nginx`: reverse proxy.
 - `prometheus`: scrape backend metrics.
 - `alertmanager`: nhan alert tu Prometheus trong local monitoring.
@@ -71,7 +71,7 @@ Nginx lang nghe port `8080` mac dinh:
 - `/health`: backend health.
 - `/metrics`: backend metrics.
 
-Ghi chu: frontend dev van mac dinh goi `VITE_API_BASE_URL=http://localhost:8000`. Khi muon di tat ca qua nginx, dat:
+Ghi chu: frontend Docker image build static asset bang Vite roi serve bang nginx. `VITE_API_BASE_URL` va `VITE_BASE_PATH` la build-time config, duoc truyen vao Docker build qua build args trong Docker Compose/CI. Khi muon di tat ca qua nginx, dat:
 
 ```text
 VITE_API_BASE_URL=/api

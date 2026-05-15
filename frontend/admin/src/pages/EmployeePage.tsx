@@ -5,6 +5,7 @@ import {
   listEmployees,
   queueEmbeddingJob,
   updateEmployee,
+  uploadEmployeeFaceImage,
 } from "../api/employees";
 import EmployeeForm from "../components/EmployeeForm";
 import EmployeeTable from "../components/EmployeeTable";
@@ -77,11 +78,12 @@ export default function EmployeePage({
     }
   }
 
-  async function handleQueueEmbedding(employeeId: number, imagePath: string) {
+  async function handleQueueEmbedding(employeeId: number, file: File) {
     setError(null);
     setMessage(null);
     try {
-      const job = await queueEmbeddingJob(token, employeeId, imagePath);
+      const upload = await uploadEmployeeFaceImage(token, employeeId, file);
+      const job = await queueEmbeddingJob(token, employeeId, upload.object_key);
       setMessage(`Embedding job queued: ${job.job_id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Cannot queue embedding job");

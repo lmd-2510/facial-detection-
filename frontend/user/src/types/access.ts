@@ -2,7 +2,7 @@ export type AccessLogStatus = "processing" | "granted" | "denied" | "error";
 
 export interface AccessCheckPayload {
   camera_id: number;
-  image_path: string;
+  image_key: string;
 }
 
 export interface AccessCheckResponse {
@@ -12,7 +12,15 @@ export interface AccessCheckResponse {
   employee_id: number | null;
   camera_id: number;
   score: number | null;
+  image_key: string;
   image_path: string;
   message: string;
   created_at: string;
+}
+
+export interface ImageUploadResponse {
+  object_key: string;
+  bucket: string;
+  content_type: string;
+  size: number;
 }

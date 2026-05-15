@@ -20,7 +20,15 @@ export interface EmbeddingJobResponse {
   job_id: string;
   type: string;
   employee_id: number;
+  image_key: string;
   image_path: string;
   queue_name: string;
   message: string;
+}
+
+export interface ImageUploadResponse {
+  object_key: string;
+  bucket: string;
+  content_type: string;
+  size: number;
 }

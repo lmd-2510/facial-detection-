@@ -6,7 +6,7 @@ interface EmployeeTableProps {
   isLoading: boolean;
   onEdit: (employee: Employee) => void;
   onDelete: (employeeId: number) => Promise<void>;
-  onQueueEmbedding: (employeeId: number, imagePath: string) => Promise<void>;
+  onQueueEmbedding: (employeeId: number, file: File) => Promise<void>;
 }
 
 export default function EmployeeTable({
@@ -16,19 +16,19 @@ export default function EmployeeTable({
   onDelete,
   onQueueEmbedding,
 }: EmployeeTableProps) {
-  const [imagePaths, setImagePaths] = useState<Record<number, string>>({});
+  const [imageFiles, setImageFiles] = useState<Record<number, File | null>>({});
 
   async function handleEmbeddingSubmit(
     event: FormEvent<HTMLFormElement>,
     employeeId: number,
   ) {
     event.preventDefault();
-    const imagePath = imagePaths[employeeId]?.trim();
-    if (!imagePath) {
+    const imageFile = imageFiles[employeeId];
+    if (!imageFile) {
       return;
     }
-    await onQueueEmbedding(employeeId, imagePath);
-    setImagePaths({ ...imagePaths, [employeeId]: "" });
+    await onQueueEmbedding(employeeId, imageFile);
+    setImageFiles({ ...imageFiles, [employeeId]: null });
   }
 
   if (isLoading) {
@@ -48,7 +48,7 @@ export default function EmployeeTable({
             <th>Name</th>
             <th>Department</th>
             <th>Status</th>
-            <th>Embedding image path</th>
+            <th>Embedding image</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -69,12 +69,12 @@ export default function EmployeeTable({
                   onSubmit={(event) => handleEmbeddingSubmit(event, employee.id)}
                 >
                   <input
-                    placeholder="/app/storage/uploads/employee_1.jpg"
-                    value={imagePaths[employee.id] ?? ""}
+                    accept="image/*"
+                    type="file"
                     onChange={(event) =>
-                      setImagePaths({
-                        ...imagePaths,
-                        [employee.id]: event.target.value,
+                      setImageFiles({
+                        ...imageFiles,
+                        [employee.id]: event.target.files?.[0] ?? null,
                       })
                     }
                   />

@@ -3,6 +3,7 @@ import type {
   EmbeddingJobResponse,
   Employee,
   EmployeePayload,
+  ImageUploadResponse,
 } from "../types/employee";
 
 export function listEmployees(token: string): Promise<Employee[]> {
@@ -42,11 +43,25 @@ export function deleteEmployee(token: string, employeeId: number): Promise<void>
 export function queueEmbeddingJob(
   token: string,
   employeeId: number,
-  imagePath: string,
+  imageKey: string,
 ): Promise<EmbeddingJobResponse> {
   return apiRequest<EmbeddingJobResponse>(`/employees/${employeeId}/embedding-jobs`, {
     method: "POST",
     token,
-    body: JSON.stringify({ image_path: imagePath }),
+    body: JSON.stringify({ image_key: imageKey }),
+  });
+}
+
+export function uploadEmployeeFaceImage(
+  token: string,
+  employeeId: number,
+  file: File,
+): Promise<ImageUploadResponse> {
+  const formData = new FormData();
+  formData.append("file", file);
+  return apiRequest<ImageUploadResponse>(`/employees/${employeeId}/face-image`, {
+    method: "POST",
+    token,
+    body: formData,
   });
 }

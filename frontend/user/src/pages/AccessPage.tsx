@@ -1,5 +1,5 @@
 import { FormEvent, useState } from "react";
-import { checkAccess } from "../api/access";
+import { checkAccess, uploadAccessSnapshot } from "../api/access";
 import CameraView from "../components/CameraView";
 import ResultCard from "../components/ResultCard";
 import type { AccessCheckResponse } from "../types/access";
@@ -11,7 +11,8 @@ interface AccessPageProps {
 
 export default function AccessPage({ token, onAccessQueued }: AccessPageProps) {
   const [cameraId, setCameraId] = useState("1");
-  const [imagePath, setImagePath] = useState("/app/storage/uploads/snapshot.jpg");
+  const [snapshotFile, setSnapshotFile] = useState<File | null>(null);
+  const [imageKey, setImageKey] = useState("");
   const [result, setResult] = useState<AccessCheckResponse | null>(null);
   const [isChecking, setIsChecking] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,10 +22,16 @@ export default function AccessPage({ token, onAccessQueued }: AccessPageProps) {
     setIsChecking(true);
     setError(null);
     try {
+      if (!snapshotFile) {
+        setError("Choose a snapshot image first.");
+        return;
+      }
+      const upload = await uploadAccessSnapshot(token, snapshotFile);
       const response = await checkAccess(token, {
         camera_id: Number(cameraId),
-        image_path: imagePath.trim(),
+        image_key: upload.object_key,
       });
+      setImageKey(upload.object_key);
       setResult(response);
       await onAccessQueued();
     } catch (err) {
@@ -58,11 +65,14 @@ export default function AccessPage({ token, onAccessQueued }: AccessPageProps) {
             />
           </label>
           <label>
-            Image path
+            Snapshot image
             <input
+              accept="image/*"
               required
-              value={imagePath}
-              onChange={(event) => setImagePath(event.target.value)}
+              type="file"
+              onChange={(event) =>
+                setSnapshotFile(event.target.files?.[0] ?? null)
+              }
             />
           </label>
           <button className="primary-button" disabled={isChecking} type="submit">
@@ -72,7 +82,7 @@ export default function AccessPage({ token, onAccessQueued }: AccessPageProps) {
       </div>
 
       <div className="page-stack">
-        <CameraView imagePath={imagePath} />
+        <CameraView imagePath={imageKey || snapshotFile?.name || ""} />
         <ResultCard result={result} />
       </div>
     </section>

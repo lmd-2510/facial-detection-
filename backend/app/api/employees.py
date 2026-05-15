@@ -1,6 +1,6 @@
 from fastapi import APIRouter, File, HTTPException, Response, UploadFile, status
 
-from app.core.deps import CurrentUser, DbSession
+from app.core.deps import AdminUser, DbSession
 from app.schemas.employee import (
     EmployeeCreate,
     EmployeeEmbeddingJobRequest,
@@ -29,7 +29,7 @@ router = APIRouter(prefix="/employees", tags=["employees"])
 @router.get("", response_model=list[EmployeeRead])
 def list_employee_records(
     db: DbSession,
-    current_user: CurrentUser,
+    current_user: AdminUser,
 ) -> list[EmployeeRead]:
     return get_employees(db)
 
@@ -38,7 +38,7 @@ def list_employee_records(
 def create_employee_record(
     payload: EmployeeCreate,
     db: DbSession,
-    current_user: CurrentUser,
+    current_user: AdminUser,
 ) -> EmployeeRead:
     try:
         return add_employee(db, payload)
@@ -53,7 +53,7 @@ def create_employee_record(
 def read_employee_record(
     employee_id: int,
     db: DbSession,
-    current_user: CurrentUser,
+    current_user: AdminUser,
 ) -> EmployeeRead:
     employee = get_employee(db, employee_id)
     if employee is None:
@@ -70,7 +70,7 @@ def update_employee_record(
     employee_id: int,
     payload: EmployeeUpdate,
     db: DbSession,
-    current_user: CurrentUser,
+    current_user: AdminUser,
 ) -> EmployeeRead:
     try:
         employee = edit_employee(db, employee_id, payload)
@@ -93,7 +93,7 @@ def update_employee_record(
 def delete_employee_record(
     employee_id: int,
     db: DbSession,
-    current_user: CurrentUser,
+    current_user: AdminUser,
 ) -> Response:
     employee = delete_employee(db, employee_id)
     if employee is None:
@@ -114,7 +114,7 @@ def create_employee_embedding_job(
     employee_id: int,
     payload: EmployeeEmbeddingJobRequest,
     db: DbSession,
-    current_user: CurrentUser,
+    current_user: AdminUser,
 ) -> EmployeeEmbeddingJobResponse:
     try:
         job = queue_employee_embedding_job(db, employee_id, payload.resolved_image_key)
@@ -143,7 +143,7 @@ def create_employee_embedding_job(
 def upload_employee_face_image(
     employee_id: int,
     db: DbSession,
-    current_user: CurrentUser,
+    current_user: AdminUser,
     file: UploadFile = File(...),
 ) -> ImageUploadResponse:
     employee = get_employee(db, employee_id)

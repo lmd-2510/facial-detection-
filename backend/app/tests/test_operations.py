@@ -1,4 +1,5 @@
 from fastapi.testclient import TestClient
+from types import SimpleNamespace
 
 from app.core.deps import get_current_user
 from app.main import app
@@ -70,7 +71,7 @@ def test_admin_status_reports_queue_lengths(monkeypatch):
         lambda: FakeRedis({"embedding_jobs": 4, "access_jobs": 5}),
     )
 
-    app.dependency_overrides[get_current_user] = lambda: object()
+    app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(role="admin")
     try:
         with TestClient(app) as client:
             response = client.get("/admin/status")
@@ -89,3 +90,15 @@ def test_admin_status_reports_queue_lengths(monkeypatch):
             "access_jobs": 5,
         },
     }
+
+
+def test_admin_status_rejects_user_role(monkeypatch):
+    app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(role="user")
+    try:
+        with TestClient(app) as client:
+            response = client.get("/admin/status")
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 403
+    assert response.json()["detail"] == "Admin role required"

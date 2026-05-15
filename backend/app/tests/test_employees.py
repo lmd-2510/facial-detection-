@@ -36,6 +36,13 @@ def client():
             )
         )
         db.add(
+            User(
+                username="user",
+                password_hash=hash_password("user123"),
+                role="user",
+            )
+        )
+        db.add(
             Employee(
                 code="EMP001",
                 name="Nguyen Van A",
@@ -65,6 +72,16 @@ def auth_headers(client):
     response = client.post(
         "/auth/login",
         json={"username": "admin", "password": "admin123"},
+    )
+    token = response.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture()
+def user_headers(client):
+    response = client.post(
+        "/auth/login",
+        json={"username": "user", "password": "user123"},
     )
     token = response.json()["access_token"]
     return {"Authorization": f"Bearer {token}"}
@@ -102,6 +119,21 @@ def test_create_employee(client, auth_headers):
     assert body["id"]
     assert body["code"] == "EMP002"
     assert body["name"] == "Tran Thi B"
+
+
+def test_user_role_cannot_create_employee(client, user_headers):
+    response = client.post(
+        "/employees",
+        headers=user_headers,
+        json={
+            "code": "EMP002",
+            "name": "Tran Thi B",
+            "department": "Operations",
+            "status": "active",
+        },
+    )
+
+    assert response.status_code == 403
 
 
 def test_create_employee_rejects_duplicate_code(client, auth_headers):

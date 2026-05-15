@@ -36,6 +36,13 @@ def client():
             )
         )
         db.add(
+            User(
+                username="user",
+                password_hash=hash_password("user123"),
+                role="user",
+            )
+        )
+        db.add(
             Camera(
                 name="Main Gate",
                 location="Lobby",
@@ -65,6 +72,16 @@ def auth_headers(client):
     response = client.post(
         "/auth/login",
         json={"username": "admin", "password": "admin123"},
+    )
+    token = response.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture()
+def user_headers(client):
+    response = client.post(
+        "/auth/login",
+        json={"username": "user", "password": "user123"},
     )
     token = response.json()["access_token"]
     return {"Authorization": f"Bearer {token}"}
@@ -225,3 +242,49 @@ def test_access_check_image_uploads_and_queues_job(client, auth_headers, monkeyp
             "image_key": "access-snapshots/snapshot.jpg",
         }
     ]
+
+
+def test_user_role_can_check_access_image(client, user_headers, monkeypatch):
+    from app.queues.access_queue import AccessJob
+    from app.services.storage_service import StoredImage
+
+    def fake_upload_fastapi_image(upload, *, prefix: str) -> StoredImage:
+        return StoredImage(
+            object_key="access-snapshots/user-snapshot.jpg",
+            bucket="deepface-images",
+            content_type="image/jpeg",
+            size=3,
+        )
+
+    def fake_enqueue_access_job(
+        log_id: int,
+        camera_id: int,
+        image_key: str,
+    ) -> AccessJob:
+        return AccessJob(
+            job_id="user-access-job-123",
+            type="access_check",
+            log_id=log_id,
+            camera_id=camera_id,
+            image_path=image_key,
+            image_key=image_key,
+        )
+
+    monkeypatch.setattr(
+        "app.api.access.upload_fastapi_image",
+        fake_upload_fastapi_image,
+    )
+    monkeypatch.setattr(
+        "app.services.access_service.enqueue_access_job",
+        fake_enqueue_access_job,
+    )
+
+    response = client.post(
+        "/access/check-image",
+        headers=user_headers,
+        data={"camera_id": "1"},
+        files={"file": ("snapshot.jpg", b"abc", "image/jpeg")},
+    )
+
+    assert response.status_code == 202
+    assert response.json()["job_id"] == "user-access-job-123"

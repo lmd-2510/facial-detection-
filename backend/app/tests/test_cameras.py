@@ -36,6 +36,13 @@ def client():
             )
         )
         db.add(
+            User(
+                username="user",
+                password_hash=hash_password("user123"),
+                role="user",
+            )
+        )
+        db.add(
             Camera(
                 name="Main Gate",
                 location="Lobby",
@@ -65,6 +72,16 @@ def auth_headers(client):
     response = client.post(
         "/auth/login",
         json={"username": "admin", "password": "admin123"},
+    )
+    token = response.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture()
+def user_headers(client):
+    response = client.post(
+        "/auth/login",
+        json={"username": "user", "password": "user123"},
     )
     token = response.json()["access_token"]
     return {"Authorization": f"Bearer {token}"}
@@ -105,3 +122,18 @@ def test_create_camera(client, auth_headers):
     assert body["location"] == "Warehouse"
     assert body["stream_url"] == "rtsp://example.local/back"
     assert body["status"] == "active"
+
+
+def test_user_role_cannot_create_camera(client, user_headers):
+    response = client.post(
+        "/cameras",
+        headers=user_headers,
+        json={
+            "name": "Back Door",
+            "location": "Warehouse",
+            "stream_url": "rtsp://example.local/back",
+            "status": "active",
+        },
+    )
+
+    assert response.status_code == 403

@@ -22,13 +22,14 @@ def test_resolve_image_path_rejects_unsupported_extension():
         resolve_image_path("/app/storage/uploads/not_an_image.txt")
 
 
-def test_reindex_readiness_explains_missing_source_image_path():
+def test_reindex_readiness_explains_automation_is_not_implemented_yet():
     readiness = check_reindex_readiness()
 
     assert readiness.ready is False
-    assert "source image_path" in readiness.reason
+    assert "source_image_key" in readiness.reason
+    assert "not implemented" in readiness.reason
 
 
-def test_reindex_face_embeddings_raises_until_source_images_are_persisted():
-    with pytest.raises(NotImplementedError, match="source image_path"):
+def test_reindex_face_embeddings_raises_until_automation_is_implemented():
+    with pytest.raises(NotImplementedError, match="not implemented"):
         reindex_face_embeddings()

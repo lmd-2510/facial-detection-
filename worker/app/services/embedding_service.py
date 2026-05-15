@@ -22,6 +22,7 @@ class StoredEmbedding:
     vector: list[float]
     model_name: str
     image_path: str
+    source_image_key: str
 
 
 def create_employee_embedding(
@@ -46,6 +47,7 @@ def create_employee_embedding(
             employee_id=employee_id,
             vector=embedding.vector,
             model_name=embedding.model_name,
+            source_image_key=image_path,
         )
     )
     embedding_id = int(result.inserted_primary_key[0])
@@ -68,4 +70,5 @@ def create_employee_embedding(
         vector=embedding.vector,
         model_name=embedding.model_name,
         image_path=image_path,
+        source_image_key=image_path,
     )

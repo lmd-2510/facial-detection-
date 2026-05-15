@@ -35,6 +35,7 @@ face_embeddings = Table(
     Column("employee_id", Integer, ForeignKey("employees.id"), nullable=False),
     Column("vector", JSON, nullable=False),
     Column("model_name", String(100), nullable=False),
+    Column("source_image_key", Text, nullable=True),
     Column("created_at", DateTime(timezone=True), server_default=func.now()),
 )
 

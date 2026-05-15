@@ -159,12 +159,14 @@ def test_create_employee_embedding_stores_deepface_embedding(
     assert stored_embedding.id == 1
     assert stored_embedding.employee_id == 1
     assert stored_embedding.model_name == "Facenet512"
+    assert stored_embedding.source_image_key == "/app/storage/uploads/employee_1.jpg"
     assert len(stored_embedding.vector) == 3
 
     row = db_session.execute(select(face_embeddings)).first()
     assert row is not None
     assert row.employee_id == 1
     assert row.vector == stored_embedding.vector
+    assert row.source_image_key == "/app/storage/uploads/employee_1.jpg"
 
 
 def test_create_employee_embedding_rejects_missing_employee(db_session):

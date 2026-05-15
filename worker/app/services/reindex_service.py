@@ -11,8 +11,8 @@ def check_reindex_readiness() -> ReindexReadiness:
     return ReindexReadiness(
         ready=False,
         reason=(
-            "Reindex is not available yet because face_embeddings does not store "
-            "the source image_path needed to recreate embeddings for a new model."
+            "face_embeddings now stores source_image_key for future reindexing, "
+            "but the automated reindex job is not implemented yet."
         ),
     )
 

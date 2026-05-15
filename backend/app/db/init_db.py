@@ -11,6 +11,7 @@ import app.models  # noqa: F401
 def create_tables() -> None:
     Base.metadata.create_all(bind=engine)
     ensure_employee_embedding_status_columns()
+    ensure_face_embedding_source_image_column()
 
 
 def ensure_employee_embedding_status_columns() -> None:
@@ -44,6 +45,23 @@ def ensure_employee_embedding_status_columns() -> None:
     with engine.begin() as connection:
         for statement in statements:
             connection.execute(text(statement))
+
+
+def ensure_face_embedding_source_image_column() -> None:
+    inspector = inspect(engine)
+    if not inspector.has_table("face_embeddings"):
+        return
+
+    existing_columns = {
+        column["name"] for column in inspector.get_columns("face_embeddings")
+    }
+    if "source_image_key" in existing_columns:
+        return
+
+    with engine.begin() as connection:
+        connection.execute(
+            text("ALTER TABLE face_embeddings ADD COLUMN source_image_key TEXT")
+        )
 
 
 def main() -> None:

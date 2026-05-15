@@ -18,6 +18,13 @@ class CameraCreate(CameraBase):
     pass
 
 
+class CameraUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=150)
+    location: str | None = Field(default=None, max_length=255)
+    stream_url: str | None = None
+    status: CameraStatus | None = None
+
+
 class CameraRead(CameraBase):
     model_config = ConfigDict(from_attributes=True)
 

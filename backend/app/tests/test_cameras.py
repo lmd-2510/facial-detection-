@@ -137,3 +137,76 @@ def test_user_role_cannot_create_camera(client, user_headers):
     )
 
     assert response.status_code == 403
+
+
+def test_get_camera_by_id(client, auth_headers):
+    response = client.get("/cameras/1", headers=auth_headers)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["name"] == "Main Gate"
+    assert body["status"] == "active"
+
+
+def test_get_camera_by_id_returns_404(client, auth_headers):
+    response = client.get("/cameras/999", headers=auth_headers)
+
+    assert response.status_code == 404
+
+
+def test_update_camera(client, auth_headers):
+    response = client.put(
+        "/cameras/1",
+        headers=auth_headers,
+        json={
+            "name": "Main Gate Updated",
+            "location": "Front Lobby",
+            "stream_url": None,
+            "status": "inactive",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["name"] == "Main Gate Updated"
+    assert body["location"] == "Front Lobby"
+    assert body["stream_url"] is None
+    assert body["status"] == "inactive"
+
+
+def test_update_camera_returns_404(client, auth_headers):
+    response = client.put(
+        "/cameras/999",
+        headers=auth_headers,
+        json={"name": "Missing"},
+    )
+
+    assert response.status_code == 404
+
+
+def test_delete_camera_soft_deletes_record(client, auth_headers):
+    delete_response = client.delete("/cameras/1", headers=auth_headers)
+
+    assert delete_response.status_code == 204
+
+    get_response = client.get("/cameras/1", headers=auth_headers)
+    assert get_response.status_code == 200
+    assert get_response.json()["status"] == "inactive"
+
+
+def test_delete_camera_returns_404(client, auth_headers):
+    response = client.delete("/cameras/999", headers=auth_headers)
+
+    assert response.status_code == 404
+
+
+def test_user_role_cannot_update_or_delete_camera(client, user_headers):
+    update_response = client.put(
+        "/cameras/1",
+        headers=user_headers,
+        json={"name": "Blocked"},
+    )
+    delete_response = client.delete("/cameras/1", headers=user_headers)
+
+    assert update_response.status_code == 403
+    assert delete_response.status_code == 403

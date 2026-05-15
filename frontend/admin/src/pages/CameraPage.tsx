@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { createCamera, listCameras } from "../api/cameras";
+import { createCamera, deleteCamera, listCameras, updateCamera } from "../api/cameras";
 import CameraForm from "../components/CameraForm";
 import type { Camera, CameraPayload } from "../types/camera";
 
@@ -10,6 +10,7 @@ interface CameraPageProps {
 
 export default function CameraPage({ token, onCamerasChange }: CameraPageProps) {
   const [cameras, setCameras] = useState<Camera[]>([]);
+  const [editingCamera, setEditingCamera] = useState<Camera | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,18 +34,39 @@ export default function CameraPage({ token, onCamerasChange }: CameraPageProps) 
     void loadCameras();
   }, [token]);
 
-  async function handleCreateCamera(payload: CameraPayload) {
+  async function handleSubmitCamera(payload: CameraPayload) {
     setIsSaving(true);
     setError(null);
     setMessage(null);
     try {
-      await createCamera(token, payload);
-      setMessage("Camera created.");
+      if (editingCamera) {
+        await updateCamera(token, editingCamera.id, payload);
+        setMessage("Camera updated.");
+      } else {
+        await createCamera(token, payload);
+        setMessage("Camera created.");
+      }
+      setEditingCamera(null);
       await loadCameras();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Cannot create camera");
+      setError(err instanceof Error ? err.message : "Cannot save camera");
     } finally {
       setIsSaving(false);
+    }
+  }
+
+  async function handleDeleteCamera(cameraId: number) {
+    setError(null);
+    setMessage(null);
+    try {
+      await deleteCamera(token, cameraId);
+      setMessage("Camera disabled.");
+      if (editingCamera?.id === cameraId) {
+        setEditingCamera(null);
+      }
+      await loadCameras();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Cannot disable camera");
     }
   }
 
@@ -64,7 +86,12 @@ export default function CameraPage({ token, onCamerasChange }: CameraPageProps) 
       {message ? <div className="alert success">{message}</div> : null}
 
       <div className="split-layout">
-        <CameraForm isSaving={isSaving} onSubmit={handleCreateCamera} />
+        <CameraForm
+          camera={editingCamera}
+          isSaving={isSaving}
+          onCancelEdit={() => setEditingCamera(null)}
+          onSubmit={handleSubmitCamera}
+        />
         <div className="panel table-panel">
           {isLoading ? (
             <div className="state-panel">Loading cameras...</div>
@@ -78,6 +105,7 @@ export default function CameraPage({ token, onCamerasChange }: CameraPageProps) 
                   <th>Location</th>
                   <th>Stream</th>
                   <th>Status</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -90,6 +118,20 @@ export default function CameraPage({ token, onCamerasChange }: CameraPageProps) 
                       <span className={`status-pill ${camera.status}`}>
                         {camera.status}
                       </span>
+                    </td>
+                    <td className="row-actions">
+                      <button
+                        className="small-button"
+                        onClick={() => setEditingCamera(camera)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="danger-button"
+                        onClick={() => void handleDeleteCamera(camera.id)}
+                      >
+                        Disable
+                      </button>
                     </td>
                   </tr>
                 ))}

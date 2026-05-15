@@ -74,6 +74,9 @@ Tat ca endpoint cameras can Bearer token.
 
 - `GET /cameras`: danh sach camera/cong.
 - `POST /cameras`: tao camera/cong.
+- `GET /cameras/{id}`: xem chi tiet camera/cong.
+- `PUT /cameras/{id}`: cap nhat camera/cong.
+- `DELETE /cameras/{id}`: soft-delete camera/cong bang cach doi `status` thanh `inactive`.
 
 Request tao camera:
 

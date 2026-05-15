@@ -1,8 +1,10 @@
-import { FormEvent, useState } from "react";
-import type { CameraPayload, CameraStatus } from "../types/camera";
+import { FormEvent, useEffect, useState } from "react";
+import type { Camera, CameraPayload, CameraStatus } from "../types/camera";
 
 interface CameraFormProps {
+  camera?: Camera | null;
   isSaving: boolean;
+  onCancelEdit: () => void;
   onSubmit: (payload: CameraPayload) => Promise<void>;
 }
 
@@ -13,8 +15,27 @@ const initialForm: CameraPayload = {
   status: "active",
 };
 
-export default function CameraForm({ isSaving, onSubmit }: CameraFormProps) {
+export default function CameraForm({
+  camera,
+  isSaving,
+  onCancelEdit,
+  onSubmit,
+}: CameraFormProps) {
   const [form, setForm] = useState<CameraPayload>(initialForm);
+
+  useEffect(() => {
+    if (camera) {
+      setForm({
+        name: camera.name,
+        location: camera.location ?? "",
+        stream_url: camera.stream_url ?? "",
+        status: camera.status,
+      });
+      return;
+    }
+
+    setForm(initialForm);
+  }, [camera]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -24,16 +45,23 @@ export default function CameraForm({ isSaving, onSubmit }: CameraFormProps) {
       stream_url: form.stream_url?.trim() || null,
       status: form.status,
     });
-    setForm(initialForm);
+    if (!camera) {
+      setForm(initialForm);
+    }
   }
 
   return (
     <form className="panel form-panel" onSubmit={handleSubmit}>
       <div className="panel-heading">
         <div>
-          <p className="eyebrow">Entry point</p>
-          <h2>Add camera</h2>
+          <p className="eyebrow">{camera ? "Edit camera" : "Entry point"}</p>
+          <h2>{camera ? camera.name : "Add camera"}</h2>
         </div>
+        {camera ? (
+          <button className="ghost-button" onClick={onCancelEdit} type="button">
+            Cancel
+          </button>
+        ) : null}
       </div>
 
       <label>
@@ -79,7 +107,7 @@ export default function CameraForm({ isSaving, onSubmit }: CameraFormProps) {
       </label>
 
       <button className="primary-button" disabled={isSaving} type="submit">
-        {isSaving ? "Saving..." : "Create camera"}
+        {isSaving ? "Saving..." : camera ? "Update camera" : "Create camera"}
       </button>
     </form>
   );

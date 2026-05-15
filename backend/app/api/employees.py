@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Response, status
+from fastapi import APIRouter, File, HTTPException, Response, UploadFile, status
 
 from app.core.deps import CurrentUser, DbSession
 from app.schemas.employee import (
@@ -7,6 +7,7 @@ from app.schemas.employee import (
     EmployeeEmbeddingJobResponse,
     EmployeeRead,
     EmployeeUpdate,
+    ImageUploadResponse,
 )
 from app.services.employee_service import (
     EmployeeCodeAlreadyExistsError,
@@ -19,6 +20,7 @@ from app.services.employee_service import (
     get_employees,
     queue_employee_embedding_job,
 )
+from app.services.storage_service import UnsupportedImageTypeError, upload_fastapi_image
 
 
 router = APIRouter(prefix="/employees", tags=["employees"])
@@ -115,7 +117,7 @@ def create_employee_embedding_job(
     current_user: CurrentUser,
 ) -> EmployeeEmbeddingJobResponse:
     try:
-        job = queue_employee_embedding_job(db, employee_id, payload.image_path)
+        job = queue_employee_embedding_job(db, employee_id, payload.resolved_image_key)
     except EmployeeNotFoundError as exc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -126,7 +128,50 @@ def create_employee_embedding_job(
         job_id=job.job_id,
         type=job.type,
         employee_id=job.employee_id,
+        image_key=job.image_key or job.image_path,
         image_path=job.image_path,
         queue_name=get_embedding_queue_name(),
         message="Embedding job queued. Worker will process it in background.",
+    )
+
+
+@router.post(
+    "/{employee_id}/face-image",
+    response_model=ImageUploadResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def upload_employee_face_image(
+    employee_id: int,
+    db: DbSession,
+    current_user: CurrentUser,
+    file: UploadFile = File(...),
+) -> ImageUploadResponse:
+    employee = get_employee(db, employee_id)
+    if employee is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Employee not found",
+        )
+
+    try:
+        stored_image = upload_fastapi_image(
+            file,
+            prefix=f"employee-faces/{employee_id}",
+        )
+    except UnsupportedImageTypeError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+
+    return ImageUploadResponse(
+        object_key=stored_image.object_key,
+        bucket=stored_image.bucket,
+        content_type=stored_image.content_type,
+        size=stored_image.size,
     )

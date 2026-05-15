@@ -1,8 +1,13 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, File, HTTPException, UploadFile, status
 
 from app.core.deps import CurrentUser, DbSession
-from app.schemas.access import AccessCheckRequest, AccessCheckResponse
+from app.schemas.access import (
+    AccessCheckRequest,
+    AccessCheckResponse,
+    AccessSnapshotUploadResponse,
+)
 from app.services.access_service import CameraNotFoundError, check_access
+from app.services.storage_service import UnsupportedImageTypeError, upload_fastapi_image
 
 
 router = APIRouter(prefix="/access", tags=["access"])
@@ -33,7 +38,38 @@ def check_access_record(
         employee_id=access_log.employee_id,
         camera_id=access_log.camera_id,
         score=access_log.score,
+        image_key=access_log.image_path,
         image_path=access_log.image_path,
         message="Access check queued. Worker will process it in background.",
         created_at=access_log.created_at,
+    )
+
+
+@router.post(
+    "/snapshots",
+    response_model=AccessSnapshotUploadResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def upload_access_snapshot(
+    current_user: CurrentUser,
+    file: UploadFile = File(...),
+) -> AccessSnapshotUploadResponse:
+    try:
+        stored_image = upload_fastapi_image(file, prefix="access-snapshots")
+    except UnsupportedImageTypeError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+
+    return AccessSnapshotUploadResponse(
+        object_key=stored_image.object_key,
+        bucket=stored_image.bucket,
+        content_type=stored_image.content_type,
+        size=stored_image.size,
     )

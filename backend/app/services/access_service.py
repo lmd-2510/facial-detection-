@@ -22,11 +22,7 @@ def check_access(db: Session, payload: AccessCheckRequest) -> tuple[AccessLog, A
         camera_id=camera.id,
         status="processing",
         score=None,
-        image_path=payload.image_path,
+        image_path=payload.resolved_image_key,
     )
-    job = enqueue_access_job(
-        log_id=access_log.id,
-        camera_id=camera.id,
-        image_path=payload.image_path,
-    )
+    job = enqueue_access_job(access_log.id, camera.id, payload.resolved_image_key)
     return access_log, job

@@ -69,13 +69,13 @@ def delete_employee(db: Session, employee_id: int) -> Employee | None:
 def queue_employee_embedding_job(
     db: Session,
     employee_id: int,
-    image_path: str,
+    image_key: str,
 ) -> EmbeddingJob:
     employee = get_employee_by_id(db, employee_id)
     if employee is None:
         raise EmployeeNotFoundError
 
-    return enqueue_embedding_job(employee_id=employee.id, image_path=image_path)
+    return enqueue_embedding_job(employee.id, image_key)
 
 
 def get_embedding_queue_name() -> str:

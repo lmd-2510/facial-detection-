@@ -20,3 +20,14 @@ class MinioSettings:
 
 
 minio_settings = MinioSettings()
+
+
+def get_minio_client():
+    from minio import Minio
+
+    return Minio(
+        minio_settings.endpoint,
+        access_key=minio_settings.access_key,
+        secret_key=minio_settings.secret_key,
+        secure=minio_settings.secure,
+    )

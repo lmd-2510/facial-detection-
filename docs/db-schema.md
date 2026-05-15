@@ -8,7 +8,7 @@ Tai lieu nay ghi schema toi thieu cho DeepFace Access Control MVP. Muc tieu cua 
 - Dung `id` kieu integer auto-increment cho cac bang nghiep vu de don gian khi build API.
 - Dung `created_at` cho tat ca bang chinh de audit co ban.
 - Cac truong trang thai nen dung chuoi ngan va co tap gia tri ro rang.
-- Anh upload ban dau luu bang duong dan local trong `image_path`; MinIO se tinh sau.
+- Anh upload trong flow moi luu tren MinIO/S3; PostgreSQL hien luu object key trong cot `image_path` de tranh migration lon.
 - Vector khuon mat ban dau co the luu trong PostgreSQL de test end-to-end; Qdrant se tinh sau khi pipeline on dinh.
 
 ## So Do Tong Quan
@@ -104,7 +104,7 @@ Luu lich su check ra vao.
 | `camera_id` | integer | no | Foreign key den `cameras.id`, null neu check thu cong khong co camera |
 | `status` | varchar(50) | yes | Ket qua check access |
 | `score` | double precision | no | Diem matching/cosine similarity |
-| `image_path` | text | no | Duong dan anh snapshot/upload |
+| `image_path` | text | no | Object key anh snapshot trong MinIO/S3; ten cot giu lai de tuong thich nguoc |
 | `created_at` | timestamptz | yes | Thoi diem ghi log |
 
 Gia tri `status` ban dau:

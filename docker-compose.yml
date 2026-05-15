@@ -36,7 +36,10 @@ services:
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-1440}
       BACKEND_CORS_ORIGINS: ${BACKEND_CORS_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174,http://localhost:8080,http://127.0.0.1:8080}
       MINIO_ENDPOINT: ${MINIO_ENDPOINT:-minio:9000}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
       MINIO_BUCKET: ${MINIO_BUCKET:-deepface-images}
+      MINIO_SECURE: ${MINIO_SECURE:-false}
       QDRANT_URL: ${QDRANT_URL:-http://qdrant:6333}
       QDRANT_COLLECTION: ${QDRANT_COLLECTION:-deepface_embeddings}
     volumes:
@@ -47,6 +50,8 @@ services:
       database:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      minio:
         condition: service_healthy
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000
     healthcheck:
@@ -112,7 +117,10 @@ services:
       DEEPFACE_MATCH_THRESHOLD: ${DEEPFACE_MATCH_THRESHOLD:-0.70}
       DEEPFACE_ANTI_SPOOFING: ${DEEPFACE_ANTI_SPOOFING:-false}
       MINIO_ENDPOINT: ${MINIO_ENDPOINT:-minio:9000}
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
       MINIO_BUCKET: ${MINIO_BUCKET:-deepface-images}
+      MINIO_SECURE: ${MINIO_SECURE:-false}
       QDRANT_URL: ${QDRANT_URL:-http://qdrant:6333}
       QDRANT_COLLECTION: ${QDRANT_COLLECTION:-deepface_embeddings}
     volumes:
@@ -121,6 +129,8 @@ services:
       database:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      minio:
         condition: service_healthy
     command: python -m app.main
     healthcheck:

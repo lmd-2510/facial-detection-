@@ -49,7 +49,7 @@ URL mac dinh:
 - `prometheus`: scrape backend metrics.
 - `alertmanager`: nhan alert tu Prometheus trong local monitoring.
 - `grafana`: dashboard doc metric tu Prometheus.
-- `minio`: object storage, da co service/config nhung chua noi vao upload flow that.
+- `minio`: object storage cho upload employee face image va access snapshot.
 - `qdrant`: vector database, da co service/config nhung access matching hien van dung PostgreSQL JSONB.
 
 ## Health Check
@@ -134,3 +134,4 @@ Gioi han hien tai:
 
 - Helm chart la baseline de render/deploy, chua duoc xac nhan tren cluster production that.
 - Database/Redis/MinIO/Qdrant trong chart phu hop dev/staging nho; production nen can nhac managed service.
+- Cot database `image_path` tam thoi luu MinIO object key de tranh migration lon; neu production hoa nen doi schema ro thanh `image_key`/`object_key`.

@@ -33,7 +33,7 @@ Trong `docker-compose.yml`, he thong duoc chay bang cac service chinh:
 - `prometheus`: scrape metric toi thieu cua backend.
 - `alertmanager`: nhan alert tu Prometheus trong local monitoring.
 - `grafana`: dashboard truc quan hoa metric Prometheus.
-- `minio`: object storage da co service/config cho Giai Doan 8, nhung flow upload that chua bat buoc dung.
+- `minio`: object storage cho anh employee/access snapshot trong flow upload moi.
 - `qdrant`: vector database da co service/config cho Giai Doan 8, nhung matching hien van dung PostgreSQL JSONB.
 
 Co the hinh dung luong tong quat nhu sau:
@@ -60,15 +60,15 @@ Backend API
 Flow chinh cua MVP:
 
 1. Admin tao employee.
-2. Admin cung cap `image_path` anh khuon mat cho employee.
+2. Admin upload anh khuon mat cho employee len MinIO va nhan `image_key`.
 3. Backend tao embedding job trong Redis.
 4. Worker doc job tu Redis.
 5. Worker tao embedding cho anh khuon mat.
-6. User cung cap `image_path` anh/snapshot de kiem tra quyen ra vao.
+6. User upload anh/snapshot len MinIO va gui `image_key` de kiem tra quyen ra vao.
 7. Worker so sanh embedding cua snapshot voi embedding da dang ky.
 8. He thong ghi access log voi ket qua `granted`, `denied` hoac `error`.
 
-Hien tai project da hoan thanh phan code cot loi cua Giai Doan 7. Backend co API cot loi cho auth, employees, cameras, logs, va day duoc `embedding_jobs` / `access_jobs` vao Redis. Worker nghe Redis queue, dung DeepFace cho face detection, anti-spoofing/liveness, embedding va cosine matching, luu vector vao `face_embeddings`, va cap nhat `access_logs` thanh `granted`, `denied` hoac `error`. Admin/user frontend da co login, thao tac flow chinh theo API, hien thi loading/error/empty state co ban.
+Hien tai project da hoan thanh phan code cot loi cua Giai Doan 7 va lop van hanh Giai Doan 8. Backend co API cot loi cho auth, employees, cameras, logs, upload anh len MinIO, va day duoc `embedding_jobs` / `access_jobs` vao Redis bang object key. Worker nghe Redis queue, tai anh tu MinIO ve temp file, dung DeepFace cho face detection, anti-spoofing/liveness, embedding va cosine matching, luu vector vao `face_embeddings`, va cap nhat `access_logs` thanh `granted`, `denied` hoac `error`. Admin/user frontend da co login, thao tac flow chinh theo API, hien thi loading/error/empty state co ban.
 
 ## Cau Truc Thu Muc Nen Doc Truoc
 
@@ -163,9 +163,8 @@ Backup toi thieu database va thu muc `data/`:
 
 Nhung phan nen uu tien sau khi da nam tong quan:
 
-- Bo sung upload file that thay vi nhap `image_path` thu cong.
+- Hoan thien schema rieng cho `image_key`/`object_key` thay vi tam luu trong cot `image_path`.
 - Bo sung Playwright end-to-end test khi muon test UI tren browser that.
 - Smoke test DeepFace voi bo anh that nho, roi tinh chinh `DEEPFACE_MATCH_THRESHOLD`.
-- Noi MinIO vao upload flow that.
 - Dua embedding search sang Qdrant khi volume vector lon hon.
 - Hoan thien kenh gui alert ra email/Slack neu can.

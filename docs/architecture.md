@@ -43,23 +43,29 @@ PostgreSQL Redis Queue
 ```text
 Admin UI
 -> Backend /employees
+-> Backend /employees/{id}/face-image
+-> MinIO/S3 object key
 -> Backend /employees/{id}/embedding-jobs
 -> Redis embedding_jobs
 -> Worker
+-> download object ve temp file
 -> DeepFace detector/liveness/embedder
 -> PostgreSQL face_embeddings
 ```
 
-Hien tai input van la `image_path` local.
+Flow moi uu tien object key tu MinIO/S3. Cac endpoint JSON van chap nhan `image_path` local de tuong thich smoke test/dev cu.
 
 ## Flow Check Access
 
 ```text
 User UI
+-> Backend /access/snapshots
+-> MinIO/S3 object key
 -> Backend /access/check
 -> PostgreSQL access_logs status=processing
 -> Redis access_jobs
 -> Worker
+-> download object ve temp file
 -> DeepFace embedding
 -> PostgreSQL face_embeddings matching
 -> PostgreSQL access_logs status=granted/denied/error
@@ -75,7 +81,7 @@ User UI
 
 ## Gioi Han Hien Tai
 
-- Chua co upload file that qua MinIO.
+- Upload file that qua MinIO da co cho employee face image va access snapshot; metadata hien van luu trong cot `image_path` duoi dang object key de tranh migration lon.
 - Chua dung Qdrant trong matching production.
 - Chua co kenh gui alert ra email/Slack/webhook production.
 - Helm chart da render/lint duoc, nhung chua xac nhan tren cluster production.

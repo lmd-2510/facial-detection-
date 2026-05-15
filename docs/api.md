@@ -40,6 +40,7 @@ Tat ca endpoint employees can Bearer token.
 - `GET /employees/{id}`: xem chi tiet employee.
 - `PUT /employees/{id}`: cap nhat employee.
 - `DELETE /employees/{id}`: soft-delete employee bang cach doi `status` thanh `inactive`.
+- `POST /employees/{id}/face-image`: upload anh khuon mat employee len MinIO/S3, tra ve `object_key`.
 - `POST /employees/{id}/embedding-jobs`: tao job Redis de worker xu ly embedding cho anh employee.
 
 Request tao employee:
@@ -57,11 +58,11 @@ Request tao embedding job:
 
 ```json
 {
-  "image_path": "/app/storage/uploads/employee_1.jpg"
+  "image_key": "employee-faces/1/<uuid>.jpg"
 }
 ```
 
-Response tra ve `job_id`, `type = embedding`, `employee_id`, `image_path` va `queue_name = embedding_jobs`. Worker se nhan job tu Redis, chay DeepFace detector/anti-spoofing, goi DeepFace de tao embedding, roi luu vector vao bang `face_embeddings`.
+Response tra ve `job_id`, `type = embedding`, `employee_id`, `image_key`, `image_path` va `queue_name = embedding_jobs`. `image_path` duoc giu de tuong thich nguoc, nhung gia tri chinh trong flow moi la MinIO/S3 object key. Worker se nhan job tu Redis, tai object ve file tam, chay DeepFace detector/anti-spoofing, goi DeepFace de tao embedding, roi luu vector vao bang `face_embeddings`.
 
 ## Cameras
 
@@ -95,6 +96,21 @@ id, employee_id, camera_id, status, score, image_path, created_at
 
 ## Access
 
+### `POST /access/snapshots`
+
+Can Bearer token. Upload anh snapshot len MinIO/S3 va tra ve object key.
+
+Response:
+
+```json
+{
+  "object_key": "access-snapshots/<uuid>.jpg",
+  "bucket": "deepface-images",
+  "content_type": "image/jpeg",
+  "size": 12345
+}
+```
+
 ### `POST /access/check`
 
 Can Bearer token. Backend tao `access_log` trang thai `processing`, day job vao Redis queue `access_jobs`, roi tra response `202 Accepted`. Worker se xu ly job bat dong bo bang DeepFace embedding pipeline va cap nhat `access_logs`.
@@ -104,11 +120,11 @@ Request:
 ```json
 {
   "camera_id": 1,
-  "image_path": "/app/storage/uploads/snapshot.jpg"
+  "image_key": "access-snapshots/<uuid>.jpg"
 }
 ```
 
-Response ban dau co `status` mac dinh la `processing`, `employee_id` la `null`, `job_id` cua Redis job va `log_id` cua access log vua duoc tao. Sau khi worker xu ly xong, log co the duoc cap nhat thanh:
+Response ban dau co `status` mac dinh la `processing`, `employee_id` la `null`, `job_id` cua Redis job va `log_id` cua access log vua duoc tao. `image_path` trong response/log hien luu cung gia tri object key de tranh migration lon. Sau khi worker xu ly xong, log co the duoc cap nhat thanh:
 
 - `granted`: match duoc employee active vuot threshold.
 - `denied`: khong co embedding phu hop hoac score duoi threshold.

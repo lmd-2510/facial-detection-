@@ -6,7 +6,8 @@ Sau Giai Doan 7, worker da thay cac phan fake AI trong flow chinh bang DeepFace.
 ## Flow Hien Tai
 
 ```text
-image_path
+image_key/object_key
+-> worker tai anh tu MinIO/S3 ve temp file
 -> DeepFace.extract_faces() de detect mat
 -> DeepFace.extract_faces(anti_spoofing=True) de check liveness
 -> DeepFace.represent()
@@ -14,6 +15,8 @@ image_path
 -> decision
 -> access_log
 ```
+
+Worker van chap nhan `image_path` local de giu smoke test/dev cu, nhung flow UI/API moi upload anh len MinIO/S3 va dung object key trong Redis job.
 
 `detector.py`, `anti_spoof.py` va `embedder.py` deu wrap DeepFace de giu contract noi bo on dinh cho worker.
 

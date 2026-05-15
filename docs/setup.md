@@ -63,4 +63,4 @@ C:\Users\Dell\.conda\envs\ltxldl\Library\bin
 
 ## Ghi Chu
 
-MinIO va Qdrant da co service/config trong Giai Doan 8, nhung flow chinh hien van nhap `image_path` local va match vector tu PostgreSQL.
+MinIO da duoc noi vao flow upload employee face image/access snapshot. PostgreSQL hien van luu object key trong cot `image_path` de tranh migration lon. Qdrant da co service/config, nhung flow chinh hien van match vector tu PostgreSQL.

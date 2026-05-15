@@ -61,7 +61,7 @@ Expand-Archive backup\<timestamp>\data.zip -DestinationPath data -Force
 
 ## MinIO
 
-Compose da co service MinIO, nhung flow upload that chua noi vao backend/worker. Khi bat dau dung MinIO cho anh production, can backup bucket bang `mc mirror` hoac co che snapshot volume.
+Compose da co service MinIO va flow upload employee face image/access snapshot da dung bucket MinIO. Neu self-host MinIO, can backup bucket bang `mc mirror` hoac co che snapshot volume.
 
 Nhung bucket can backup sau khi noi flow:
 

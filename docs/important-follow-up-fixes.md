@@ -304,9 +304,11 @@ PostgreSQL van giu vai tro source of truth, Qdrant la search index. Neu Qdrant c
 
 ## 5. Embedding Job Loi Khong Co Trang Thai Cho Admin
 
+Trang thai: da hoan thanh theo cach nhe. Bang `employees` co `embedding_status` (`none`/`pending`/`success`/`error`) va `embedding_error`. Backend set `pending` khi queue embedding job. Worker set `success` sau khi tao embedding/upsert Qdrant thanh cong, va set `error` kem message neu pipeline loi. Admin UI hien trang thai embedding trong bang employee.
+
 ### Van De
 
-Access job co `access_logs.status = processing/granted/denied/error`. Nhung embedding job neu loi thi worker chi log exception; admin khong biet job tao embedding thanh cong hay that bai.
+Access job co `access_logs.status = processing/granted/denied/error`. Truoc day embedding job neu loi thi worker chi log exception; admin khong biet job tao embedding thanh cong hay that bai.
 
 ### Dang Nam O Dau
 
@@ -317,11 +319,11 @@ Access job co `access_logs.status = processing/granted/denied/error`. Nhung embe
 - `frontend/admin/src/components/EmployeeTable.tsx`
 - `frontend/admin/src/pages/EmployeePage.tsx`
 
-### Nen Sua Nhu The Nao
+### Cach Da Sua
 
 Cach nhe:
 
-Them vao `employees`:
+Da them vao `employees`:
 
 ```text
 embedding_status: none/pending/success/error
@@ -348,7 +350,7 @@ embedding_status = error
 embedding_error = message
 ```
 
-Cach day du hon:
+Cach day du hon neu ve sau can audit tung lan retry/job:
 
 ```text
 Them bang embedding_jobs

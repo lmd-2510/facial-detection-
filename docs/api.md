@@ -54,6 +54,8 @@ Request tao employee:
 }
 ```
 
+Employee response gom them `embedding_status` va `embedding_error` de admin biet job tao embedding gan nhat dang `none`, `pending`, `success` hay `error`.
+
 Request tao embedding job:
 
 ```json
@@ -63,6 +65,8 @@ Request tao embedding job:
 ```
 
 Response tra ve `job_id`, `type = embedding`, `employee_id`, `image_key`, `image_path` va `queue_name = embedding_jobs`. `image_path` duoc giu de tuong thich nguoc, nhung gia tri chinh trong flow moi la MinIO/S3 object key. Worker se nhan job tu Redis, tai object ve file tam, chay DeepFace detector/anti-spoofing, goi DeepFace de tao embedding, roi luu vector vao bang `face_embeddings`.
+
+Khi job duoc queue, backend cap nhat employee `embedding_status = pending`. Worker cap nhat thanh `success` neu tao embedding/upsert Qdrant thanh cong, hoac `error` kem `embedding_error` neu pipeline loi.
 
 ## Cameras
 

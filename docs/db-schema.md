@@ -50,12 +50,21 @@ Luu nhan vien duoc dang ky khuon mat.
 | `name` | varchar(150) | yes | Ten hien thi |
 | `department` | varchar(150) | no | Phong ban |
 | `status` | varchar(50) | yes | Trang thai nhan vien |
+| `embedding_status` | varchar(50) | yes | `none`, `pending`, `success` hoac `error` |
+| `embedding_error` | varchar(1000) | no | Loi embedding job gan nhat neu co |
 | `created_at` | timestamptz | yes | Thoi diem tao ho so |
 
 Gia tri `status` ban dau:
 
 - `active`: duoc phep check access.
 - `inactive`: tam ngung hoac da nghi viec.
+
+Gia tri `embedding_status`:
+
+- `none`: chua queue embedding job.
+- `pending`: da queue job va dang cho worker xu ly.
+- `success`: worker da tao embedding va upsert Qdrant thanh cong.
+- `error`: worker xu ly loi, chi tiet nam trong `embedding_error`.
 
 ## Bang `cameras`
 

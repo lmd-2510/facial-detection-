@@ -9,7 +9,7 @@ Sau Giai Doan 7, worker da thay cac phan fake AI trong flow chinh bang DeepFace.
 image_key/object_key
 -> worker tai anh tu MinIO/S3 ve temp file
 -> DeepFace.extract_faces() de detect mat
--> DeepFace.extract_faces(anti_spoofing=True) de check liveness
+-> optional DeepFace.extract_faces(anti_spoofing=True) de check liveness neu `DEEPFACE_ANTI_SPOOFING=true`
 -> DeepFace.represent()
 -> Qdrant vector search
 -> PostgreSQL verify employee/embedding active
@@ -58,6 +58,7 @@ Check liveness bang `DeepFace.extract_faces(anti_spoofing=True)`.
 - Reject `image_path` rong.
 - Tra ve fail neu DeepFace bao `is_real = false`.
 - Neu `DEEPFACE_ANTI_SPOOFING=false`, module tra ve pass voi message noi ro anti-spoofing dang tat theo cau hinh.
+- Mac dinh worker de `DEEPFACE_ANTI_SPOOFING=false` de demo chinh khong bi phu thuoc vao model/dependency anti-spoofing.
 
 ### `worker/app/ml/embedder.py`
 
@@ -66,7 +67,7 @@ Tao embedding that bang DeepFace.
 - Goi `DeepFace.represent()` bang config tu bien moi truong.
 - Lay embedding cua face dau tien trong ket qua.
 - Validate vector khong rong va toan so.
-- Luu `model_name` vao database de tranh match nham voi embedding cua model khac.
+- Luu `model_name` va `source_image_key` vao database de tranh match nham voi embedding cua model khac va giu duong dan reindex ve sau.
 
 ### `worker/app/ml/matcher.py`
 
@@ -92,10 +93,10 @@ Da co:
 - Worker queue o `worker/app/tasks/queue_worker.py` lay job tu Redis va dispatch sang job handler.
 - Ket noi PostgreSQL rieng cho worker trong `worker/app/config/database.py`.
 - Schema SQLAlchemy Core toi thieu cho worker trong `worker/app/db/schema.py`.
-- `embedding_job.py` goi detector/liveness/embedder, luu vector DeepFace vao `face_embeddings`, roi upsert vector vao Qdrant.
+- `embedding_job.py` goi detector/liveness/embedder, luu vector DeepFace va `source_image_key` vao `face_embeddings`, roi upsert vector vao Qdrant.
 - `access_job.py` goi pipeline, query Qdrant theo vector cung `model_name`, verify employee active trong PostgreSQL, roi cap nhat `access_logs`.
 - `storage_service.py` normalize va validate `image_path` local truoc khi worker goi DeepFace.
-- `reindex_service.py` hien chi co readiness check vi DB chua luu source `image_path` de tao lai embedding khi doi model.
+- `reindex_service.py` hien chi co readiness check; DB da luu `source_image_key`, nhung automated reindex job chua duoc implement.
 
 Trang thai access log sau worker:
 
@@ -118,5 +119,4 @@ Unit test mock DeepFace de test nhanh contract cua detector, anti-spoof, embedde
 1. Chuan bi bo anh test nho gom cung nguoi/khac nguoi/anh loi/spoof neu co.
 2. Chay embedding job va access job that voi Docker Compose.
 3. Dieu chinh `DEEPFACE_MATCH_THRESHOLD` theo ket qua thuc te.
-4. Luu them source `image_path` cho embedding neu muon reindex model ve sau.
-5. Bo sung reindex Qdrant khi doi model hoac rebuild collection.
+4. Bo sung reindex Qdrant khi doi model hoac rebuild collection.

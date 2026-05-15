@@ -32,7 +32,7 @@ class Settings:
     deepface_align: bool = _get_bool("DEEPFACE_ALIGN", True)
     deepface_normalization: str = getenv("DEEPFACE_NORMALIZATION", "base")
     deepface_match_threshold: float = _get_float("DEEPFACE_MATCH_THRESHOLD", 0.70)
-    deepface_anti_spoofing: bool = _get_bool("DEEPFACE_ANTI_SPOOFING", True)
+    deepface_anti_spoofing: bool = _get_bool("DEEPFACE_ANTI_SPOOFING", False)
 
 
 settings = Settings()

@@ -360,11 +360,13 @@ Them bang embedding_jobs
 
 Neu can demo nhanh, cach them cot vao `employees` la de hieu nhat.
 
-## 6. Chua Luu Source Image Cua Embedding
+## 6. Luu Source Image Cua Embedding
+
+Trang thai: da hoan thanh. Bang `face_embeddings` da co `source_image_key` de luu object key MinIO/S3 hoac local image path tuong thich dev/smoke test. Worker ghi gia tri nay khi tao embedding thanh cong, cung luc luu vector/model va upsert Qdrant.
 
 ### Van De
 
-Bang `face_embeddings` hien luu vector va `model_name`, nhung khong luu anh goc da tao ra vector. Vi vay neu sau nay doi model DeepFace hoac can reindex Qdrant, he thong khong biet lay anh nao de tao lai embedding.
+Truoc day bang `face_embeddings` chi luu vector va `model_name`, nhung khong luu anh goc da tao ra vector. Vi vay neu sau nay doi model DeepFace hoac can reindex Qdrant, he thong khong biet lay anh nao de tao lai embedding.
 
 ### Dang Nam O Dau
 
@@ -389,13 +391,15 @@ Neu chuyen sang MinIO:
 face_embeddings.source_image_key
 ```
 
-Sau khi worker tao embedding thanh cong, luu source nay cung record embedding.
+Sau khi worker tao embedding thanh cong, source nay duoc luu cung record embedding.
 
 ### Ghi Chu
 
-Nen lam chung voi upload MinIO de tranh doi schema hai lan.
+`source_image_key` hien luu duoc ca object key MinIO/S3 va local path cu de giu tuong thich smoke test/dev. Automated reindex job van la phan sau, nhung du lieu nguon de reindex da khong con bi mat.
 
 ## 7. Hoan Thien Anti-spoofing/Liveness
+
+Trang thai: da hoan thanh phan cau hinh an toan. Code worker, `.env.example`, Docker Compose va docs deu thong nhat `DEEPFACE_ANTI_SPOOFING=false` mac dinh. Anti-spoofing van co san trong `worker/app/ml/anti_spoof.py` va co the bat bang bien moi truong khi can demo liveness that.
 
 ### Van De
 
@@ -407,13 +411,13 @@ DEEPFACE_ANTI_SPOOFING=false
 
 Ly do tam tat la anti-spoofing co the can them dependency/model nang, lan dau chay co the tai weight lau, va do on dinh phu thuoc chat luong anh/camera. Neu bat khi chua test ky, flow demo chinh co the bi false reject hoac worker loi dependency.
 
-Ngoai ra docs, `.env.example`, va `docker-compose.yml` deu noi mac dinh la `false`, nhung code worker:
+Truoc day docs, `.env.example`, va `docker-compose.yml` deu noi mac dinh la `false`, nhung code worker:
 
 ```text
 worker/app/config/settings.py
 ```
 
-co default la `true` neu chay worker ngoai Docker Compose. Can sua de hanh vi local/test/doc khop nhau.
+co default la `true` neu chay worker ngoai Docker Compose. Hien da sua ve `false` de hanh vi local/test/doc khop nhau.
 
 ### Dang Nam O Dau
 
@@ -439,22 +443,22 @@ co default la `true` neu chay worker ngoai Docker Compose. Can sua de hanh vi lo
 - Unit test hien mock DeepFace nen test contract nhanh, chua chung minh anti-spoof model that chay trong container.
 - Smoke test DeepFace gan day moi xac nhan detector/embedding/matching, chua bat anti-spoofing that.
 
-### Nen Sua Nhu The Nao
+### Cach Da Sua / Nen Test Tiep
 
 Lam theo tung buoc nho, khong bat mac dinh ngay:
 
-1. Sua default config cho khop docs:
+1. Da sua default config cho khop docs:
 
 ```python
 deepface_anti_spoofing: bool = _get_bool("DEEPFACE_ANTI_SPOOFING", False)
 ```
 
-2. Them/sua test de confirm:
+2. Da them/sua test de confirm:
 
 ```text
-[ ] Khi khong set env, settings.deepface_anti_spoofing la False
-[ ] Khi DEEPFACE_ANTI_SPOOFING=true, anti_spoof.py goi DeepFace voi anti_spoofing=True
-[ ] Khi DeepFace tra is_real=false, worker update access log thanh error hoac denied theo quyet dinh ro rang
+[x] Khi khong set env, settings.deepface_anti_spoofing la False
+[x] Khi DEEPFACE_ANTI_SPOOFING=true, anti_spoof.py goi DeepFace voi anti_spoofing=True
+[x] Khi DeepFace tra is_real=false, require_live_face raise ValueError va worker pipeline se cap nhat status error theo error handling hien co
 ```
 
 3. Chay thu anti-spoofing bang Docker Compose rieng:
@@ -500,7 +504,7 @@ Huong B - Bat mac dinh:
 DEEPFACE_ANTI_SPOOFING=true chi khi smoke test that on dinh, toc do chap nhan duoc, va anh that/spoof cho ket qua hop ly.
 ```
 
-Khuyen nghi hien tai: giu **Huong A** cho den khi co bo anh test that tot hon va da test dependency trong container.
+Quyet dinh hien tai: giu **Huong A** cho den khi co bo anh test that tot hon va da test dependency/model trong container.
 
 ### Moc Hoan Thanh
 
@@ -513,9 +517,11 @@ Khuyen nghi hien tai: giu **Huong A** cho den khi co bo anh test that tot hon va
 
 ## 8. Camera Thieu Update/Delete
 
+Trang thai: da hoan thanh. Backend da co `GET /cameras/{id}`, `PUT /cameras/{id}` va `DELETE /cameras/{id}` soft-delete bang `status = inactive`. Admin UI da co edit va disable camera tu bang camera.
+
 ### Van De
 
-Backend/frontend hien co:
+Truoc day backend/frontend chi co:
 
 ```text
 GET /cameras
@@ -535,9 +541,9 @@ Nhung chua co update/delete. Roadmap da ghi day la phan con thieu cua Giai Doan 
 - `frontend/admin/src/pages/CameraPage.tsx`
 - `frontend/admin/src/components/CameraForm.tsx`
 
-### Nen Sua Nhu The Nao
+### Cach Da Sua
 
-Them:
+Da them:
 
 ```text
 GET /cameras/{id}
@@ -551,7 +557,7 @@ Delete nen soft-delete bang:
 status = inactive
 ```
 
-Frontend admin them edit/disable camera tuong tu employee.
+Frontend admin da them edit/disable camera tuong tu employee.
 
 ## 9. Helm Ingress `/api` Co The Khong Strip Prefix
 
@@ -915,3 +921,30 @@ Nhung muc tren khong co nghia repo dang hong. Repo hien da co core flow, test, d
 - tranh bi hoi vao cac diem co ban nhu upload, phan quyen, object storage, vector database.
 
 Neu hoan thanh cac muc 1, 2, 3, 4, 8, 11, 12, 13, 14 va 16, repo se vung hon nhieu cho phan yeu cau co ban cua de bai. Cac muc monitoring/Helm/backup hien da co baseline kha tot, nhung van nen giu checklist de chung minh bang lenh chay that.
+
+## Optional Anti-spoof Smoke Test Sau Nay
+
+Phan nay khong chan demo chinh. Hien tai `DEEPFACE_ANTI_SPOOFING=false` mac dinh de flow nhan dien chinh on dinh va khong bi phu thuoc vao model/dependency anti-spoofing nang.
+
+Khi co thoi gian test liveness that, chay rieng:
+
+```powershell
+$env:DEEPFACE_ANTI_SPOOFING="true"
+docker compose up -d --build worker
+docker compose logs -f worker
+```
+
+Checklist:
+
+```text
+[ ] Worker boot duoc khi DEEPFACE_ANTI_SPOOFING=true.
+[ ] employee_a_ref.jpg tao embedding pass liveness.
+[ ] employee_a_ok.jpg access pass liveness va co the granted.
+[ ] employee_b_ok.jpg pass liveness nhung denied do khac nguoi.
+[ ] no_face.jpg loi dung do khong co mat.
+[ ] spoof_a.jpg fail liveness neu anh spoof phu hop voi model.
+[ ] Neu worker loi import/dependency, doc log truoc roi moi them dependency nhu torch.
+[ ] Ghi lai liveness score, access status, match score va thoi gian xu ly.
+```
+
+Khuyen nghi: khong them `torch` hoac dependency nang theo cam tinh. Chi them khi da bat anti-spoofing that va log worker noi ro dang thieu dependency nao.

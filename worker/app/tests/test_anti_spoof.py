@@ -1,3 +1,5 @@
+import importlib
+
 import pytest
 
 from app.ml import anti_spoof
@@ -11,6 +13,41 @@ class LiveDeepFace:
     def extract_faces(**kwargs):
         LiveDeepFace.calls.append(kwargs)
         return [{"is_real": True, "antispoof_score": 0.94}]
+
+
+def test_worker_settings_default_disables_anti_spoofing(monkeypatch):
+    monkeypatch.delenv("DEEPFACE_ANTI_SPOOFING", raising=False)
+
+    import app.config.settings as settings_module
+
+    reloaded_settings_module = importlib.reload(settings_module)
+
+    assert reloaded_settings_module.settings.deepface_anti_spoofing is False
+
+
+def test_worker_settings_can_enable_anti_spoofing(monkeypatch):
+    monkeypatch.setenv("DEEPFACE_ANTI_SPOOFING", "true")
+
+    import app.config.settings as settings_module
+
+    reloaded_settings_module = importlib.reload(settings_module)
+
+    assert reloaded_settings_module.settings.deepface_anti_spoofing is True
+
+
+def test_check_liveness_default_does_not_call_deepface_when_disabled(monkeypatch):
+    class FailingDeepFace:
+        @staticmethod
+        def extract_faces(**kwargs):
+            raise AssertionError("DeepFace should not be called by default")
+
+    monkeypatch.setattr(anti_spoof, "load_deepface", lambda: FailingDeepFace)
+
+    result = check_liveness("/app/storage/uploads/employee_1.jpg")
+
+    assert result.passed is True
+    assert result.confidence == 0.0
+    assert result.message == "DeepFace anti-spoofing is disabled by configuration."
 
 
 def test_check_liveness_uses_deepface_anti_spoofing(monkeypatch):

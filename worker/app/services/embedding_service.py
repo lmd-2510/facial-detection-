@@ -8,6 +8,7 @@ from app.ml.anti_spoof import require_live_face
 from app.ml.detector import require_face
 from app.ml.embedder import create_face_embedding
 from app.services.storage_service import resolved_image_file
+from app.services.vector_store_service import upsert_face_embedding
 
 
 class EmployeeNotFoundError(Exception):
@@ -47,10 +48,22 @@ def create_employee_embedding(
             model_name=embedding.model_name,
         )
     )
+    embedding_id = int(result.inserted_primary_key[0])
+    try:
+        upsert_face_embedding(
+            embedding_id=embedding_id,
+            employee_id=employee_id,
+            vector=embedding.vector,
+            model_name=embedding.model_name,
+        )
+    except Exception:
+        db.rollback()
+        raise
+
     db.commit()
 
     return StoredEmbedding(
-        id=int(result.inserted_primary_key[0]),
+        id=embedding_id,
         employee_id=employee_id,
         vector=embedding.vector,
         model_name=embedding.model_name,

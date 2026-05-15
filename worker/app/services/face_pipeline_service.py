@@ -7,8 +7,9 @@ from app.db.schema import access_logs, employees, face_embeddings
 from app.ml.anti_spoof import require_live_face
 from app.ml.detector import require_face
 from app.ml.embedder import create_face_embedding
-from app.ml.matcher import DEFAULT_MATCH_THRESHOLD, MatchCandidate, find_best_match
+from app.ml.matcher import DEFAULT_MATCH_THRESHOLD, MatchResult
 from app.services.storage_service import resolved_image_file
+from app.services.vector_store_service import VectorSearchCandidate, search_face_embeddings
 
 
 class AccessLogNotFoundError(Exception):
@@ -25,30 +26,66 @@ class AccessDecision:
     message: str
 
 
-def _load_active_embedding_candidates(
+def _is_active_embedding_candidate(
     db: Session,
     *,
-    model_name: str,
-) -> list[MatchCandidate]:
-    rows = db.execute(
-        select(
-            face_embeddings.c.employee_id,
-            face_embeddings.c.vector,
-            face_embeddings.c.model_name,
-        )
+    candidate: VectorSearchCandidate,
+) -> bool:
+    row = db.execute(
+        select(face_embeddings.c.id)
         .join(employees, employees.c.id == face_embeddings.c.employee_id)
+        .where(face_embeddings.c.id == candidate.embedding_id)
+        .where(face_embeddings.c.employee_id == candidate.employee_id)
         .where(employees.c.status == "active")
-        .where(face_embeddings.c.model_name == model_name)
+        .where(face_embeddings.c.model_name == candidate.model_name)
+    ).first()
+    return row is not None
+
+
+def _find_best_active_qdrant_match(
+    db: Session,
+    *,
+    query_vector: list[float],
+    model_name: str,
+    threshold: float,
+) -> MatchResult:
+    if not 0 <= threshold <= 1:
+        raise ValueError("Match threshold must be between 0 and 1.")
+
+    candidates = search_face_embeddings(
+        query_vector=query_vector,
+        model_name=model_name,
+        limit=10,
     )
 
-    return [
-        MatchCandidate(
-            employee_id=int(row.employee_id),
-            vector=row.vector,
-            model_name=row.model_name,
+    for candidate in candidates:
+        if not _is_active_embedding_candidate(db, candidate=candidate):
+            continue
+
+        if candidate.score >= threshold:
+            return MatchResult(
+                matched=True,
+                employee_id=candidate.employee_id,
+                score=candidate.score,
+                threshold=threshold,
+                message="Face matched embedding from Qdrant.",
+            )
+
+        return MatchResult(
+            matched=False,
+            employee_id=candidate.employee_id,
+            score=candidate.score,
+            threshold=threshold,
+            message="Best Qdrant match is below threshold.",
         )
-        for row in rows
-    ]
+
+    return MatchResult(
+        matched=False,
+        employee_id=None,
+        score=None,
+        threshold=threshold,
+        message="No active Qdrant face embeddings available for matching.",
+    )
 
 
 def _update_access_log(
@@ -89,9 +126,10 @@ def process_access_check(
             require_face(resolved_image.normalized_path)
             require_live_face(resolved_image.normalized_path)
             embedding = create_face_embedding(resolved_image.normalized_path)
-            match = find_best_match(
-                embedding.vector,
-                _load_active_embedding_candidates(db, model_name=embedding.model_name),
+            match = _find_best_active_qdrant_match(
+                db,
+                query_vector=embedding.vector,
+                model_name=embedding.model_name,
                 threshold=threshold,
             )
 

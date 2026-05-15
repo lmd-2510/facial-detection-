@@ -13,6 +13,7 @@ from app.services.face_pipeline_service import (
     AccessLogNotFoundError,
     process_access_check,
 )
+from app.services.vector_store_service import VectorSearchCandidate
 
 
 @pytest.fixture()
@@ -75,6 +76,8 @@ def get_access_log(db_session, log_id: int):
 
 @pytest.fixture()
 def deepface_embedding_stub(monkeypatch):
+    indexed_embeddings = []
+
     class DetectionResult:
         detected = True
 
@@ -112,6 +115,32 @@ def deepface_embedding_stub(monkeypatch):
     monkeypatch.setattr(
         "app.services.face_pipeline_service.require_live_face",
         lambda image_path: LivenessResult(),
+    )
+    monkeypatch.setattr(
+        "app.services.embedding_service.upsert_face_embedding",
+        lambda **payload: indexed_embeddings.append(payload),
+    )
+
+    def fake_search_face_embeddings(
+        *,
+        query_vector: list[float],
+        model_name: str,
+        limit: int = 10,
+    ) -> list[VectorSearchCandidate]:
+        return [
+            VectorSearchCandidate(
+                embedding_id=int(payload["embedding_id"]),
+                employee_id=int(payload["employee_id"]),
+                score=1.0,
+                model_name=str(payload["model_name"]),
+            )
+            for payload in indexed_embeddings
+            if payload["model_name"] == model_name
+        ][:limit]
+
+    monkeypatch.setattr(
+        "app.services.face_pipeline_service.search_face_embeddings",
+        fake_search_face_embeddings,
     )
 
 

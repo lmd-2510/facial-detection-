@@ -83,8 +83,12 @@ export default function EmployeePage({
     setMessage(null);
     try {
       const upload = await uploadEmployeeFaceImage(token, employeeId, file);
-      const job = await queueEmbeddingJob(token, employeeId, upload.object_key);
-      setMessage(`Embedding job queued: ${job.job_id}`);
+      if (upload.job_id) {
+        setMessage(`Image uploaded and embedding job queued: ${upload.job_id}`);
+      } else {
+        const job = await queueEmbeddingJob(token, employeeId, upload.object_key);
+        setMessage(`Embedding job queued: ${job.job_id}`);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Cannot queue embedding job");
     }

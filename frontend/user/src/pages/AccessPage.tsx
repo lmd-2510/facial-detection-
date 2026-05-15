@@ -1,5 +1,5 @@
 import { FormEvent, useState } from "react";
-import { checkAccess, uploadAccessSnapshot } from "../api/access";
+import { checkAccessImage } from "../api/access";
 import CameraView from "../components/CameraView";
 import ResultCard from "../components/ResultCard";
 import type { AccessCheckResponse } from "../types/access";
@@ -26,12 +26,8 @@ export default function AccessPage({ token, onAccessQueued }: AccessPageProps) {
         setError("Choose a snapshot image first.");
         return;
       }
-      const upload = await uploadAccessSnapshot(token, snapshotFile);
-      const response = await checkAccess(token, {
-        camera_id: Number(cameraId),
-        image_key: upload.object_key,
-      });
-      setImageKey(upload.object_key);
+      const response = await checkAccessImage(token, Number(cameraId), snapshotFile);
+      setImageKey(response.image_key);
       setResult(response);
       await onAccessQueued();
     } catch (err) {

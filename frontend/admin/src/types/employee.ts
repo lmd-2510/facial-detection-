@@ -31,4 +31,9 @@ export interface ImageUploadResponse {
   bucket: string;
   content_type: string;
   size: number;
+  job_id: string | null;
+  type: string | null;
+  employee_id: number | null;
+  queue_name: string | null;
+  message: string | null;
 }

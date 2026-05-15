@@ -28,3 +28,18 @@ export function uploadAccessSnapshot(
     body: formData,
   });
 }
+
+export function checkAccessImage(
+  token: string,
+  cameraId: number,
+  file: File,
+): Promise<AccessCheckResponse> {
+  const formData = new FormData();
+  formData.append("camera_id", String(cameraId));
+  formData.append("file", file);
+  return apiRequest<AccessCheckResponse>("/access/check-image", {
+    method: "POST",
+    token,
+    body: formData,
+  });
+}

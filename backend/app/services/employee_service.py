@@ -13,6 +13,7 @@ from app.repositories.employee_repository import (
     list_employees,
     soft_delete_employee,
     update_employee,
+    update_employee_embedding_status,
 )
 from app.schemas.employee import EmployeeCreate, EmployeeUpdate
 
@@ -75,7 +76,14 @@ def queue_employee_embedding_job(
     if employee is None:
         raise EmployeeNotFoundError
 
-    return enqueue_embedding_job(employee.id, image_key)
+    job = enqueue_embedding_job(employee.id, image_key)
+    update_employee_embedding_status(
+        db,
+        employee,
+        status="pending",
+        error=None,
+    )
+    return job
 
 
 def get_embedding_queue_name() -> str:

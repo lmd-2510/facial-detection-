@@ -5,6 +5,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 EmployeeStatus = Literal["active", "inactive"]
+EmbeddingStatus = Literal["none", "pending", "success", "error"]
 
 
 class EmployeeBase(BaseModel):
@@ -29,6 +30,8 @@ class EmployeeRead(EmployeeBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    embedding_status: EmbeddingStatus = "none"
+    embedding_error: str | None = None
     created_at: datetime
 
 

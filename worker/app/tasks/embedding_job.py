@@ -1,8 +1,29 @@
 import logging
 from typing import Any
 
+from sqlalchemy import update
+
 from app.config.database import get_db_session
+from app.db.schema import employees
 from app.services.embedding_service import create_employee_embedding
+
+
+def _set_embedding_status(
+    db,
+    *,
+    employee_id: int,
+    status: str,
+    error: str | None = None,
+) -> None:
+    db.execute(
+        update(employees)
+        .where(employees.c.id == employee_id)
+        .values(
+            embedding_status=status,
+            embedding_error=error[:1000] if error is not None else None,
+        )
+    )
+    db.commit()
 
 
 def handle_embedding_job(payload: dict[str, Any]) -> None:
@@ -19,12 +40,29 @@ def handle_embedding_job(payload: dict[str, Any]) -> None:
         employee_id,
         image_path,
     )
+    employee_id_int = int(employee_id)
     with get_db_session() as db:
-        embedding = create_employee_embedding(
-            db,
-            employee_id=int(employee_id),
-            image_path=str(image_path),
-        )
+        try:
+            embedding = create_employee_embedding(
+                db,
+                employee_id=employee_id_int,
+                image_path=str(image_path),
+            )
+            _set_embedding_status(
+                db,
+                employee_id=employee_id_int,
+                status="success",
+                error=None,
+            )
+        except Exception as exc:
+            db.rollback()
+            _set_embedding_status(
+                db,
+                employee_id=employee_id_int,
+                status="error",
+                error=str(exc),
+            )
+            raise
 
     logging.info(
         "Embedding job completed: job_id=%s employee_id=%s embedding_id=%s model=%s",

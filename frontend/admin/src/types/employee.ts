@@ -1,4 +1,5 @@
 export type EmployeeStatus = "active" | "inactive";
+export type EmbeddingStatus = "none" | "pending" | "success" | "error";
 
 export interface Employee {
   id: number;
@@ -6,6 +7,8 @@ export interface Employee {
   name: string;
   department: string | null;
   status: EmployeeStatus;
+  embedding_status: EmbeddingStatus;
+  embedding_error: string | null;
   created_at: string;
 }
 

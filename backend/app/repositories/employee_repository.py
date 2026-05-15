@@ -43,3 +43,17 @@ def soft_delete_employee(db: Session, employee: Employee) -> Employee:
     db.commit()
     db.refresh(employee)
     return employee
+
+
+def update_employee_embedding_status(
+    db: Session,
+    employee: Employee,
+    *,
+    status: str,
+    error: str | None = None,
+) -> Employee:
+    employee.embedding_status = status
+    employee.embedding_error = error
+    db.commit()
+    db.refresh(employee)
+    return employee

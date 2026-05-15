@@ -314,12 +314,14 @@ th {
 }
 
 .status-pill.inactive,
-.status-pill.denied {
+.status-pill.denied,
+.status-pill.none {
   color: var(--warning);
   background: #fff0d8;
 }
 
-.status-pill.processing {
+.status-pill.processing,
+.status-pill.pending {
   color: #1c5f7a;
   background: #dff0f8;
 }
@@ -327,6 +329,20 @@ th {
 .status-pill.error {
   color: var(--danger);
   background: #ffe2e2;
+}
+
+.status-pill.success {
+  color: var(--success);
+  background: #dff4e8;
+}
+
+.cell-note {
+  max-width: 260px;
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+  word-break: break-word;
 }
 
 .alert {

@@ -23,6 +23,8 @@ employees = Table(
     Column("name", String(150), nullable=False),
     Column("department", String(150), nullable=True),
     Column("status", String(50), nullable=False, default="active"),
+    Column("embedding_status", String(50), nullable=False, default="none"),
+    Column("embedding_error", String(1000), nullable=True),
     Column("created_at", DateTime(timezone=True), server_default=func.now()),
 )
 

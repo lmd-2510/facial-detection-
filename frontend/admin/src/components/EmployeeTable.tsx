@@ -48,6 +48,7 @@ export default function EmployeeTable({
             <th>Name</th>
             <th>Department</th>
             <th>Status</th>
+            <th>Embedding</th>
             <th>Embedding image</th>
             <th>Actions</th>
           </tr>
@@ -62,6 +63,14 @@ export default function EmployeeTable({
                 <span className={`status-pill ${employee.status}`}>
                   {employee.status}
                 </span>
+              </td>
+              <td>
+                <span className={`status-pill ${employee.embedding_status}`}>
+                  {employee.embedding_status}
+                </span>
+                {employee.embedding_error ? (
+                  <p className="cell-note">{employee.embedding_error}</p>
+                ) : null}
               </td>
               <td>
                 <form

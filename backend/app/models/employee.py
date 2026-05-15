@@ -19,6 +19,13 @@ class Employee(Base):
     name: Mapped[str] = mapped_column(String(150), index=True)
     department: Mapped[str | None] = mapped_column(String(150), nullable=True)
     status: Mapped[str] = mapped_column(String(50), default="active", index=True)
+    embedding_status: Mapped[str] = mapped_column(
+        String(50),
+        default="none",
+        server_default="none",
+        index=True,
+    )
+    embedding_error: Mapped[str | None] = mapped_column(String(1000), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),

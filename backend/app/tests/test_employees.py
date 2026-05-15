@@ -100,6 +100,8 @@ def test_list_employees(client, auth_headers):
     body = response.json()
     assert len(body) == 1
     assert body[0]["code"] == "EMP001"
+    assert body[0]["embedding_status"] == "none"
+    assert body[0]["embedding_error"] is None
 
 
 def test_create_employee(client, auth_headers):
@@ -119,6 +121,7 @@ def test_create_employee(client, auth_headers):
     assert body["id"]
     assert body["code"] == "EMP002"
     assert body["name"] == "Tran Thi B"
+    assert body["embedding_status"] == "none"
 
 
 def test_user_role_cannot_create_employee(client, user_headers):
@@ -245,6 +248,9 @@ def test_create_embedding_job_queues_job(client, auth_headers, monkeypatch):
     assert body["employee_id"] == 1
     assert body["image_path"] == "/app/storage/uploads/employee_1.jpg"
     assert body["queue_name"] == "embedding_jobs"
+    employee_response = client.get("/employees/1", headers=auth_headers)
+    assert employee_response.json()["embedding_status"] == "pending"
+    assert employee_response.json()["embedding_error"] is None
     assert queued_jobs == [
         {
             "employee_id": 1,
@@ -302,6 +308,9 @@ def test_upload_employee_face_image_uploads_and_queues_embedding(
     assert body["object_key"] == "employee-faces/1/reference.jpg"
     assert body["job_id"] == "embedding-image-123"
     assert body["queue_name"] == "embedding_jobs"
+    employee_response = client.get("/employees/1", headers=auth_headers)
+    assert employee_response.json()["embedding_status"] == "pending"
+    assert employee_response.json()["embedding_error"] is None
     assert queued_jobs == [
         {
             "employee_id": 1,

@@ -1,3 +1,4 @@
+from sqlalchemy import inspect, text
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.db.base import Base
@@ -9,6 +10,40 @@ import app.models  # noqa: F401
 
 def create_tables() -> None:
     Base.metadata.create_all(bind=engine)
+    ensure_employee_embedding_status_columns()
+
+
+def ensure_employee_embedding_status_columns() -> None:
+    inspector = inspect(engine)
+    if not inspector.has_table("employees"):
+        return
+
+    existing_columns = {
+        column["name"] for column in inspector.get_columns("employees")
+    }
+    existing_indexes = {
+        index["name"] for index in inspector.get_indexes("employees")
+    }
+    statements = []
+    if "embedding_status" not in existing_columns:
+        statements.append(
+            "ALTER TABLE employees "
+            "ADD COLUMN embedding_status VARCHAR(50) NOT NULL DEFAULT 'none'"
+        )
+    if "embedding_error" not in existing_columns:
+        statements.append("ALTER TABLE employees ADD COLUMN embedding_error VARCHAR(1000)")
+    if "ix_employees_embedding_status" not in existing_indexes:
+        statements.append(
+            "CREATE INDEX IF NOT EXISTS ix_employees_embedding_status "
+            "ON employees (embedding_status)"
+        )
+
+    if not statements:
+        return
+
+    with engine.begin() as connection:
+        for statement in statements:
+            connection.execute(text(statement))
 
 
 def main() -> None:

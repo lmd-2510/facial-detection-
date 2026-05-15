@@ -219,3 +219,60 @@ def test_create_embedding_job_queues_job(client, auth_headers, monkeypatch):
             "image_path": "/app/storage/uploads/employee_1.jpg",
         }
     ]
+
+
+def test_upload_employee_face_image_uploads_and_queues_embedding(
+    client,
+    auth_headers,
+    monkeypatch,
+):
+    from app.queues.embedding_queue import EmbeddingJob
+    from app.services.storage_service import StoredImage
+
+    queued_jobs = []
+
+    def fake_upload_fastapi_image(upload, *, prefix: str) -> StoredImage:
+        assert prefix == "employee-faces/1"
+        return StoredImage(
+            object_key="employee-faces/1/reference.jpg",
+            bucket="deepface-images",
+            content_type="image/jpeg",
+            size=3,
+        )
+
+    def fake_enqueue_embedding_job(employee_id: int, image_key: str) -> EmbeddingJob:
+        queued_jobs.append({"employee_id": employee_id, "image_key": image_key})
+        return EmbeddingJob(
+            job_id="embedding-image-123",
+            type="embedding",
+            employee_id=employee_id,
+            image_path=image_key,
+            image_key=image_key,
+        )
+
+    monkeypatch.setattr(
+        "app.api.employees.upload_fastapi_image",
+        fake_upload_fastapi_image,
+    )
+    monkeypatch.setattr(
+        "app.services.employee_service.enqueue_embedding_job",
+        fake_enqueue_embedding_job,
+    )
+
+    response = client.post(
+        "/employees/1/face-image",
+        headers=auth_headers,
+        files={"file": ("reference.jpg", b"abc", "image/jpeg")},
+    )
+
+    assert response.status_code == 201
+    body = response.json()
+    assert body["object_key"] == "employee-faces/1/reference.jpg"
+    assert body["job_id"] == "embedding-image-123"
+    assert body["queue_name"] == "embedding_jobs"
+    assert queued_jobs == [
+        {
+            "employee_id": 1,
+            "image_key": "employee-faces/1/reference.jpg",
+        }
+    ]

@@ -158,3 +158,70 @@ def test_access_check_queues_job(client, auth_headers, monkeypatch):
             "image_path": "/app/storage/uploads/snapshot.jpg",
         }
     ]
+
+
+def test_access_check_image_uploads_and_queues_job(client, auth_headers, monkeypatch):
+    from app.queues.access_queue import AccessJob
+    from app.services.storage_service import StoredImage
+
+    queued_jobs = []
+
+    def fake_upload_fastapi_image(upload, *, prefix: str) -> StoredImage:
+        assert prefix == "access-snapshots"
+        return StoredImage(
+            object_key="access-snapshots/snapshot.jpg",
+            bucket="deepface-images",
+            content_type="image/jpeg",
+            size=3,
+        )
+
+    def fake_enqueue_access_job(
+        log_id: int,
+        camera_id: int,
+        image_key: str,
+    ) -> AccessJob:
+        queued_jobs.append(
+            {
+                "log_id": log_id,
+                "camera_id": camera_id,
+                "image_key": image_key,
+            }
+        )
+        return AccessJob(
+            job_id="access-job-image-123",
+            type="access_check",
+            log_id=log_id,
+            camera_id=camera_id,
+            image_path=image_key,
+            image_key=image_key,
+        )
+
+    monkeypatch.setattr(
+        "app.api.access.upload_fastapi_image",
+        fake_upload_fastapi_image,
+    )
+    monkeypatch.setattr(
+        "app.services.access_service.enqueue_access_job",
+        fake_enqueue_access_job,
+    )
+
+    response = client.post(
+        "/access/check-image",
+        headers=auth_headers,
+        data={"camera_id": "1"},
+        files={"file": ("snapshot.jpg", b"abc", "image/jpeg")},
+    )
+
+    assert response.status_code == 202
+    body = response.json()
+    assert body["job_id"] == "access-job-image-123"
+    assert body["status"] == "processing"
+    assert body["image_key"] == "access-snapshots/snapshot.jpg"
+    assert body["image_path"] == "access-snapshots/snapshot.jpg"
+    assert queued_jobs == [
+        {
+            "log_id": body["log_id"],
+            "camera_id": 1,
+            "image_key": "access-snapshots/snapshot.jpg",
+        }
+    ]

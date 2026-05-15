@@ -65,3 +65,8 @@ class ImageUploadResponse(BaseModel):
     bucket: str
     content_type: str
     size: int
+    job_id: str | None = None
+    type: str | None = None
+    employee_id: int | None = None
+    queue_name: str | None = None
+    message: str | None = None

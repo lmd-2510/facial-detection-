@@ -158,6 +158,7 @@ def upload_employee_face_image(
             file,
             prefix=f"employee-faces/{employee_id}",
         )
+        job = queue_employee_embedding_job(db, employee_id, stored_image.object_key)
     except UnsupportedImageTypeError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -174,4 +175,9 @@ def upload_employee_face_image(
         bucket=stored_image.bucket,
         content_type=stored_image.content_type,
         size=stored_image.size,
+        job_id=job.job_id,
+        type=job.type,
+        employee_id=job.employee_id,
+        queue_name=get_embedding_queue_name(),
+        message="Image uploaded and embedding job queued.",
     )

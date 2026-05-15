@@ -9,3 +9,10 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 .vscode/settings.json
+backup/*
+!backup/db/
+!backup/db/.gitkeep
+!backup/minio/
+!backup/minio/.gitkeep
+!backup/qdrant/
+!backup/qdrant/.gitkeep

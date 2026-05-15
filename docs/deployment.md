@@ -104,6 +104,19 @@ helm lint helm/deepface-access
 helm template deepface-access helm/deepface-access
 ```
 
+Khi bat ingress nginx, chart render 2 ingress:
+
+- `deepface-access-api-ingress`: route `/api(/|$)(.*)` ve backend va rewrite thanh `/$2`, vi backend co route `/auth`, `/access`, `/employees`... chu khong co prefix `/api`.
+- `deepface-access-ingress`: route `/docs`, `/openapi.json`, `/admin` va `/` ma khong rewrite prefix.
+
+Vi vay frontend co the dung:
+
+```text
+VITE_API_BASE_URL=/api
+```
+
+Va cac request nhu `/api/auth/login`, `/api/health` se toi backend lan luot thanh `/auth/login`, `/health`.
+
 Chart hien tai khong tu tao Kubernetes Secret that. Cac template backend/worker/database/minio se doc secret co san ten `deepface-access-secrets`, vi vay secret nay can duoc tao truoc khi deploy that.
 
 Secret that nen tao ngoai chart:

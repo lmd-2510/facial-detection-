@@ -561,6 +561,8 @@ Frontend admin da them edit/disable camera tuong tu employee.
 
 ## 9. Helm Ingress `/api` Co The Khong Strip Prefix
 
+Trang thai: da hoan thanh. Helm chart da tach rieng API ingress voi nginx rewrite rule de `/api/<path>` duoc strip prefix thanh `/<path>` truoc khi toi backend. Cac route `/docs`, `/openapi.json`, `/admin` va `/` nam trong ingress rieng khong bi rewrite nham.
+
 ### Van De
 
 Nginx local route:
@@ -573,7 +575,7 @@ location /api/ {
 
 Cach nay strip `/api/` truoc khi goi backend.
 
-Nhung Helm ingress hien route `/api` thang ve backend. Backend khong co route `/api/auth`, ma co `/auth`.
+Truoc day Helm ingress route `/api` thang ve backend. Backend khong co route `/api/auth`, ma co `/auth`.
 
 ### Dang Nam O Dau
 
@@ -582,11 +584,17 @@ Nhung Helm ingress hien route `/api` thang ve backend. Backend khong co route `/
 - `nginx/nginx.conf`
 - `docs/deployment.md`
 
-### Nen Sua Nhu The Nao
+### Cach Da Sua
 
-Neu dung nginx ingress, them rewrite annotation phu hop, hoac doi frontend trong Helm khong goi `/api`.
+Dung nginx ingress rewrite rieng cho API:
 
-Can test:
+```text
+/api(/|$)(.*) -> /$2
+```
+
+Vi rewrite annotation cua nginx ingress ap dung cho toan bo Ingress resource, chart tach API ingress rieng de tranh lam hong `/docs`, `/openapi.json`, `/admin` va `/`.
+
+Da test render/lint:
 
 ```text
 GET https://host/api/health

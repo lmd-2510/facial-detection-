@@ -35,8 +35,8 @@ PostgreSQL Redis Queue
 - `prometheus`: scrape backend `/metrics`.
 - `alertmanager`: nhan alert tu Prometheus trong local monitoring.
 - `grafana`: dashboard doc metric tu Prometheus.
-- `minio`: object storage da san sang ve service/config, chua noi vao upload flow that.
-- `qdrant`: vector database da san sang ve service/config, chua noi vao access matching that.
+- `minio`: object storage cho upload employee face image va access snapshot.
+- `qdrant`: vector database dung lam search index cho access matching.
 
 ## Flow Dang Ky Khuon Mat
 
@@ -80,6 +80,6 @@ User UI
 ## Gioi Han Hien Tai
 
 - Upload file that qua MinIO da co cho employee face image va access snapshot; metadata hien van luu trong cot `image_path` duoi dang object key de tranh migration lon.
-- Chua dung Qdrant trong matching production.
+- Qdrant da duoc dung cho matching, nhung chua co reindex flow day du khi rebuild collection/doi model.
 - Chua co kenh gui alert ra email/Slack/webhook production.
 - Helm chart da render/lint duoc, nhung chua xac nhan tren cluster production.

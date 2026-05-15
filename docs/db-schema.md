@@ -9,7 +9,7 @@ Tai lieu nay ghi schema toi thieu cho DeepFace Access Control MVP. Muc tieu cua 
 - Dung `created_at` cho tat ca bang chinh de audit co ban.
 - Cac truong trang thai nen dung chuoi ngan va co tap gia tri ro rang.
 - Anh upload trong flow moi luu tren MinIO/S3; PostgreSQL hien luu object key trong cot `image_path` de tranh migration lon.
-- Vector khuon mat ban dau co the luu trong PostgreSQL de test end-to-end; Qdrant se tinh sau khi pipeline on dinh.
+- Vector khuon mat van luu trong PostgreSQL lam source of truth; Qdrant dong vai tro search index cho access matching.
 
 ## So Do Tong Quan
 
@@ -91,7 +91,7 @@ Ghi chu:
 
 - Giai Doan 7 da dung DeepFace that, mac dinh `Facenet512`.
 - Can ghi ro `model_name` de tranh tron embedding cua nhieu model.
-- Khi tich hop Qdrant, bang nay van co the giu metadata va id tham chieu vector.
+- Qdrant luu/search vector theo `face_embeddings.id` va payload `employee_id`, `embedding_id`, `model_name`; bang nay van la source of truth de verify employee active va de rebuild index sau nay.
 
 ## Bang `access_logs`
 

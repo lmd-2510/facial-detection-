@@ -26,16 +26,16 @@ Neu thoi gian it, nen uu tien theo thu tu:
 
 ### Van De
 
-Hien tai repo da co MinIO va Qdrant trong `docker-compose.yml`, `.env.example` va config code, nhung chung moi o muc service/config baseline. MinIO chua duoc noi vao upload flow that, Qdrant chua duoc noi vao matching flow that.
+Repo da co MinIO va Qdrant trong `docker-compose.yml`, `.env.example` va config code. Cac flow chinh hien da noi MinIO cho upload anh va Qdrant cho vector search.
 
 Noi cach khac:
 
 ```text
-MinIO: co service, chua luu anh that tu backend/frontend
-Qdrant: co service, chua duoc dung de search vector
+MinIO: luu anh employee/access snapshot tu backend/frontend
+Qdrant: search vector embedding trong access matching
 ```
 
-Day la mot phan can fix vi de bai co nhac toi object storage va vector database. Neu chi co service nhung flow chinh khong dung, khi demo can noi ro day moi la baseline, chua phai tich hop day du.
+Day la mot phan quan trong vi de bai co nhac toi object storage va vector database. Trang thai hien tai khong con chi la baseline service: flow chinh da dung ca hai thanh phan nay.
 
 ### Pipeline Mong Muon Sau Nay
 
@@ -66,7 +66,7 @@ Trong pipeline nay:
 - MinIO/S3 luu file anh that.
 - PostgreSQL luu metadata, object key, employee, camera, access log, embedding metadata.
 - Worker khong doc local path nua, ma tai anh tu object key ve temp file trong container.
-- Qdrant sau nay nen luu/search vector embedding, con PostgreSQL van la source of truth.
+- Qdrant luu/search vector embedding, con PostgreSQL van la source of truth.
 
 ### Dang Nam O Dau
 
@@ -114,12 +114,12 @@ Lam theo cac buoc nho:
 
 ### Ghi Chu
 
-Neu chua kip lam day du, khi demo nen noi ro:
+Trang thai hien tai khi demo co the noi ro:
 
 ```text
-Hien tai MinIO va Qdrant da co service/config baseline.
-Flow chinh hien van dung image_path local va PostgreSQL JSON vector.
-Huong mo rong tiep theo la noi upload vao MinIO va matching vao Qdrant.
+MinIO va Qdrant da duoc noi vao flow chinh.
+PostgreSQL van la source of truth; Qdrant la search index co the rebuild ve sau.
+Huong mo rong tiep theo la reindex Qdrant va chuan hoa schema image_key/object_key.
 ```
 
 ## 2. Upload Anh That Thay Vi Nhap `image_path`
@@ -250,9 +250,11 @@ Day la loi phan quyen co ban, khac voi MinIO/Qdrant. MinIO/Qdrant la luu tru va 
 
 ## 4. Qdrant Chua Duoc Dung Trong Matching That
 
+Trang thai: da hoan thanh. Worker da co `vector_store_service` de tao collection Qdrant, upsert embedding khi tao face embedding, va search Qdrant trong access matching. PostgreSQL van la source of truth: sau khi Qdrant tra candidate, worker verify embedding/employee active trong PostgreSQL roi moi cap nhat `access_logs`.
+
 ### Van De
 
-Repo da co Qdrant service/config, nhung access matching hien van lay vector tu PostgreSQL JSON/JSONB roi so sanh cosine trong worker.
+Repo da co Qdrant service/config, nhung truoc day access matching lay vector tu PostgreSQL JSON/JSONB roi so sanh cosine trong worker.
 
 Neu de bai yeu cau vector database, can bien Qdrant tu "co service" thanh "duoc dung trong flow".
 
@@ -277,7 +279,7 @@ Khi tao employee embedding:
 ```text
 DeepFace vector
   -> luu metadata/vector vao PostgreSQL
-  -> upsert vector vao Qdrant
+  -> upsert vector vao Qdrant voi payload employee_id, embedding_id, model_name
 ```
 
 Khi check access:
@@ -290,7 +292,7 @@ DeepFace query vector
   -> update access_logs
 ```
 
-Can them service Qdrant client trong worker, vi du:
+Da them service Qdrant client trong worker:
 
 ```text
 worker/app/services/vector_store_service.py
@@ -298,7 +300,7 @@ worker/app/services/vector_store_service.py
 
 ### Ghi Chu
 
-Co the van giu PostgreSQL la source of truth, Qdrant la search index.
+PostgreSQL van giu vai tro source of truth, Qdrant la search index. Neu Qdrant collection chua ton tai, worker se tao collection theo kich thuoc vector cua embedding dau tien. Neu collection da ton tai nhung sai vector size, worker bao loi de tranh ghi/search sai model.
 
 ## 5. Embedding Job Loi Khong Co Trang Thai Cho Admin
 
@@ -887,8 +889,8 @@ Frontend admin                         | frontend/admin
 Backend API                            | backend FastAPI
 Message queue                          | Redis embedding_jobs/access_jobs
 Database                               | PostgreSQL
-Object storage                         | MinIO, can noi upload flow
-Vector database                        | Qdrant, can noi matching flow
+Object storage                         | MinIO, da noi upload flow
+Vector database                        | Qdrant, da noi matching flow
 Load balancer/reverse proxy            | nginx
 Docker Compose                         | docker-compose.yml
 AI model / inference                   | worker DeepFace

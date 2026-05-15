@@ -34,7 +34,7 @@ Trong `docker-compose.yml`, he thong duoc chay bang cac service chinh:
 - `alertmanager`: nhan alert tu Prometheus trong local monitoring.
 - `grafana`: dashboard truc quan hoa metric Prometheus.
 - `minio`: object storage cho anh employee/access snapshot trong flow upload moi.
-- `qdrant`: vector database da co service/config cho Giai Doan 8, nhung matching hien van dung PostgreSQL JSONB.
+- `qdrant`: vector database dung lam search index cho access matching; PostgreSQL van la source of truth.
 
 Co the hinh dung luong tong quat nhu sau:
 
@@ -166,5 +166,5 @@ Nhung phan nen uu tien sau khi da nam tong quan:
 - Hoan thien schema rieng cho `image_key`/`object_key` thay vi tam luu trong cot `image_path`.
 - Bo sung Playwright end-to-end test khi muon test UI tren browser that.
 - Smoke test DeepFace voi bo anh that nho, roi tinh chinh `DEEPFACE_MATCH_THRESHOLD`.
-- Dua embedding search sang Qdrant khi volume vector lon hon.
+- Bo sung reindex Qdrant khi doi model hoac can rebuild collection.
 - Hoan thien kenh gui alert ra email/Slack neu can.

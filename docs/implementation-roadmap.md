@@ -510,7 +510,7 @@ Trang thai repo sau khi code lop van hanh Giai Doan 8:
 - `nginx/nginx.conf`, `monitoring/prometheus/prometheus.yml`, `monitoring/prometheus/rules/`, `monitoring/alertmanager/`, `monitoring/grafana/`, `scripts/dev.ps1`, `scripts/backup.ps1`, `docs/deployment.md`, `docs/monitoring.md`, `docs/backup.md`, `docs/cicd.md` da co noi dung van hanh toi thieu.
 - Helm chart `helm/deepface-access` da co `Chart.yaml`, `values.yaml`, configmap, deployments/services, optional MinIO/Qdrant va ingress.
 - `backend/app/config/minio.py`, `backend/app/config/qdrant.py`, `worker/app/config/minio.py`, `worker/app/config/qdrant.py` da co config toi thieu.
-- MinIO va Qdrant da co service/config, nhung upload flow that va vector search Qdrant chua noi vao flow chinh.
+- MinIO da noi upload flow that, Qdrant da noi access matching lam search index; PostgreSQL van la source of truth.
 
 Nguyen tac lam Giai Doan 8:
 
@@ -972,22 +972,18 @@ Nhung phan duoi day khong con la blocker cho lop van hanh co ban, nhung nen duoc
      - dashboard backend health/request/queue length
      - receiver email/Slack/webhook cho backend 5xx, Redis down, database down, queue tang bat thuong
 
-3. MinIO moi o muc service/config, chua noi vao flow that
-   - Backend van nhan `image_path` thay vi upload file.
-   - Worker van resolve local path thay vi object key hoac temporary file tu MinIO.
-   - Khi quay lai phan nay, nho bo sung:
-     - bucket bootstrap/init
-     - upload API
-     - validate type/size
-     - cleanup file tam neu worker tai object ve local
+3. MinIO da noi vao upload flow that
+   - Backend upload employee face/access snapshot vao MinIO.
+   - Worker tai object key ve temp file de xu ly DeepFace.
+   - Van nen chuan hoa schema rieng `image_key`/`object_key` thay vi tam luu trong `image_path`.
 
-4. Qdrant moi o muc service/config, chua thay flow matching chinh
-   - Hien access matching van dua vao vector JSONB trong PostgreSQL.
-   - Khi quay lai phan nay, nho chot:
-     - collection schema theo `model_name`
-     - upsert lifecycle khi employee inactive/delete
-     - reindex flow khi doi model DeepFace
-     - chinh sach rebuild neu PostgreSQL la source of truth
+4. Qdrant da noi vao flow matching chinh
+   - Worker upsert embedding moi vao Qdrant sau khi luu metadata/vector vao PostgreSQL.
+   - Access matching query Qdrant, roi verify employee/embedding active trong PostgreSQL.
+   - Viec con lai:
+     - upsert lifecycle khi employee inactive/delete neu can xoa/disable index;
+     - reindex flow khi doi model DeepFace hoac rebuild collection;
+     - chinh sach backup/snapshot neu khong coi Qdrant la index co the rebuild.
 
 5. Backup da co muc toi thieu, nhung restore chua duoc tu dong hoa
    - Da co dump PostgreSQL va archive `data/`.

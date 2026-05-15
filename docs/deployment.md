@@ -50,7 +50,7 @@ URL mac dinh:
 - `alertmanager`: nhan alert tu Prometheus trong local monitoring.
 - `grafana`: dashboard doc metric tu Prometheus.
 - `minio`: object storage cho upload employee face image va access snapshot.
-- `qdrant`: vector database, da co service/config nhung access matching hien van dung PostgreSQL JSONB.
+- `qdrant`: vector database dung lam search index cho access matching; PostgreSQL van la source of truth.
 
 ## Health Check
 

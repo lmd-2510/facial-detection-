@@ -31,7 +31,6 @@ Tai lieu nay tom tat cac use case chinh cua DeepFace Access Control MVP.
 
 ## Ngoai Pham Vi Hien Tai
 
-- Upload file that qua UI/API.
-- Matching vector bang Qdrant trong flow chinh.
+- Reindex Qdrant day du khi doi model hoac rebuild collection.
 - Kenh gui alert production nhu email/Slack.
 - Playwright E2E tren browser that.

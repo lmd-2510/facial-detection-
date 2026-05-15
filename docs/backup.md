@@ -69,14 +69,14 @@ Nhung bucket can backup sau khi noi flow:
 
 ## Qdrant
 
-Compose da co service Qdrant, nhung access matching hien van dung vector JSONB trong PostgreSQL.
+Compose da co service Qdrant va access matching hien dung Qdrant lam search index.
 
-Khi noi Qdrant vao flow that, can chon mot trong hai chien luoc:
+Backup Qdrant can chon mot trong hai chien luoc:
 
 - backup Qdrant snapshot/volume;
 - hoac coi Qdrant la index co the rebuild tu PostgreSQL.
 
-Neu doi model DeepFace, can reindex vector theo `model_name` moi.
+PostgreSQL van luu vector trong `face_embeddings`, nen co the rebuild Qdrant tu DB khi co script reindex day du. Neu doi model DeepFace, can reindex vector theo `model_name` moi.
 
 ## Gioi Han Con Lai
 

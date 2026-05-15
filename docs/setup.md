@@ -63,4 +63,4 @@ C:\Users\Dell\.conda\envs\ltxldl\Library\bin
 
 ## Ghi Chu
 
-MinIO da duoc noi vao flow upload employee face image/access snapshot. PostgreSQL hien van luu object key trong cot `image_path` de tranh migration lon. Qdrant da co service/config, nhung flow chinh hien van match vector tu PostgreSQL.
+MinIO da duoc noi vao flow upload employee face image/access snapshot. PostgreSQL hien van luu object key trong cot `image_path` de tranh migration lon. Qdrant da duoc noi vao flow matching, con PostgreSQL van la source of truth cho employee/embedding metadata.

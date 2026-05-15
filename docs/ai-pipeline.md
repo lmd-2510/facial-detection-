@@ -11,7 +11,8 @@ image_key/object_key
 -> DeepFace.extract_faces() de detect mat
 -> DeepFace.extract_faces(anti_spoofing=True) de check liveness
 -> DeepFace.represent()
--> cosine matching
+-> Qdrant vector search
+-> PostgreSQL verify employee/embedding active
 -> decision
 -> access_log
 ```
@@ -33,6 +34,8 @@ Worker doc cac bien moi truong sau:
 | `DEEPFACE_NORMALIZATION` | `base` | Chuan hoa anh dau vao theo DeepFace |
 | `DEEPFACE_MATCH_THRESHOLD` | `0.70` | Nguong cosine similarity de grant access |
 | `DEEPFACE_ANTI_SPOOFING` | `false` | Bat/tat anti-spoofing cua DeepFace |
+| `QDRANT_URL` | `http://qdrant:6333` | Qdrant HTTP endpoint dung cho vector search |
+| `QDRANT_COLLECTION` | `deepface_embeddings` | Collection luu/search face embedding |
 
 Nguong `0.70` la moc ban dau cho cosine similarity khi dung `Facenet512`. Can smoke test voi bo anh that cua du an de tinh chinh nguong nay.
 Mac dinh smoke test local nen tat `DEEPFACE_ANTI_SPOOFING` de tranh blocker dependency `torch`; khi muon test liveness that thi bat lai va bo sung dependency phu hop.
@@ -73,6 +76,15 @@ So sanh vector bang cosine similarity.
 - Co `find_best_match()` de tim candidate co score cao nhat.
 - Threshold mac dinh hien tai doc tu `DEEPFACE_MATCH_THRESHOLD`.
 
+### `worker/app/services/vector_store_service.py`
+
+Noi worker voi Qdrant qua HTTP API.
+
+- Tao collection Qdrant neu collection chua ton tai.
+- Upsert vector employee embedding voi payload `embedding_id`, `employee_id`, `model_name`.
+- Search top candidate theo query vector va filter `model_name`.
+- Worker van verify candidate voi PostgreSQL de dam bao employee con `active`.
+
 ## Trang Thai Tich Hop
 
 Da co:
@@ -80,8 +92,8 @@ Da co:
 - Worker queue o `worker/app/tasks/queue_worker.py` lay job tu Redis va dispatch sang job handler.
 - Ket noi PostgreSQL rieng cho worker trong `worker/app/config/database.py`.
 - Schema SQLAlchemy Core toi thieu cho worker trong `worker/app/db/schema.py`.
-- `embedding_job.py` goi detector/liveness/embedder va luu vector DeepFace vao `face_embeddings`.
-- `access_job.py` goi pipeline, chi match voi embedding cua employee active va cung `model_name`, roi cap nhat `access_logs`.
+- `embedding_job.py` goi detector/liveness/embedder, luu vector DeepFace vao `face_embeddings`, roi upsert vector vao Qdrant.
+- `access_job.py` goi pipeline, query Qdrant theo vector cung `model_name`, verify employee active trong PostgreSQL, roi cap nhat `access_logs`.
 - `storage_service.py` normalize va validate `image_path` local truoc khi worker goi DeepFace.
 - `reindex_service.py` hien chi co readiness check vi DB chua luu source `image_path` de tao lai embedding khi doi model.
 
@@ -107,4 +119,4 @@ Unit test mock DeepFace de test nhanh contract cua detector, anti-spoof, embedde
 2. Chay embedding job va access job that voi Docker Compose.
 3. Dieu chinh `DEEPFACE_MATCH_THRESHOLD` theo ket qua thuc te.
 4. Luu them source `image_path` cho embedding neu muon reindex model ve sau.
-5. Khi volume embedding lon hon, tich hop Qdrant de search vector tot hon.
+5. Bo sung reindex Qdrant khi doi model hoac rebuild collection.

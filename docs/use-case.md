@@ -10,6 +10,7 @@ Tai lieu nay tom tat cac use case chinh cua DeepFace Access Control MVP.
 - Tao camera/cong ra vao.
 - Xem access logs va trang thai `processing`, `granted`, `denied`, `error`.
 - Kiem tra trang thai van hanh qua `/admin/status`.
+- Cac API `/employees`, `/cameras`, `/admin/status` yeu cau role `admin`.
 
 ## User
 
@@ -17,6 +18,7 @@ Tai lieu nay tom tat cac use case chinh cua DeepFace Access Control MVP.
 - Upload snapshot len MinIO/S3 va gui yeu cau check access bang `camera_id` qua endpoint `POST /access/check-image`.
 - Xem lich su access logs.
 - Xem thong tin profile dang nhap.
+- Khong duoc goi API quan tri employee/camera/admin status.
 
 ## Operator / DevOps
 

@@ -189,6 +189,8 @@ MinIO da co service/config trong repo, nhung chua noi vao flow that.
 
 ## 3. Role `admin` / `user` Chua Duoc Chan That
 
+Trang thai: da hoan thanh. Backend da co dependency `require_admin_user` va ap dung cho `/admin/status`, `/employees/*`, `/cameras/*`. Flow user nhu `/access/check-image`, `/access/check` va `/auth/me` van dung token user binh thuong.
+
 ### Van De
 
 Backend hien kiem tra nguoi dung da dang nhap chua, nhung chua chan ro endpoint nao chi danh cho admin. Tai khoan co role `user` van co the goi mot so API quan tri neu co token hop le.

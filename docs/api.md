@@ -98,7 +98,7 @@ id, employee_id, camera_id, status, score, image_path, created_at
 
 ### `POST /access/snapshots`
 
-Can Bearer token. Upload anh snapshot len MinIO/S3 va tra ve object key.
+Can Bearer token admin hoac user. Upload anh snapshot len MinIO/S3 va tra ve object key.
 
 Response:
 
@@ -113,13 +113,13 @@ Response:
 
 ### `POST /access/check-image`
 
-Can Bearer token. Nhan `multipart/form-data` gom `camera_id` va file anh snapshot. Backend upload anh len MinIO/S3, tao `access_log` trang thai `processing`, day job vao Redis queue `access_jobs`, roi tra response `202 Accepted`.
+Can Bearer token admin hoac user. Nhan `multipart/form-data` gom `camera_id` va file anh snapshot. Backend upload anh len MinIO/S3, tao `access_log` trang thai `processing`, day job vao Redis queue `access_jobs`, roi tra response `202 Accepted`.
 
 Endpoint nay la flow UI chinh sau buoc upload that.
 
 ### `POST /access/check`
 
-Can Bearer token. Backend tao `access_log` trang thai `processing`, day job vao Redis queue `access_jobs`, roi tra response `202 Accepted`. Worker se xu ly job bat dong bo bang DeepFace embedding pipeline va cap nhat `access_logs`.
+Can Bearer token admin hoac user. Backend tao `access_log` trang thai `processing`, day job vao Redis queue `access_jobs`, roi tra response `202 Accepted`. Worker se xu ly job bat dong bo bang DeepFace embedding pipeline va cap nhat `access_logs`.
 
 Request:
 
@@ -142,7 +142,7 @@ Co the goi `GET /logs` de xem ket qua sau khi worker xu ly.
 
 ### `GET /admin/status`
 
-Can Bearer token. Tra ve trang thai van hanh toi thieu:
+Can Bearer token role `admin`. Tra ve trang thai van hanh toi thieu:
 
 - database ok/error
 - Redis ok/error

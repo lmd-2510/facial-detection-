@@ -94,12 +94,14 @@ Luu vector khuon mat cua employee. Trong MVP, mot employee co the co nhieu embed
 | `employee_id` | integer | yes | Foreign key den `employees.id` |
 | `vector` | jsonb | yes | Mang so thuc, vi du `[0.12, 0.34, ...]` |
 | `model_name` | varchar(100) | yes | Ten model da tao vector |
+| `source_image_key` | text | no | Object key MinIO/S3 hoac local path da tao ra embedding |
 | `created_at` | timestamptz | yes | Thoi diem tao embedding |
 
 Ghi chu:
 
 - Giai Doan 7 da dung DeepFace that, mac dinh `Facenet512`.
 - Can ghi ro `model_name` de tranh tron embedding cua nhieu model.
+- `source_image_key` giup reindex Qdrant hoac tao lai embedding khi doi model ve sau.
 - Qdrant luu/search vector theo `face_embeddings.id` va payload `employee_id`, `embedding_id`, `model_name`; bang nay van la source of truth de verify employee active va de rebuild index sau nay.
 
 ## Bang `access_logs`

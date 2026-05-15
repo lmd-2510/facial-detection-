@@ -432,7 +432,7 @@ Nhung gi con thieu de xem la xong Giai Doan 7:
    - Khong de service trong trang thai trong ma khong chu thich.
 
 8. Lam ro vai tro `reindex_service` trong Giai Doan 7
-   - Trang thai: da co readiness check va thong bao ro rang la chua the reindex that khi DB chua luu source `image_path`.
+   - Trang thai: da co readiness check. DB da luu `source_image_key`, nhung automated reindex job chua duoc implement.
    - Neu doi model DeepFace, embedding cu se khong con tuong thich.
    - Can quyet dinh co can reindex lai embedding cu ngay trong Giai Doan 7 hay khong.
    - Neu chua can, ghi ro `reindex_service` de danh cho buoc doi model/Qdrant sau.

@@ -162,6 +162,7 @@ Backup toi thieu database va thu muc `data/`:
 - `worker/Dockerfile`: cach build worker image.
 - `frontend/user/Dockerfile`: cach build user frontend.
 - `frontend/admin/Dockerfile`: cach build admin frontend.
+- `helm/deepface-access/values.yaml`: cau hinh image registry/tag khi deploy Kubernetes, mac dinh theo format GHCR `ghcr.io/<owner>/<repo>/<service>:<tag>`.
 
 ## Ghi Chu Ve Database
 

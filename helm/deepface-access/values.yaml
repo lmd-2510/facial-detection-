@@ -1,21 +1,26 @@
 imagePullPolicy: IfNotPresent
 
+global:
+  imageRegistry: ghcr.io/your-owner/your-repo
+  imageTag: latest
+  imagePullSecrets: []
+
 backend:
-  image: deepface-backend:latest
+  imageRepository: backend
   replicas: 1
   port: 8000
 
 worker:
-  image: deepface-worker:latest
+  imageRepository: worker
   replicas: 1
 
 frontendUser:
-  image: deepface-frontend-user:latest
+  imageRepository: frontend-user
   replicas: 1
   port: 80
 
 frontendAdmin:
-  image: deepface-frontend-admin:latest
+  imageRepository: frontend-admin
   replicas: 1
   port: 80
 

@@ -119,6 +119,35 @@ Va cac request nhu `/api/auth/login`, `/api/health` se toi backend lan luot than
 
 Chart hien tai khong tu tao Kubernetes Secret that. Cac template backend/worker/database/minio se doc secret co san ten `deepface-access-secrets`, vi vay secret nay can duoc tao truoc khi deploy that.
 
+### Helm Image Registry
+
+Helm chart dung GHCR theo cung format voi GitHub Actions:
+
+```text
+ghcr.io/<owner>/<repo>/backend:<tag>
+ghcr.io/<owner>/<repo>/worker:<tag>
+ghcr.io/<owner>/<repo>/frontend-user:<tag>
+ghcr.io/<owner>/<repo>/frontend-admin:<tag>
+```
+
+Trong `helm/deepface-access/values.yaml`, cac bien can doi khi deploy image da publish la:
+
+```yaml
+global:
+  imageRegistry: ghcr.io/<owner>/<repo>
+  imageTag: <commit-sha-or-latest>
+```
+
+Vi du:
+
+```powershell
+helm upgrade --install deepface-access helm/deepface-access `
+  --set global.imageRegistry=ghcr.io/<owner>/<repo> `
+  --set global.imageTag=latest
+```
+
+Neu GHCR package la private, tao image pull secret va truyen vao `global.imagePullSecrets`.
+
 Secret that nen tao ngoai chart:
 
 ```powershell

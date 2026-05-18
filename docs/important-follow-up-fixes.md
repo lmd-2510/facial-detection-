@@ -833,6 +833,8 @@ Frontend admin:
 
 ## 14. Docker Image Registry Theo Yeu Cau Mon Hoc
 
+Trang thai: da hoan thanh theo huong GHCR. CI publish 4 image len GitHub Container Registry khi push vao `main`, docs da ghi ro registry dang dung, va Helm values da chuan hoa theo `global.imageRegistry` + `global.imageTag` de deploy dung cac image tu GHCR.
+
 ### Van De
 
 CI hien co build va publish image len GHCR khi push `main`. Neu de bai/giang vien yeu cau Docker Hub, can bo sung Docker Hub hoac ghi ro registry dang dung.
@@ -869,9 +871,9 @@ Neu dung Docker Hub:
 Neu tiep tuc dung GHCR:
 
 ```text
-[ ] Docs noi ro image registry la GHCR
-[ ] Demo checklist co link image packages
-[ ] Helm values dung image tu GHCR
+[x] Docs noi ro image registry la GHCR
+[x] Demo checklist co link image packages
+[x] Helm values dung image tu GHCR
 ```
 
 ### Moc Hoan Thanh

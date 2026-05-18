@@ -12,9 +12,13 @@ spec:
       labels:
         app: {{ .Release.Name }}-backend
     spec:
+      {{- if .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml .Values.global.imagePullSecrets | nindent 8 }}
+      {{- end }}
       containers:
         - name: backend
-          image: {{ .Values.backend.image | quote }}
+          image: {{ printf "%s/%s:%s" (.Values.global.imageRegistry | trimSuffix "/") .Values.backend.imageRepository .Values.global.imageTag | quote }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
             - containerPort: {{ .Values.backend.port }}

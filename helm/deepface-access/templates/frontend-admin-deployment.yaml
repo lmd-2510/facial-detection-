@@ -12,9 +12,13 @@ spec:
       labels:
         app: {{ .Release.Name }}-frontend-admin
     spec:
+      {{- if .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml .Values.global.imagePullSecrets | nindent 8 }}
+      {{- end }}
       containers:
         - name: frontend-admin
-          image: {{ .Values.frontendAdmin.image | quote }}
+          image: {{ printf "%s/%s:%s" (.Values.global.imageRegistry | trimSuffix "/") .Values.frontendAdmin.imageRepository .Values.global.imageTag | quote }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           ports:
             - containerPort: {{ .Values.frontendAdmin.port }}

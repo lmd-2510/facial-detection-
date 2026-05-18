@@ -284,6 +284,25 @@ Nếu bấm vào package, nên thấy tag như:
 - `latest`
 - commit SHA
 
+Ghi chu registry:
+
+```text
+Registry chinh thuc hien tai la GHCR.
+Format chung:
+ghcr.io/<owner>/<repo>/backend:<tag>
+ghcr.io/<owner>/<repo>/worker:<tag>
+ghcr.io/<owner>/<repo>/frontend-user:<tag>
+ghcr.io/<owner>/<repo>/frontend-admin:<tag>
+```
+
+Khi kiem tra Helm deploy, values nen tro ve cung registry:
+
+```powershell
+helm template deepface-access helm/deepface-access `
+  --set global.imageRegistry=ghcr.io/<owner>/<repo> `
+  --set global.imageTag=latest
+```
+
 ### 3.4. Cách nói ngắn khi demo
 
 ```text

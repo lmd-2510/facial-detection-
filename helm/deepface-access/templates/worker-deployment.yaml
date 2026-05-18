@@ -12,9 +12,13 @@ spec:
       labels:
         app: {{ .Release.Name }}-worker
     spec:
+      {{- if .Values.global.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml .Values.global.imagePullSecrets | nindent 8 }}
+      {{- end }}
       containers:
         - name: worker
-          image: {{ .Values.worker.image | quote }}
+          image: {{ printf "%s/%s:%s" (.Values.global.imageRegistry | trimSuffix "/") .Values.worker.imageRepository .Values.global.imageTag | quote }}
           imagePullPolicy: {{ .Values.imagePullPolicy }}
           envFrom:
             - configMapRef:

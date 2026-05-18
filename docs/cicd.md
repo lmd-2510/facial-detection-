@@ -41,6 +41,28 @@ ghcr.io/<owner>/<repo>/frontend-admin:latest
 
 Workflow dung `GITHUB_TOKEN` de login GHCR, nen khong can them Docker Hub secret. Can dam bao repository cho phep GitHub Actions ghi package voi quyen `packages: write`.
 
+Registry chinh thuc cua repo hien tai la GHCR, khop voi workflow CI va Helm chart. Neu deploy bang Helm, dat:
+
+```powershell
+helm upgrade --install deepface-access helm/deepface-access `
+  --set global.imageRegistry=ghcr.io/<owner>/<repo> `
+  --set global.imageTag=<commit-sha>
+```
+
+Trong do `<owner>/<repo>` phai trung voi `GITHUB_REPOSITORY` trong workflow, viet thuong. Neu package GHCR dang private, tao Kubernetes image pull secret va truyen vao chart:
+
+```powershell
+kubectl create secret docker-registry ghcr-pull `
+  --docker-server=ghcr.io `
+  --docker-username=<github-username> `
+  --docker-password=<github-token>
+
+helm upgrade --install deepface-access helm/deepface-access `
+  --set global.imageRegistry=ghcr.io/<owner>/<repo> `
+  --set global.imageTag=<commit-sha> `
+  --set global.imagePullSecrets[0].name=ghcr-pull
+```
+
 ## Dieu Pipeline Chua Lam
 
 - Chua deploy tu dong len server, Kubernetes hoac staging.

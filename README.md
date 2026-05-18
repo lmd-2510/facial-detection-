@@ -90,7 +90,7 @@ Bang nay giup doi chieu nhanh giua cac yeu cau he thong va phan hien co trong re
 | Docker Compose | `docker-compose.yml` | Chay local multi-service bang `docker compose up --build` |
 | Monitoring | `monitoring/prometheus`, `monitoring/grafana`, `monitoring/alertmanager` | Prometheus scrape `/metrics`, Grafana dashboard, Alertmanager UI |
 | Backup | `scripts/backup.ps1`, `docs/backup.md` | Backup PostgreSQL dump va archive thu muc `data/` |
-| CI/CD artifact publishing | `.github/workflows/ci.yml`, `docs/cicd.md` | Test/build va publish Docker images len GHCR khi push `main` |
+| CI/CD artifact publishing | `.github/workflows/ci.yml`, `docs/cicd.md` | Test/build va publish Docker images len Docker Hub khi push `main` |
 | Helm / Kubernetes packaging | `helm/deepface-access`, `docs/deployment.md` | Helm chart render/lint duoc; deploy cluster can secret va image registry dung |
 | Demo verification | `docs/demo-checklist.md`, `scripts/demo-baseline-check.ps1`, `scripts/smoke-deepface.ps1` | Checklist va script de chung minh cac thanh phan chay that |
 
@@ -199,12 +199,12 @@ Backup toi thieu database va thu muc `data/`:
 - `monitoring/prometheus/rules/`: Prometheus alert rules.
 - `monitoring/alertmanager/alertmanager.yml`: Alertmanager local routing config.
 - `monitoring/grafana/`: Grafana datasource provisioning va dashboard.
-- `.github/workflows/ci.yml`: GitHub Actions test/build va publish Docker images len GHCR.
+- `.github/workflows/ci.yml`: GitHub Actions test/build va publish Docker images len Docker Hub.
 - `backend/Dockerfile`: cach build backend image.
 - `worker/Dockerfile`: cach build worker image.
 - `frontend/user/Dockerfile`: cach build user frontend.
 - `frontend/admin/Dockerfile`: cach build admin frontend.
-- `helm/deepface-access/values.yaml`: cau hinh image registry/tag khi deploy Kubernetes, mac dinh theo format GHCR `ghcr.io/<owner>/<repo>/<service>:<tag>`.
+- `helm/deepface-access/values.yaml`: cau hinh image registry/tag khi deploy Kubernetes, mac dinh theo format Docker Hub `<dockerhub-username>/deepface-<service>:<tag>`.
 
 ## Ghi Chu Ve Database
 

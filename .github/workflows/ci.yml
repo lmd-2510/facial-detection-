@@ -6,7 +6,6 @@ on:
 
 permissions:
   contents: read
-  packages: write
 
 jobs:
   backend-tests:
@@ -80,55 +79,58 @@ jobs:
 
       - name: Prepare image names
         run: |
-          IMAGE_PREFIX="ghcr.io/${GITHUB_REPOSITORY}"
-          IMAGE_PREFIX="$(echo "$IMAGE_PREFIX" | tr '[:upper:]' '[:lower:]')"
-          echo "IMAGE_PREFIX=$IMAGE_PREFIX" >> "$GITHUB_ENV"
+          DOCKERHUB_NAMESPACE="${{ secrets.DOCKERHUB_USERNAME }}"
+          if [ -z "$DOCKERHUB_NAMESPACE" ]; then
+            DOCKERHUB_NAMESPACE="deepface-access"
+          fi
+          DOCKERHUB_NAMESPACE="$(echo "$DOCKERHUB_NAMESPACE" | tr '[:upper:]' '[:lower:]')"
+          echo "DOCKERHUB_NAMESPACE=$DOCKERHUB_NAMESPACE" >> "$GITHUB_ENV"
           echo "IMAGE_TAG=${GITHUB_SHA}" >> "$GITHUB_ENV"
 
-      - name: Login to GHCR
+      - name: Login to Docker Hub
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
 
       - name: Build backend image
         run: |
           docker build \
             -t deepface-backend:test \
-            -t "$IMAGE_PREFIX/backend:$IMAGE_TAG" \
-            -t "$IMAGE_PREFIX/backend:latest" \
+            -t "$DOCKERHUB_NAMESPACE/deepface-backend:$IMAGE_TAG" \
+            -t "$DOCKERHUB_NAMESPACE/deepface-backend:latest" \
             backend
 
       - name: Build worker image
         run: |
           docker build \
             -t deepface-worker:test \
-            -t "$IMAGE_PREFIX/worker:$IMAGE_TAG" \
-            -t "$IMAGE_PREFIX/worker:latest" \
+            -t "$DOCKERHUB_NAMESPACE/deepface-worker:$IMAGE_TAG" \
+            -t "$DOCKERHUB_NAMESPACE/deepface-worker:latest" \
             worker
 
       - name: Build user frontend image
         run: |
           docker build \
             -t deepface-frontend-user:test \
-            -t "$IMAGE_PREFIX/frontend-user:$IMAGE_TAG" \
-            -t "$IMAGE_PREFIX/frontend-user:latest" \
+            -t "$DOCKERHUB_NAMESPACE/deepface-frontend-user:$IMAGE_TAG" \
+            -t "$DOCKERHUB_NAMESPACE/deepface-frontend-user:latest" \
             frontend/user
 
       - name: Build admin frontend image
         run: |
           docker build \
             -t deepface-frontend-admin:test \
-            -t "$IMAGE_PREFIX/frontend-admin:$IMAGE_TAG" \
-            -t "$IMAGE_PREFIX/frontend-admin:latest" \
+            -t "$DOCKERHUB_NAMESPACE/deepface-frontend-admin:$IMAGE_TAG" \
+            -t "$DOCKERHUB_NAMESPACE/deepface-frontend-admin:latest" \
             frontend/admin
 
-      - name: Publish images to GHCR
+      - name: Publish images to Docker Hub
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
-          docker push "$IMAGE_PREFIX/backend:$IMAGE_TAG"
-          docker push "$IMAGE_PREFIX/backend:latest"
-          docker push "$IMAGE_PREFIX/worker:$IMAGE_TAG"
-          docker push "$IMAGE_PREFIX/worker:latest"
-          docker push "$IMAGE_PREFIX/frontend-user:$IMAGE_TAG"
-          docker push "$IMAGE_PREFIX/frontend-user:latest"
-          docker push "$IMAGE_PREFIX/frontend-admin:$IMAGE_TAG"
-          docker push "$IMAGE_PREFIX/frontend-admin:latest"
+          docker push "$DOCKERHUB_NAMESPACE/deepface-backend:$IMAGE_TAG"
+          docker push "$DOCKERHUB_NAMESPACE/deepface-backend:latest"
+          docker push "$DOCKERHUB_NAMESPACE/deepface-worker:$IMAGE_TAG"
+          docker push "$DOCKERHUB_NAMESPACE/deepface-worker:latest"
+          docker push "$DOCKERHUB_NAMESPACE/deepface-frontend-user:$IMAGE_TAG"
+          docker push "$DOCKERHUB_NAMESPACE/deepface-frontend-user:latest"
+          docker push "$DOCKERHUB_NAMESPACE/deepface-frontend-admin:$IMAGE_TAG"
+          docker push "$DOCKERHUB_NAMESPACE/deepface-frontend-admin:latest"

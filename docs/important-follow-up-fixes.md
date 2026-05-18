@@ -833,11 +833,11 @@ Frontend admin:
 
 ## 14. Docker Image Registry Theo Yeu Cau Mon Hoc
 
-Trang thai: da hoan thanh theo huong GHCR. CI publish 4 image len GitHub Container Registry khi push vao `main`, docs da ghi ro registry dang dung, va Helm values da chuan hoa theo `global.imageRegistry` + `global.imageTag` de deploy dung cac image tu GHCR.
+Trang thai: da hoan thanh theo huong Docker Hub. CI publish 4 image len Docker Hub khi push vao `main`, docs da ghi ro registry dang dung, Docker Compose dat ten image theo Docker Hub, va Helm values da chuan hoa theo `global.imageRegistry` + `global.imageTag` de deploy dung cac image tu Docker Hub.
 
 ### Van De
 
-CI hien co build va publish image len GHCR khi push `main`. Neu de bai/giang vien yeu cau Docker Hub, can bo sung Docker Hub hoac ghi ro registry dang dung.
+CI hien co build va publish image len Docker Hub khi push `main`. Can tao Docker Hub repositories va them secrets `DOCKERHUB_USERNAME` / `DOCKERHUB_TOKEN` tren GitHub truoc khi publish that.
 
 ### Dang Nam O Dau
 
@@ -854,36 +854,29 @@ CI hien co build va publish image len GHCR khi push `main`. Neu de bai/giang vie
 Neu dung Docker Hub:
 
 ```text
-[ ] Tao Docker Hub repository cho:
+[x] Tao cau hinh Docker Hub repository cho:
     deepface-backend
     deepface-worker
     deepface-frontend-user
     deepface-frontend-admin
-[ ] Them GitHub Secrets:
+[ ] Them GitHub Secrets tren GitHub:
     DOCKERHUB_USERNAME
     DOCKERHUB_TOKEN
-[ ] CI login Docker Hub
-[ ] Push tag commit SHA va latest
-[ ] Cap nhat Helm values dung image Docker Hub
-[ ] Cap nhat docs cach pull/run image
-```
-
-Neu tiep tuc dung GHCR:
-
-```text
-[x] Docs noi ro image registry la GHCR
-[x] Demo checklist co link image packages
-[x] Helm values dung image tu GHCR
+[x] CI login Docker Hub
+[x] Push tag commit SHA va latest
+[x] Cap nhat Docker Compose dat ten image Docker Hub
+[x] Cap nhat Helm values dung image Docker Hub
+[x] Cap nhat docs cach pull/run image
 ```
 
 ### Moc Hoan Thanh
 
-- Nguoi khac clone repo co the pull image tu registry va chay deploy.
+- Nguoi khac clone repo co the build local hoac pull image tu Docker Hub va chay deploy.
 - Docs khop voi registry thuc te.
 
 ## 15. Checklist Chung Minh Du Baseline De Bai
 
-Trang thai: da hoan thanh. `docs/demo-checklist.md` da duoc chuan hoa thanh checklist baseline day du, gom Docker Compose, backend health/metrics, frontend/nginx, auth/roles, DeepFace smoke, MinIO/Qdrant/Redis, monitoring, Helm, CI/GHCR va backup. Repo cung co `scripts/demo-baseline-check.ps1` de kiem tra nhanh static/runtime baseline.
+Trang thai: da hoan thanh. `docs/demo-checklist.md` da duoc chuan hoa thanh checklist baseline day du, gom Docker Compose, backend health/metrics, frontend/nginx, auth/roles, DeepFace smoke, MinIO/Qdrant/Redis, monitoring, Helm, CI/Docker Hub va backup. Repo cung co `scripts/demo-baseline-check.ps1` de kiem tra nhanh static/runtime baseline.
 
 ### Van De
 

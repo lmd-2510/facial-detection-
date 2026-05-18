@@ -228,7 +228,7 @@ docker compose start backend
 Phần hiện tại là:
 
 - CI chạy test/build
-- publish Docker images lên GHCR khi push vào `main`
+- publish Docker images lên Docker Hub khi push vào `main`
 
 ### 3.1. Kiểm tra local trước khi push
 
@@ -264,20 +264,20 @@ Kết quả mong đợi:
   - `frontend-builds`
   - `docker-builds`
 
-### 3.3. Kiểm tra GHCR Packages
+### 3.3. Kiểm tra Docker Hub Repositories
 
 Sau khi workflow chạy xanh trên `main`:
 
-1. Vào repo hoặc owner trên GitHub
-2. Tìm phần `Packages`
+1. Vào Docker Hub
+2. Mở namespace của nhóm
 
 Kết quả mong đợi:
 
-- có 4 package:
-  - `facial-recognition-system/backend`
-  - `facial-recognition-system/worker`
-  - `facial-recognition-system/frontend-user`
-  - `facial-recognition-system/frontend-admin`
+- có 4 repository:
+  - `<dockerhub-username>/deepface-backend`
+  - `<dockerhub-username>/deepface-worker`
+  - `<dockerhub-username>/deepface-frontend-user`
+  - `<dockerhub-username>/deepface-frontend-admin`
 
 Nếu bấm vào package, nên thấy tag như:
 
@@ -287,26 +287,34 @@ Nếu bấm vào package, nên thấy tag như:
 Ghi chu registry:
 
 ```text
-Registry chinh thuc hien tai la GHCR.
+Registry chinh thuc hien tai la Docker Hub.
 Format chung:
-ghcr.io/<owner>/<repo>/backend:<tag>
-ghcr.io/<owner>/<repo>/worker:<tag>
-ghcr.io/<owner>/<repo>/frontend-user:<tag>
-ghcr.io/<owner>/<repo>/frontend-admin:<tag>
+<dockerhub-username>/deepface-backend:<tag>
+<dockerhub-username>/deepface-worker:<tag>
+<dockerhub-username>/deepface-frontend-user:<tag>
+<dockerhub-username>/deepface-frontend-admin:<tag>
 ```
 
 Khi kiem tra Helm deploy, values nen tro ve cung registry:
 
 ```powershell
 helm template deepface-access helm/deepface-access `
-  --set global.imageRegistry=ghcr.io/<owner>/<repo> `
+  --set global.imageRegistry=<dockerhub-username> `
   --set global.imageTag=latest
 ```
+
+Kiem tra nhanh cau hinh Docker Hub trong repo:
+
+```powershell
+.\scripts\check-dockerhub-readiness.ps1 -Namespace <dockerhub-username> -ImageTag latest -SkipRemote
+```
+
+Sau khi CI da publish image that len Docker Hub, chay lai lenh tren va bo `-SkipRemote`.
 
 ### 3.4. Cách nói ngắn khi demo
 
 ```text
-Nhóm em dùng GitHub Actions để tự động chạy backend tests, worker tests, frontend builds và Docker builds. Khi push vào main, workflow sẽ tự publish 4 Docker images lên GitHub Container Registry. Mức hiện tại là CI cộng với artifact publishing; chưa có auto deploy production.
+Nhóm em dùng GitHub Actions để tự động chạy backend tests, worker tests, frontend builds và Docker builds. Khi push vào main, workflow sẽ tự publish 4 Docker images lên Docker Hub. Mức hiện tại là CI cộng với artifact publishing; chưa có auto deploy production.
 ```
 
 ## 4. Nếu cần ảnh để thuyết trình
@@ -318,7 +326,7 @@ Nên chụp:
 - ảnh Alertmanager UI;
 - ảnh dashboard Grafana;
 - ảnh GitHub Actions có 4 job xanh;
-- ảnh GitHub Packages có 4 image.
+- ảnh Docker Hub có 4 repository/image.
 
 ## 5. Ghi nhớ nhanh
 
@@ -333,4 +341,4 @@ Nên chụp:
 
 - `CI/CD`:
   - kiểm tra `Actions`
-  - kiểm tra `Packages`
+  - kiểm tra Docker Hub repositories

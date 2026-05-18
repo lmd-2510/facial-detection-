@@ -6,7 +6,7 @@ GitHub Actions workflow nam o:
 .github/workflows/ci.yml
 ```
 
-Pipeline hien tai la CI + publish Docker images. Workflow tu dong test/build tren moi `push` va `pull_request`; rieng khi `push` vao `main`, workflow se publish Docker images len GitHub Container Registry (GHCR).
+Pipeline hien tai la CI + publish Docker images. Workflow tu dong test/build tren moi `push` va `pull_request`; rieng khi `push` vao `main`, workflow se publish Docker images len Docker Hub.
 
 ## Jobs
 
@@ -15,7 +15,7 @@ CI hien co 4 job:
 - `backend-tests`: cai `backend/requirements.txt` va chay `python -m pytest backend/app/tests`.
 - `worker-tests`: cai `worker/requirements.txt` va chay `python -m pytest worker/app/tests`.
 - `frontend-builds`: chay `npm ci` va `npm run build` cho user/admin frontend.
-- `docker-builds`: build Docker image cho backend, worker, user frontend va admin frontend; khi push vao `main` thi publish image len GHCR.
+- `docker-builds`: build Docker image cho backend, worker, user frontend va admin frontend; khi push vao `main` thi publish image len Docker Hub.
 
 ## Dieu CI Dang Bat Loi
 
@@ -26,42 +26,55 @@ CI hien co 4 job:
 
 ## Docker Images
 
-Images duoc publish len GHCR theo format:
+Images duoc publish len Docker Hub theo format:
 
 ```text
-ghcr.io/<owner>/<repo>/backend:<commit-sha>
-ghcr.io/<owner>/<repo>/backend:latest
-ghcr.io/<owner>/<repo>/worker:<commit-sha>
-ghcr.io/<owner>/<repo>/worker:latest
-ghcr.io/<owner>/<repo>/frontend-user:<commit-sha>
-ghcr.io/<owner>/<repo>/frontend-user:latest
-ghcr.io/<owner>/<repo>/frontend-admin:<commit-sha>
-ghcr.io/<owner>/<repo>/frontend-admin:latest
+<dockerhub-username>/deepface-backend:<commit-sha>
+<dockerhub-username>/deepface-backend:latest
+<dockerhub-username>/deepface-worker:<commit-sha>
+<dockerhub-username>/deepface-worker:latest
+<dockerhub-username>/deepface-frontend-user:<commit-sha>
+<dockerhub-username>/deepface-frontend-user:latest
+<dockerhub-username>/deepface-frontend-admin:<commit-sha>
+<dockerhub-username>/deepface-frontend-admin:latest
 ```
 
-Workflow dung `GITHUB_TOKEN` de login GHCR, nen khong can them Docker Hub secret. Can dam bao repository cho phep GitHub Actions ghi package voi quyen `packages: write`.
+Workflow dung Docker Hub access token de login. Can them 2 GitHub Actions secrets truoc khi publish tren `main`:
 
-Registry chinh thuc cua repo hien tai la GHCR, khop voi workflow CI va Helm chart. Neu deploy bang Helm, dat:
+```text
+DOCKERHUB_USERNAME
+DOCKERHUB_TOKEN
+```
+
+Registry chinh thuc cua repo hien tai la Docker Hub, khop voi workflow CI va Helm chart. Neu deploy bang Helm, dat:
 
 ```powershell
 helm upgrade --install deepface-access helm/deepface-access `
-  --set global.imageRegistry=ghcr.io/<owner>/<repo> `
+  --set global.imageRegistry=<dockerhub-username> `
   --set global.imageTag=<commit-sha>
 ```
 
-Trong do `<owner>/<repo>` phai trung voi `GITHUB_REPOSITORY` trong workflow, viet thuong. Neu package GHCR dang private, tao Kubernetes image pull secret va truyen vao chart:
+Trong do `<dockerhub-username>` phai trung voi Docker Hub namespace duoc dung trong CI. Neu Docker Hub repositories dang private, tao Kubernetes image pull secret va truyen vao chart:
 
 ```powershell
-kubectl create secret docker-registry ghcr-pull `
-  --docker-server=ghcr.io `
-  --docker-username=<github-username> `
-  --docker-password=<github-token>
+kubectl create secret docker-registry dockerhub-pull `
+  --docker-server=https://index.docker.io/v1/ `
+  --docker-username=<dockerhub-username> `
+  --docker-password=<dockerhub-token>
 
 helm upgrade --install deepface-access helm/deepface-access `
-  --set global.imageRegistry=ghcr.io/<owner>/<repo> `
+  --set global.imageRegistry=<dockerhub-username> `
   --set global.imageTag=<commit-sha> `
-  --set global.imagePullSecrets[0].name=ghcr-pull
+  --set global.imagePullSecrets[0].name=dockerhub-pull
 ```
+
+Co the kiem tra cau hinh Docker Hub trong repo bang:
+
+```powershell
+.\scripts\check-dockerhub-readiness.ps1 -Namespace <dockerhub-username> -ImageTag latest -SkipRemote
+```
+
+Sau khi workflow tren `main` da push image that, bo `-SkipRemote` de script kiem tra tag `latest` tren Docker Hub.
 
 ## Dieu Pipeline Chua Lam
 
@@ -83,7 +96,7 @@ Neu worker dependency DeepFace qua nang cho may CI, co the tach Docker build wor
 Co the mo ta pipeline hien tai la:
 
 ```text
-test backend/worker -> build frontend -> build Docker images -> publish images to GHCR on main
+test backend/worker -> build frontend -> build Docker images -> publish images to Docker Hub on main
 ```
 
 Day la muc CI + artifact publishing. De thanh CD day du hon, buoc tiep theo se la tu dong deploy image vua publish len staging/server.

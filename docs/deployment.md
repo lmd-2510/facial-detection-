@@ -121,20 +121,20 @@ Chart hien tai khong tu tao Kubernetes Secret that. Cac template backend/worker/
 
 ### Helm Image Registry
 
-Helm chart dung GHCR theo cung format voi GitHub Actions:
+Helm chart dung Docker Hub theo cung format voi GitHub Actions:
 
 ```text
-ghcr.io/<owner>/<repo>/backend:<tag>
-ghcr.io/<owner>/<repo>/worker:<tag>
-ghcr.io/<owner>/<repo>/frontend-user:<tag>
-ghcr.io/<owner>/<repo>/frontend-admin:<tag>
+<dockerhub-username>/deepface-backend:<tag>
+<dockerhub-username>/deepface-worker:<tag>
+<dockerhub-username>/deepface-frontend-user:<tag>
+<dockerhub-username>/deepface-frontend-admin:<tag>
 ```
 
 Trong `helm/deepface-access/values.yaml`, cac bien can doi khi deploy image da publish la:
 
 ```yaml
 global:
-  imageRegistry: ghcr.io/<owner>/<repo>
+  imageRegistry: <dockerhub-username>
   imageTag: <commit-sha-or-latest>
 ```
 
@@ -142,11 +142,11 @@ Vi du:
 
 ```powershell
 helm upgrade --install deepface-access helm/deepface-access `
-  --set global.imageRegistry=ghcr.io/<owner>/<repo> `
+  --set global.imageRegistry=<dockerhub-username> `
   --set global.imageTag=latest
 ```
 
-Neu GHCR package la private, tao image pull secret va truyen vao `global.imagePullSecrets`.
+Neu Docker Hub repository la private, tao image pull secret va truyen vao `global.imagePullSecrets`.
 
 Secret that nen tao ngoai chart:
 

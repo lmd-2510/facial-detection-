@@ -43,7 +43,7 @@ Run-Step "Static project files" {
     @(
         "docker-compose.yml",
         "README.md",
-        "docs/demo-checklist-bonus.md",
+        "docs/demo-checklist.md",
         "helm/deepface-access/values.yaml",
         "monitoring/prometheus/prometheus.yml",
         "monitoring/grafana/dashboards/deepface-access-overview.json",

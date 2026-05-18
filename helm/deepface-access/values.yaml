@@ -1,26 +1,26 @@
 imagePullPolicy: IfNotPresent
 
 global:
-  imageRegistry: ghcr.io/your-owner/your-repo
+  imageRegistry: your-dockerhub-username
   imageTag: latest
   imagePullSecrets: []
 
 backend:
-  imageRepository: backend
+  imageRepository: deepface-backend
   replicas: 1
   port: 8000
 
 worker:
-  imageRepository: worker
+  imageRepository: deepface-worker
   replicas: 1
 
 frontendUser:
-  imageRepository: frontend-user
+  imageRepository: deepface-frontend-user
   replicas: 1
   port: 80
 
 frontendAdmin:
-  imageRepository: frontend-admin
+  imageRepository: deepface-frontend-admin
   replicas: 1
   port: 80
 

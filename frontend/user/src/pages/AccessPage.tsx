@@ -64,11 +64,14 @@ export default function AccessPage({ token, onAccessQueued }: AccessPageProps) {
             Snapshot image
             <input
               accept="image/*"
-              required
               type="file"
-              onChange={(event) =>
-                setSnapshotFile(event.target.files?.[0] ?? null)
-              }
+              onChange={(event) => {
+                const file = event.target.files?.[0] ?? null;
+                setSnapshotFile(file);
+                setImageKey(file?.name ?? "");
+                setResult(null);
+                setError(null);
+              }}
             />
           </label>
           <button className="primary-button" disabled={isChecking} type="submit">
@@ -78,7 +81,15 @@ export default function AccessPage({ token, onAccessQueued }: AccessPageProps) {
       </div>
 
       <div className="page-stack">
-        <CameraView imagePath={imageKey || snapshotFile?.name || ""} />
+        <CameraView
+          imagePath={imageKey || snapshotFile?.name || ""}
+          onCapture={(file) => {
+            setSnapshotFile(file);
+            setImageKey(file.name);
+            setResult(null);
+            setError(null);
+          }}
+        />
         <ResultCard result={result} />
       </div>
     </section>

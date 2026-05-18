@@ -714,17 +714,19 @@ Flow nay da duoc dua vao `scripts/smoke-deepface.ps1` va `worker/app/smoke/deepf
 
 ## 12. Webcam/Camera Capture Tren Frontend User
 
+Trang thai: da hoan thanh phan UI capture co ban. User UI co the bat webcam bang `navigator.mediaDevices.getUserMedia()`, preview video, chup frame thanh file JPEG, roi dung lai endpoint `POST /access/check-image` de upload snapshot va queue access job. File upload fallback van duoc giu cho trinh duyet/may khong dung webcam.
+
 ### Van De
 
 De bai la he thong AI xu ly computer vision, nen demo se thuyet phuc hon neu user co the dung camera/webcam de chup frame that thay vi nhap `image_path` hoac chi upload file.
 
-Hien tai user flow van la:
+Truoc day user flow van la:
 
 ```text
 Nhap image_path -> backend queue access job -> worker xu ly
 ```
 
-Flow nen co cho demo:
+Flow hien tai cho demo:
 
 ```text
 Mo webcam tren User UI
@@ -732,7 +734,7 @@ Mo webcam tren User UI
 -> gui multipart/form-data len backend
 -> backend luu anh vao MinIO/S3
 -> worker xu ly DeepFace
--> UI poll log/result va hien granted/denied/error
+-> UI refresh history va hien ket qua queue ban dau
 ```
 
 ### Dang Nam O Dau
@@ -747,17 +749,17 @@ Mo webcam tren User UI
 
 ### Nen Sua Nhu The Nao
 
-Them UI dung `navigator.mediaDevices.getUserMedia()`:
+Da them UI dung `navigator.mediaDevices.getUserMedia()`:
 
 ```text
-[ ] Nut bat/tat camera
-[ ] Preview video
-[ ] Nut chup frame
-[ ] Convert canvas frame thanh Blob/File
-[ ] Goi API upload/check-image
-[ ] Hien loading khi job dang processing
-[ ] Poll `/logs` hoac endpoint log detail de cap nhat ket qua
-[ ] Fallback upload file neu trinh duyet khong co camera
+[x] Nut bat/tat camera
+[x] Preview video
+[x] Nut chup frame
+[x] Convert canvas frame thanh Blob/File
+[x] Goi API upload/check-image qua form Check access hien co
+[x] Hien loading khi queue request dang gui
+[ ] Poll `/logs` hoac endpoint log detail de cap nhat ket qua sau khi worker xu ly
+[x] Fallback upload file neu trinh duyet khong co camera
 ```
 
 Backend nen uu tien API multipart:
@@ -768,10 +770,10 @@ POST /access/check-image
 
 ### Moc Hoan Thanh
 
-- Demo duoc bang webcam laptop.
-- Anh chup tu UI duoc luu vao MinIO/S3 hoac storage service da chon.
-- Access log hien ket qua sau khi worker xu ly.
-- Docs co ghi ro trinh duyet can quyen camera.
+- Demo duoc bang webcam laptop tren trinh duyet co quyen camera.
+- Anh chup tu UI duoc gui nhu file JPEG len endpoint multipart va luu qua storage flow hien co.
+- Access log duoc refresh sau khi queue job; poll result chi tiet van la cai tien tiep theo neu can realtime hon.
+- File upload fallback van hoat dong khi khong co webcam.
 
 ## 13. Quan Ly User Va Phan Quyen Day Du Hon
 

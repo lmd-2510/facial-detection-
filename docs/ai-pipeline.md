@@ -18,6 +18,7 @@ image_key/object_key
 ```
 
 Worker van chap nhan `image_path` local de giu smoke test/dev cu, nhung flow UI/API moi upload anh len MinIO/S3 va dung object key trong Redis job. Access UI dung `POST /access/check-image` de upload snapshot va queue access job trong mot request.
+User UI co the upload file anh hoac bat webcam de chup frame JPEG tren trinh duyet; ca hai cach deu di qua `POST /access/check-image`.
 
 `detector.py`, `anti_spoof.py` va `embedder.py` deu wrap DeepFace de giu contract noi bo on dinh cho worker.
 

@@ -1,6 +1,12 @@
 import type { User } from "../types/user";
 
-export type AdminView = "dashboard" | "employees" | "cameras" | "logs" | "settings";
+export type AdminView =
+  | "dashboard"
+  | "employees"
+  | "cameras"
+  | "logs"
+  | "users"
+  | "settings";
 
 interface SidebarProps {
   activeView: AdminView;
@@ -14,6 +20,7 @@ const items: Array<{ id: AdminView; label: string }> = [
   { id: "employees", label: "Employees" },
   { id: "cameras", label: "Cameras" },
   { id: "logs", label: "Access logs" },
+  { id: "users", label: "Users" },
   { id: "settings", label: "Settings" },
 ];
 

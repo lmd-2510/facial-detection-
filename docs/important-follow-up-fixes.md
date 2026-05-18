@@ -777,6 +777,8 @@ POST /access/check-image
 
 ## 13. Quan Ly User Va Phan Quyen Day Du Hon
 
+Trang thai: da hoan thanh phan quan ly user co ban. Backend co API admin users de list/create/update/delete tai khoan va khong tra `password_hash` ra frontend. Admin UI co trang Users de tao user, sua role/password va xoa user khac; backend chan admin tu xoa chinh minh. Delete hien la xoa record that vi bang `users` chua co cot `status`.
+
 ### Van De
 
 Repo da co `users` va login, nhung admin UI/API chua quan ly user day du. Neu bi hoi theo de bai ve admin them/xoa user, cap quyen, xem role, repo hien moi dat muc auth co ban.
@@ -803,30 +805,31 @@ user: check access, xem profile/history cua flow user
 Backend:
 
 ```text
-[ ] Them dependency require_admin_user
-[ ] Them API admin users:
+[x] Them dependency require_admin_user
+[x] Them API admin users:
     GET /admin/users
     POST /admin/users
     PUT /admin/users/{id}
-    DELETE /admin/users/{id} hoac deactivate
-[ ] Khong tra password_hash ra frontend
-[ ] Test user role bi 403 o endpoint admin
+    DELETE /admin/users/{id}
+[x] Khong tra password_hash ra frontend
+[x] Test user role bi 403 o endpoint admin
 ```
 
 Frontend admin:
 
 ```text
-[ ] Them trang User Management
-[ ] Tao/sua role admin/user
-[ ] Reset password demo neu can
+[x] Them trang User Management
+[x] Tao/sua role admin/user
+[x] Reset password demo qua truong password khi edit user
 [ ] Disable user thay vi xoa cung neu muon giu audit
 ```
 
 ### Moc Hoan Thanh
 
 - Token role `user` khong goi duoc API admin.
-- Admin tao/sua/disable user duoc.
-- README/docs ghi ro tai khoan demo va role.
+- Admin tao/sua/xoa user khac duoc.
+- Admin khong tu xoa chinh minh.
+- README/docs ghi ro API quan ly user va role.
 
 ## 14. Docker Image Registry Theo Yeu Cau Mon Hoc
 

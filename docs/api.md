@@ -156,6 +156,34 @@ Can Bearer token role `admin`. Tra ve trang thai van hanh toi thieu:
 - queue length cua `embedding_jobs`
 - queue length cua `access_jobs`
 
+### Admin users
+
+Tat ca endpoint admin users can Bearer token role `admin`.
+
+- `GET /admin/users`: danh sach user, khong tra `password_hash`.
+- `POST /admin/users`: tao user moi.
+- `PUT /admin/users/{id}`: cap nhat username, role hoac password.
+- `DELETE /admin/users/{id}`: xoa user khac; backend khong cho admin xoa chinh minh.
+
+Request tao user:
+
+```json
+{
+  "username": "guard",
+  "password": "guard123",
+  "role": "user"
+}
+```
+
+Request cap nhat user co the gui mot phan:
+
+```json
+{
+  "role": "admin",
+  "password": "new-password"
+}
+```
+
 ### `GET /health`
 
 Khong can token. Dung cho Docker/Kubernetes health check. Kiem tra backend, database va Redis.

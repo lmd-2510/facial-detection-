@@ -7,6 +7,12 @@ export interface User {
   created_at: string;
 }
 
+export interface UserPayload {
+  username: string;
+  password?: string;
+  role: UserRole;
+}
+
 export interface LoginResponse {
   access_token: string;
   token_type: "bearer";

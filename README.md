@@ -123,6 +123,8 @@ Tai khoan demo mac dinh:
 - `admin` / `admin123`
 - `user` / `user123`
 
+Admin UI co trang Users de tao tai khoan demo moi, doi role `admin`/`user`, reset password va xoa user khac.
+
 Chay test tong hop:
 
 ```powershell

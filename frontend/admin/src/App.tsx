@@ -9,6 +9,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import CameraPage from "./pages/CameraPage";
 import EmployeePage from "./pages/EmployeePage";
 import SettingsPage from "./pages/SettingsPage";
+import UserPage from "./pages/UserPage";
 import type { Camera } from "./types/camera";
 import type { Employee } from "./types/employee";
 import type { AccessLog } from "./types/log";
@@ -142,6 +143,8 @@ export default function App() {
       <CameraPage token={token} onCamerasChange={setCameras} />
     ) : activeView === "logs" ? (
       <AccessLogPage token={token} onLogsChange={setLogs} />
+    ) : activeView === "users" ? (
+      <UserPage currentUser={user} token={token} />
     ) : activeView === "settings" ? (
       <SettingsPage user={user} />
     ) : (

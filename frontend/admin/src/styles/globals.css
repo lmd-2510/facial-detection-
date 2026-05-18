@@ -308,16 +308,23 @@ th {
 }
 
 .status-pill.active,
-.status-pill.granted {
+.status-pill.granted,
+.status-pill.admin {
   color: var(--success);
   background: #dff4e8;
 }
 
 .status-pill.inactive,
 .status-pill.denied,
-.status-pill.none {
+.status-pill.none,
+.status-pill.user {
   color: var(--warning);
   background: #fff0d8;
+}
+
+.danger-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
 }
 
 .status-pill.processing,

@@ -13,6 +13,21 @@ Trong may dev hien tai, co the dung conda env `ltxldl` cho Python/Node/Helm.
 
 ## Chay Local Bang Docker
 
+Luong nhanh cho nguoi moi clone repo:
+
+```powershell
+Copy-Item .env.example .env
+.\scripts\dev.ps1 -Build -Seed
+.\scripts\demo-baseline-check.ps1
+```
+
+Tai khoan demo mac dinh:
+
+- Admin: `admin` / `admin123`
+- User: `user` / `user123`
+
+Neu muon chay tung buoc:
+
 ```powershell
 .\scripts\dev.ps1 -Build
 ```
@@ -29,9 +44,16 @@ Mo nhanh:
 - User app: `http://localhost:5173`
 - Admin app: `http://localhost:5174`
 - Nginx: `http://localhost:8080`
+- MinIO console: `http://localhost:9001`
 - Prometheus: `http://localhost:9090`
 - Alertmanager: `http://localhost:9093`
 - Grafana: `http://localhost:3000`
+
+Neu can chung minh AI runtime that, chay rieng:
+
+```powershell
+.\scripts\smoke-deepface.ps1 -SkipBuild
+```
 
 ## Chay Test
 
@@ -64,3 +86,11 @@ C:\Users\Dell\.conda\envs\ltxldl\Library\bin
 ## Ghi Chu
 
 MinIO da duoc noi vao flow upload employee face image/access snapshot. PostgreSQL hien van luu object key trong cot `image_path` de tranh migration lon. Qdrant da duoc noi vao flow matching, con PostgreSQL van la source of truth cho employee/embedding metadata.
+
+## Loi Hay Gap
+
+- Docker Desktop chua chay: start Docker Desktop roi chay lai `docker compose`.
+- Port bi trung: kiem tra cac port `5173`, `5174`, `8000`, `8080`, `9000`, `9001`, `9090`, `9093`, `3000`. Co the doi cong qua `.env`, vi du `NGINX_PORT=8081`.
+- DeepFace lan dau cham: worker can tai model weight; smoke script se cache trong volume `deepface_weights`.
+- Webcam khong mo duoc: trinh duyet can chay tren `localhost` hoac HTTPS va phai duoc cap quyen camera.
+- Worker bi cham hoac fail vi tai nguyen: tang RAM/CPU cho Docker Desktop hoac chay smoke test rieng thay vi full stack.

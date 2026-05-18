@@ -312,6 +312,8 @@ Neu muon test API/worker that:
 
 ## 3. Luong Deploy Lai Tu Dau Cho Giang Vien
 
+Trang thai: da thuc hien trong docs/script. README co `Quick Start Cho Giang Vien`, `docs/setup.md` co luong clone/chay/verify, `scripts/dev.ps1` in du URL demo, va `scripts/demo-baseline-check.ps1` kiem tra baseline static/runtime.
+
 ### Muc tieu
 
 Nguoi cham clone repo ve va co the chay he thong ma khong can hoi tac gia.

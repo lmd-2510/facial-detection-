@@ -1,5 +1,37 @@
 # Checklist Kiểm Tra Bonus
 
+## 0. Quick Start Tu Dau
+
+Muc tieu:
+
+- nguoi cham clone repo va chay duoc he thong bang Docker;
+- co tai khoan demo de dang nhap;
+- co script kiem tra baseline sau khi stack da chay.
+
+Chay:
+
+```powershell
+Copy-Item .env.example .env
+.\scripts\dev.ps1 -Build -Seed
+.\scripts\demo-baseline-check.ps1
+```
+
+URL can mo:
+
+- User UI: http://localhost:5173
+- Admin UI: http://localhost:5174/admin/
+- Backend health: http://localhost:8000/health
+- Backend docs: http://localhost:8000/docs
+- Nginx gateway: http://localhost:8080
+- MinIO console: http://localhost:9001
+- Prometheus: http://localhost:9090
+- Grafana: http://localhost:3000
+
+Tai khoan demo:
+
+- Admin: `admin` / `admin123`
+- User: `user` / `user123`
+
 Tài liệu này ghi lại cách tự tay kiểm tra các phần bonus hiện có trong repo trước khi thuyết trình hoặc demo.
 
 ## 1. Kiểm tra Helm

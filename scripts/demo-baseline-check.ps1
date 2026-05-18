@@ -4,6 +4,11 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+$NginxPort = if ($env:NGINX_PORT) { $env:NGINX_PORT } else { "8080" }
+$PrometheusPort = if ($env:PROMETHEUS_PORT) { $env:PROMETHEUS_PORT } else { "9090" }
+$AlertmanagerPort = if ($env:ALERTMANAGER_PORT) { $env:ALERTMANAGER_PORT } else { "9093" }
+$GrafanaPort = if ($env:GRAFANA_PORT) { $env:GRAFANA_PORT } else { "3000" }
+
 function Run-Step {
     param(
         [string]$Name,
@@ -44,9 +49,13 @@ Run-Step "Static project files" {
         "docker-compose.yml",
         "README.md",
         "docs/demo-checklist.md",
+        "docs/final-fixes.md",
+        "docs/setup.md",
         "helm/deepface-access/values.yaml",
         "monitoring/prometheus/prometheus.yml",
         "monitoring/grafana/dashboards/deepface-access-overview.json",
+        "scripts/check-dockerhub-readiness.ps1",
+        "scripts/dev.ps1",
         "scripts/smoke-deepface.ps1",
         "scripts/backup.ps1"
     ) | ForEach-Object { Assert-PathExists $_ }
@@ -74,14 +83,14 @@ Run-Step "Backend health and metrics" {
 Run-Step "Frontend and nginx routes" {
     Test-HttpEndpoint -Name "user frontend" -Url "http://localhost:5173"
     Test-HttpEndpoint -Name "admin frontend" -Url "http://localhost:5174/admin/"
-    Test-HttpEndpoint -Name "nginx health route" -Url "http://localhost:8080/health" -ExpectedText @('"database":"ok"', '"redis":"ok"')
-    Test-HttpEndpoint -Name "nginx api route" -Url "http://localhost:8080/api/health" -ExpectedText @('"database":"ok"', '"redis":"ok"')
+    Test-HttpEndpoint -Name "nginx health route" -Url "http://localhost:$NginxPort/health" -ExpectedText @('"database":"ok"', '"redis":"ok"')
+    Test-HttpEndpoint -Name "nginx api route" -Url "http://localhost:$NginxPort/api/health" -ExpectedText @('"database":"ok"', '"redis":"ok"')
 }
 
 Run-Step "Monitoring endpoints" {
-    Test-HttpEndpoint -Name "prometheus" -Url "http://localhost:9090/-/ready"
-    Test-HttpEndpoint -Name "alertmanager" -Url "http://localhost:9093/-/ready"
-    Test-HttpEndpoint -Name "grafana" -Url "http://localhost:3000/api/health"
+    Test-HttpEndpoint -Name "prometheus" -Url "http://localhost:$PrometheusPort/-/ready"
+    Test-HttpEndpoint -Name "alertmanager" -Url "http://localhost:$AlertmanagerPort/-/ready"
+    Test-HttpEndpoint -Name "grafana" -Url "http://localhost:$GrafanaPort/api/health"
 }
 
 Run-Step "Storage and vector services" {

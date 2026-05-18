@@ -113,6 +113,61 @@ Nen doc project theo thu tu nay de tranh bi lac:
 7. `worker/app/ml/`: xem phan AI/face processing nam o dau.
 8. `frontend/user/` va `frontend/admin/`: xem cac man hinh su dung API nhu the nao.
 
+## Quick Start Cho Giang Vien
+
+Day la luong ngan nhat de clone repo va chay lai he thong tren may co Docker Desktop.
+
+1. Tao file `.env` tu mau:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+2. Start stack va seed tai khoan demo:
+
+```powershell
+.\scripts\dev.ps1 -Build -Seed
+```
+
+Neu khong dung PowerShell script, co the chay tuong duong:
+
+```powershell
+docker compose up -d --build
+docker compose run --rm backend python -m app.db.seed
+```
+
+3. Kiem tra baseline khi stack da chay:
+
+```powershell
+.\scripts\demo-baseline-check.ps1
+```
+
+4. Mo cac URL chinh:
+
+- User UI: http://localhost:5173
+- Admin UI: http://localhost:5174/admin/
+- Backend health: http://localhost:8000/health
+- Backend docs: http://localhost:8000/docs
+- Nginx gateway: http://localhost:8080
+- MinIO console: http://localhost:9001
+- Prometheus: http://localhost:9090
+- Grafana: http://localhost:3000
+
+5. Dang nhap tai khoan demo:
+
+- Admin: `admin` / `admin123`
+- User: `user` / `user123`
+
+6. Neu can chung minh AI runtime that, chay smoke test rieng:
+
+```powershell
+.\scripts\smoke-deepface.ps1 -SkipBuild
+```
+
+Ghi chu: lan dau worker DeepFace co the mat thoi gian tai model weight. Smoke script co cache weight trong Docker volume `deepface_weights`.
+
+Neu may da co tien trinh dung port `8080`, doi cong nginx trong `.env`, vi du `NGINX_PORT=8081`, roi chay lai `.\scripts\dev.ps1 -Build -Seed`.
+
 ## Chay Local
 
 Yeu cau may co Docker va Docker Compose.

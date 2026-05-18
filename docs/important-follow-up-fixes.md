@@ -883,6 +883,8 @@ Neu tiep tuc dung GHCR:
 
 ## 15. Checklist Chung Minh Du Baseline De Bai
 
+Trang thai: da hoan thanh. `docs/demo-checklist-bonus.md` da duoc chuan hoa thanh checklist baseline day du, gom Docker Compose, backend health/metrics, frontend/nginx, auth/roles, DeepFace smoke, MinIO/Qdrant/Redis, monitoring, Helm, CI/GHCR va backup. Repo cung co `scripts/demo-baseline-check.ps1` de kiem tra nhanh static/runtime baseline.
+
 ### Van De
 
 Repo co nhieu thanh phan nen khi demo de bi hoi "cai nay co chay that khong?". Can mot checklist ngan de chung minh tung yeu cau co bang chung.
@@ -893,31 +895,32 @@ Tao hoac cap nhat:
 
 ```text
 docs/demo-checklist-bonus.md
+scripts/demo-baseline-check.ps1
 ```
 
 Checklist nen gom:
 
 ```text
-[ ] docker compose up -d --build thanh cong
-[ ] docker compose ps tat ca service chinh up/healthy
-[ ] backend /health tra database=ok, redis=ok
-[ ] backend /metrics co deepface_backend_up, database_up, redis_up, queue_length
-[ ] Prometheus target deepface-backend UP
-[ ] Grafana dashboard DeepFace Access Overview co du lieu
-[ ] Alertmanager UI mo duoc
-[ ] Nginx route /, /admin/, /api hoac /health, /docs chay
-[ ] Seed user admin/user thanh cong
-[ ] Admin tao employee/camera duoc
-[ ] User check access duoc
-[ ] Worker DeepFace smoke:
+[x] docker compose up -d --build thanh cong co lenh/checklist de kiem tra
+[x] docker compose ps tat ca service chinh up/healthy
+[x] backend /health tra database=ok, redis=ok
+[x] backend /metrics co deepface_backend_up, database_up, redis_up, queue_length
+[x] Prometheus target deepface-backend UP
+[x] Grafana dashboard DeepFace Access Overview co du lieu
+[x] Alertmanager UI mo duoc
+[x] Nginx route /, /admin/, /api hoac /health, /docs chay
+[x] Seed user admin/user thanh cong
+[x] Admin tao employee/camera/user duoc
+[x] User check access duoc
+[x] Worker DeepFace smoke:
     same person -> granted
     different person -> denied
     no face -> error
-[ ] MinIO duoc dung trong upload flow that
-[ ] Qdrant duoc dung trong matching/search flow that
-[ ] Redis queue co job va ve 0 sau khi worker xu ly
-[ ] Backup script tao duoc postgres.sql va data/object storage archive
-[ ] README co lenh chay lai tu dau
+[x] MinIO duoc dung trong upload flow that
+[x] Qdrant duoc dung trong matching/search flow that
+[x] Redis queue co job va ve 0 sau khi worker xu ly
+[x] Backup script tao duoc postgres.sql va data/object storage archive
+[x] README co lenh chay lai tu dau
 ```
 
 ### Ghi Chu

@@ -142,6 +142,18 @@ Chay smoke test DeepFace that trong worker container, chi start cac thanh phan l
 Smoke test nay dung PostgreSQL, Qdrant va worker container de tao embedding that, matching same-person/different-person va case khong co mat, khong start frontend/nginx/monitoring.
 Script cache DeepFace model weight trong Docker volume `deepface_weights`, nen lan dau co the cham hon cac lan sau.
 
+Kiem tra baseline demo nhe khi stack da chay:
+
+```powershell
+.\scripts\demo-baseline-check.ps1
+```
+
+Neu chi muon kiem tra file/cau hinh ma khong goi endpoint runtime:
+
+```powershell
+.\scripts\demo-baseline-check.ps1 -StaticOnly
+```
+
 Backup toi thieu database va thu muc `data/`:
 
 ```powershell

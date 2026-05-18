@@ -883,7 +883,7 @@ Neu tiep tuc dung GHCR:
 
 ## 15. Checklist Chung Minh Du Baseline De Bai
 
-Trang thai: da hoan thanh. `docs/demo-checklist-bonus.md` da duoc chuan hoa thanh checklist baseline day du, gom Docker Compose, backend health/metrics, frontend/nginx, auth/roles, DeepFace smoke, MinIO/Qdrant/Redis, monitoring, Helm, CI/GHCR va backup. Repo cung co `scripts/demo-baseline-check.ps1` de kiem tra nhanh static/runtime baseline.
+Trang thai: da hoan thanh. `docs/demo-checklist.md` da duoc chuan hoa thanh checklist baseline day du, gom Docker Compose, backend health/metrics, frontend/nginx, auth/roles, DeepFace smoke, MinIO/Qdrant/Redis, monitoring, Helm, CI/GHCR va backup. Repo cung co `scripts/demo-baseline-check.ps1` de kiem tra nhanh static/runtime baseline.
 
 ### Van De
 
@@ -894,7 +894,7 @@ Repo co nhieu thanh phan nen khi demo de bi hoi "cai nay co chay that khong?". C
 Tao hoac cap nhat:
 
 ```text
-docs/demo-checklist-bonus.md
+docs/demo-checklist.md
 scripts/demo-baseline-check.ps1
 ```
 
@@ -933,6 +933,8 @@ Checklist nay khong thay code/test, nhung rat huu ich khi bao ve project vi no n
 
 ## 16. Cap Nhat README Va Mapping Theo De Bai
 
+Trang thai: da hoan thanh. README da co section `Mapping Theo Yeu Cau De Bai`, doi chieu tung thanh phan nhu frontend user/admin, backend API, Redis queue, PostgreSQL, MinIO, Qdrant, worker DeepFace, nginx, Docker Compose, monitoring, backup, CI/CD, Helm va demo verification voi file/service tuong ung trong repo.
+
 ### Van De
 
 README hien giai thich repo tot, nhung nen co bang mapping truc tiep giua yeu cau de bai va file/service trong repo. Bang nay giup nguoi cham thay nhanh he thong dap ung muc co ban nao.
@@ -962,6 +964,7 @@ Monitoring                             | Prometheus/Grafana/Alertmanager
 - README noi ro phan nao da hoan thanh that.
 - README khong noi qua tay ve MinIO/Qdrant neu flow chua dung.
 - Co link den docs setup, API, AI pipeline, deployment, monitoring, backup.
+- README co ghi chu trung thuc ve Helm baseline va anti-spoof optional.
 
 ## Ghi Chu Cuoi
 

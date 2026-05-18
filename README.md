@@ -70,6 +70,36 @@ Flow chinh cua MVP:
 
 Hien tai project da hoan thanh phan code cot loi cua Giai Doan 7 va lop van hanh Giai Doan 8. Backend co API cot loi cho auth, employees, cameras, logs, upload anh len MinIO, va day duoc `embedding_jobs` / `access_jobs` vao Redis bang object key. Worker nghe Redis queue, tai anh tu MinIO ve temp file, dung DeepFace cho face detection, anti-spoofing/liveness, embedding va cosine matching, luu vector vao `face_embeddings`, va cap nhat `access_logs` thanh `granted`, `denied` hoac `error`. Admin/user frontend da co login, thao tac flow chinh theo API, hien thi loading/error/empty state co ban; user UI co the upload snapshot hoac chup frame tu webcam de check access.
 
+## Mapping Theo Yeu Cau De Bai
+
+Bang nay giup doi chieu nhanh giua cac yeu cau he thong va phan hien co trong repo.
+
+| Yeu cau / thanh phan | Repo hien co | Bang chung nhanh |
+| --- | --- | --- |
+| Frontend user | `frontend/user` | User UI login, upload file/chup webcam snapshot, check access, xem history/profile |
+| Frontend admin | `frontend/admin` | Admin UI login, quan ly employee, camera, user va access logs |
+| Backend API | `backend` | FastAPI routes cho auth, employees, cameras, users, logs, access, health, metrics |
+| Message queue | `redis` service, `backend/app/queues`, `worker/app/tasks` | Redis queues `embedding_jobs` va `access_jobs` |
+| Database | `database` PostgreSQL, `backend/app/models`, `worker/app/db/schema.py` | Luu users, employees, cameras, face_embeddings, access_logs |
+| Object storage | `minio` service, `backend/app/services/storage_service.py`, `worker/app/services/storage_service.py` | Upload employee face image va access snapshot vao MinIO/S3 flow |
+| Vector database | `qdrant` service, `worker/app/services/vector_store_service.py` | Worker upsert/search embedding bang Qdrant, PostgreSQL van la source of truth |
+| AI inference | `worker/app/ml`, `worker/app/services` | DeepFace detect face, optional anti-spoofing, embedding Facenet512, matching |
+| Frontend webcam/camera capture | `frontend/user/src/components/CameraView.tsx` | User UI chup frame JPEG bang browser webcam va gui qua `/access/check-image` |
+| Authentication / roles | `backend/app/core/deps.py`, `backend/app/api/admin.py`, `frontend/admin/src/pages/UserPage.tsx` | Bearer token, role `admin`/`user`, admin user management |
+| Reverse proxy / load balancer baseline | `nginx/nginx.conf` | Route `/`, `/admin/`, `/api/`, `/health`, `/docs`, `/metrics` |
+| Docker Compose | `docker-compose.yml` | Chay local multi-service bang `docker compose up --build` |
+| Monitoring | `monitoring/prometheus`, `monitoring/grafana`, `monitoring/alertmanager` | Prometheus scrape `/metrics`, Grafana dashboard, Alertmanager UI |
+| Backup | `scripts/backup.ps1`, `docs/backup.md` | Backup PostgreSQL dump va archive thu muc `data/` |
+| CI/CD artifact publishing | `.github/workflows/ci.yml`, `docs/cicd.md` | Test/build va publish Docker images len GHCR khi push `main` |
+| Helm / Kubernetes packaging | `helm/deepface-access`, `docs/deployment.md` | Helm chart render/lint duoc; deploy cluster can secret va image registry dung |
+| Demo verification | `docs/demo-checklist.md`, `scripts/demo-baseline-check.ps1`, `scripts/smoke-deepface.ps1` | Checklist va script de chung minh cac thanh phan chay that |
+
+Ghi chu trung thuc khi demo:
+
+- MinIO va Qdrant da duoc noi vao flow chinh; PostgreSQL van giu vai tro source of truth.
+- Helm chart la baseline packaging cho Kubernetes; can deploy len cluster that neu muon chung minh production runtime.
+- Anti-spoofing dang de optional voi `DEEPFACE_ANTI_SPOOFING=false` mac dinh de demo nhan dien chinh on dinh.
+
 ## Cau Truc Thu Muc Nen Doc Truoc
 
 Nen doc project theo thu tu nay de tranh bi lac:

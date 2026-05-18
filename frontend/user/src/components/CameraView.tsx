@@ -2,21 +2,58 @@ import { useEffect, useRef, useState } from "react";
 
 interface CameraViewProps {
   imagePath: string;
+  intervalMs: number;
+  isRealtimeActive: boolean;
+  isSubmittingFrame: boolean;
   onCapture: (file: File) => void;
+  onRealtimeFrame: (file: File) => Promise<void>;
+  onRealtimeStop: () => void;
 }
 
-export default function CameraView({ imagePath, onCapture }: CameraViewProps) {
+export default function CameraView({
+  imagePath,
+  intervalMs,
+  isRealtimeActive,
+  isSubmittingFrame,
+  onCapture,
+  onRealtimeFrame,
+  onRealtimeStop,
+}: CameraViewProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const isSubmittingFrameRef = useRef(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isCameraOn, setIsCameraOn] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
+
+  useEffect(() => {
+    isSubmittingFrameRef.current = isSubmittingFrame;
+  }, [isSubmittingFrame]);
 
   useEffect(() => {
     return () => {
       streamRef.current?.getTracks().forEach((track) => track.stop());
     };
   }, []);
+
+  useEffect(() => {
+    if (!isCameraOn || !isRealtimeActive) {
+      return;
+    }
+
+    const timer = window.setInterval(async () => {
+      if (isSubmittingFrameRef.current) {
+        return;
+      }
+
+      const file = await createFrameFile();
+      if (file) {
+        await onRealtimeFrame(file);
+      }
+    }, intervalMs);
+
+    return () => window.clearInterval(timer);
+  }, [intervalMs, isCameraOn, isRealtimeActive, onRealtimeFrame]);
 
   async function startCamera() {
     setCameraError(null);
@@ -53,40 +90,47 @@ export default function CameraView({ imagePath, onCapture }: CameraViewProps) {
       videoRef.current.srcObject = null;
     }
     setIsCameraOn(false);
+    onRealtimeStop();
   }
 
-  async function captureFrame() {
+  async function createFrameFile() {
     const video = videoRef.current;
     if (!video || !isCameraOn) {
       setCameraError("Start the camera before capturing a frame.");
-      return;
+      return null;
     }
 
-    setIsCapturing(true);
     setCameraError(null);
+    const canvas = document.createElement("canvas");
+    canvas.width = video.videoWidth || 1280;
+    canvas.height = video.videoHeight || 720;
+    const context = canvas.getContext("2d");
+    if (!context) {
+      setCameraError("Cannot capture this frame.");
+      return null;
+    }
+
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob(resolve, "image/jpeg", 0.88);
+    });
+    if (!blob) {
+      setCameraError("Cannot create a snapshot image.");
+      return null;
+    }
+
+    return new File([blob], `webcam-${Date.now()}.jpg`, {
+      type: "image/jpeg",
+    });
+  }
+
+  async function captureFrame() {
+    setIsCapturing(true);
     try {
-      const canvas = document.createElement("canvas");
-      canvas.width = video.videoWidth || 1280;
-      canvas.height = video.videoHeight || 720;
-      const context = canvas.getContext("2d");
-      if (!context) {
-        setCameraError("Cannot capture this frame.");
-        return;
+      const file = await createFrameFile();
+      if (file) {
+        onCapture(file);
       }
-
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const blob = await new Promise<Blob | null>((resolve) => {
-        canvas.toBlob(resolve, "image/jpeg", 0.92);
-      });
-      if (!blob) {
-        setCameraError("Cannot create a snapshot image.");
-        return;
-      }
-
-      const file = new File([blob], `webcam-${Date.now()}.jpg`, {
-        type: "image/jpeg",
-      });
-      onCapture(file);
     } finally {
       setIsCapturing(false);
     }
@@ -119,12 +163,16 @@ export default function CameraView({ imagePath, onCapture }: CameraViewProps) {
         )}
         <button
           className="primary-button"
-          disabled={!isCameraOn || isCapturing}
+          disabled={!isCameraOn || isCapturing || isRealtimeActive}
           type="button"
           onClick={captureFrame}
         >
           {isCapturing ? "Capturing..." : "Capture frame"}
         </button>
+      </div>
+      <div className={isRealtimeActive ? "realtime-status active" : "realtime-status"}>
+        <span>{isRealtimeActive ? "Realtime scanning" : "Realtime idle"}</span>
+        <strong>{isSubmittingFrame ? "Sending frame..." : `${intervalMs / 1000}s interval`}</strong>
       </div>
       {cameraError ? <div className="alert error">{cameraError}</div> : null}
       <div>

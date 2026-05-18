@@ -714,7 +714,7 @@ Flow nay da duoc dua vao `scripts/smoke-deepface.ps1` va `worker/app/smoke/deepf
 
 ## 12. Webcam/Camera Capture Tren Frontend User
 
-Trang thai: da hoan thanh phan UI capture co ban. User UI co the bat webcam bang `navigator.mediaDevices.getUserMedia()`, preview video, chup frame thanh file JPEG, roi dung lai endpoint `POST /access/check-image` de upload snapshot va queue access job. File upload fallback van duoc giu cho trinh duyet/may khong dung webcam.
+Trang thai: da hoan thanh phan UI capture va realtime nhe. User UI co the bat webcam bang `navigator.mediaDevices.getUserMedia()`, preview video, chup frame thanh file JPEG, hoac bat mode realtime de gui frame moi 2 giay qua endpoint `POST /access/check-image`. File upload fallback van duoc giu cho trinh duyet/may khong dung webcam.
 
 ### Van De
 
@@ -758,6 +758,7 @@ Da them UI dung `navigator.mediaDevices.getUserMedia()`:
 [x] Convert canvas frame thanh Blob/File
 [x] Goi API upload/check-image qua form Check access hien co
 [x] Hien loading khi queue request dang gui
+[x] Mode realtime nhe gui frame dinh ky va chan request chong nhau
 [ ] Poll `/logs` hoac endpoint log detail de cap nhat ket qua sau khi worker xu ly
 [x] Fallback upload file neu trinh duyet khong co camera
 ```

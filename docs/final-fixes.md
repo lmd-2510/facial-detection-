@@ -163,6 +163,8 @@ Sau khi CI da push image len Docker Hub that:
 
 ## 2. Realtime Nhe Cho User UI
 
+Trang thai: da thuc hien trong user frontend. UI co mode `Manual` / `Realtime`, nut `Start realtime` / `Stop realtime`, gui frame webcam moi 2 giay qua `POST /access/check-image`, va bo qua frame moi khi request truoc chua xong.
+
 ### Muc tieu
 
 Khong lam streaming that. Lam realtime nhe theo kieu:

@@ -311,7 +311,28 @@ Kiem tra nhanh cau hinh Docker Hub trong repo:
 
 Sau khi CI da publish image that len Docker Hub, chay lai lenh tren va bo `-SkipRemote`.
 
-### 3.4. Cách nói ngắn khi demo
+### 3.4. Kiem tra realtime nhe tren User UI
+
+Muc tieu:
+
+- xac nhan User UI co the bat webcam;
+- xac nhan mode realtime gui frame dinh ky qua `POST /access/check-image`;
+- xac nhan UI khong spam request khi request truoc chua xong.
+
+Cach demo ngan:
+
+```text
+User UI -> Check access -> Realtime -> Start camera -> Start realtime
+```
+
+Ket qua mong doi:
+
+- trang thai hien `Realtime scanning`;
+- UI cap nhat `Last frame ...` sau moi frame thanh cong;
+- access logs/history refresh sau khi queue job;
+- co the dung `Stop realtime` de dung gui frame.
+
+### 3.5. Cách nói ngắn khi demo
 
 ```text
 Nhóm em dùng GitHub Actions để tự động chạy backend tests, worker tests, frontend builds và Docker builds. Khi push vào main, workflow sẽ tự publish 4 Docker images lên Docker Hub. Mức hiện tại là CI cộng với artifact publishing; chưa có auto deploy production.

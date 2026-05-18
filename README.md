@@ -68,7 +68,7 @@ Flow chinh cua MVP:
 7. Worker so sanh embedding cua snapshot voi embedding da dang ky.
 8. He thong ghi access log voi ket qua `granted`, `denied` hoac `error`.
 
-Hien tai project da hoan thanh phan code cot loi cua Giai Doan 7 va lop van hanh Giai Doan 8. Backend co API cot loi cho auth, employees, cameras, logs, upload anh len MinIO, va day duoc `embedding_jobs` / `access_jobs` vao Redis bang object key. Worker nghe Redis queue, tai anh tu MinIO ve temp file, dung DeepFace cho face detection, anti-spoofing/liveness, embedding va cosine matching, luu vector vao `face_embeddings`, va cap nhat `access_logs` thanh `granted`, `denied` hoac `error`. Admin/user frontend da co login, thao tac flow chinh theo API, hien thi loading/error/empty state co ban; user UI co the upload snapshot hoac chup frame tu webcam de check access.
+Hien tai project da hoan thanh phan code cot loi cua Giai Doan 7 va lop van hanh Giai Doan 8. Backend co API cot loi cho auth, employees, cameras, logs, upload anh len MinIO, va day duoc `embedding_jobs` / `access_jobs` vao Redis bang object key. Worker nghe Redis queue, tai anh tu MinIO ve temp file, dung DeepFace cho face detection, anti-spoofing/liveness, embedding va cosine matching, luu vector vao `face_embeddings`, va cap nhat `access_logs` thanh `granted`, `denied` hoac `error`. Admin/user frontend da co login, thao tac flow chinh theo API, hien thi loading/error/empty state co ban; user UI co the upload snapshot, chup frame webcam thu cong, hoac bat realtime nhe de gui frame dinh ky qua `/access/check-image`.
 
 ## Mapping Theo Yeu Cau De Bai
 
@@ -76,7 +76,7 @@ Bang nay giup doi chieu nhanh giua cac yeu cau he thong va phan hien co trong re
 
 | Yeu cau / thanh phan | Repo hien co | Bang chung nhanh |
 | --- | --- | --- |
-| Frontend user | `frontend/user` | User UI login, upload file/chup webcam snapshot, check access, xem history/profile |
+| Frontend user | `frontend/user` | User UI login, upload file/chup webcam snapshot, realtime nhe, check access, xem history/profile |
 | Frontend admin | `frontend/admin` | Admin UI login, quan ly employee, camera, user va access logs |
 | Backend API | `backend` | FastAPI routes cho auth, employees, cameras, users, logs, access, health, metrics |
 | Message queue | `redis` service, `backend/app/queues`, `worker/app/tasks` | Redis queues `embedding_jobs` va `access_jobs` |
@@ -84,7 +84,7 @@ Bang nay giup doi chieu nhanh giua cac yeu cau he thong va phan hien co trong re
 | Object storage | `minio` service, `backend/app/services/storage_service.py`, `worker/app/services/storage_service.py` | Upload employee face image va access snapshot vao MinIO/S3 flow |
 | Vector database | `qdrant` service, `worker/app/services/vector_store_service.py` | Worker upsert/search embedding bang Qdrant, PostgreSQL van la source of truth |
 | AI inference | `worker/app/ml`, `worker/app/services` | DeepFace detect face, optional anti-spoofing, embedding Facenet512, matching |
-| Frontend webcam/camera capture | `frontend/user/src/components/CameraView.tsx` | User UI chup frame JPEG bang browser webcam va gui qua `/access/check-image` |
+| Frontend webcam/camera capture | `frontend/user/src/components/CameraView.tsx` | User UI chup frame JPEG bang browser webcam hoac gui frame dinh ky trong mode realtime nhe qua `/access/check-image` |
 | Authentication / roles | `backend/app/core/deps.py`, `backend/app/api/admin.py`, `frontend/admin/src/pages/UserPage.tsx` | Bearer token, role `admin`/`user`, admin user management |
 | Reverse proxy / load balancer baseline | `nginx/nginx.conf` | Route `/`, `/admin/`, `/api/`, `/health`, `/docs`, `/metrics` |
 | Docker Compose | `docker-compose.yml` | Chay local multi-service bang `docker compose up --build` |

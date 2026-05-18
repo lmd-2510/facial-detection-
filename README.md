@@ -131,6 +131,15 @@ Chay test tong hop:
 
 Ghi chu test va smoke test Giai Doan 6 nam trong `docs/phase6-testing.md`.
 
+Chay smoke test DeepFace that trong worker container, chi start cac thanh phan lien quan:
+
+```powershell
+.\scripts\smoke-deepface.ps1
+```
+
+Smoke test nay dung PostgreSQL, Qdrant va worker container de tao embedding that, matching same-person/different-person va case khong co mat, khong start frontend/nginx/monitoring.
+Script cache DeepFace model weight trong Docker volume `deepface_weights`, nen lan dau co the cham hon cac lan sau.
+
 Backup toi thieu database va thu muc `data/`:
 
 ```powershell

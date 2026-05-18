@@ -114,9 +114,22 @@ $env:PYTHONPATH='worker'; python -m pytest worker\app\tests
 
 Unit test mock DeepFace de test nhanh contract cua detector, anti-spoof, embedder va service. Smoke test voi anh that nen chay qua Docker Compose sau khi rebuild worker de cai dependency va tai model weight.
 
+Chay smoke test DeepFace that trong worker container voi PostgreSQL va Qdrant toi thieu:
+
+```powershell
+.\scripts\smoke-deepface.ps1
+```
+
+Script nay khong start frontend, nginx, Prometheus, Alertmanager hay Grafana. No tao employee/camera smoke trong PostgreSQL, tao embedding that tu `data/smoke/employee_a_ref.jpg`, upsert Qdrant, roi kiem tra:
+
+```text
+employee_a_ok.jpg -> granted
+employee_b_ok.jpg -> denied
+no_face.jpg       -> error
+```
+
 ## Buoc Tiep Theo
 
-1. Chuan bi bo anh test nho gom cung nguoi/khac nguoi/anh loi/spoof neu co.
-2. Chay embedding job va access job that voi Docker Compose.
-3. Dieu chinh `DEEPFACE_MATCH_THRESHOLD` theo ket qua thuc te.
-4. Bo sung reindex Qdrant khi doi model hoac rebuild collection.
+1. Dieu chinh `DEEPFACE_MATCH_THRESHOLD` theo ket qua smoke test va bo anh that cua du an.
+2. Neu can liveness demo, chay smoke test rieng voi `DEEPFACE_ANTI_SPOOFING=true` va anh spoof phu hop.
+3. Bo sung reindex Qdrant khi doi model hoac rebuild collection.

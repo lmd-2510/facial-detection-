@@ -635,6 +635,8 @@ Frontend image khong con chay Vite dev server. Luu y `VITE_API_BASE_URL` va `VIT
 
 ## 11. Can Smoke Test DeepFace That Trong Container
 
+Trang thai: da hoan thanh phan script/checklist co the lap lai. Repo co `scripts/smoke-deepface.ps1` de chay smoke test DeepFace that trong worker container voi cac service toi thieu: PostgreSQL va Qdrant. Script khong dung frontend, nginx, monitoring hay full stack nen nhe hon nhieu so voi demo tong hop.
+
 ### Van De
 
 Unit test worker hien mock DeepFace. Dieu nay tot cho CI nhanh, nhung chua chung minh model weight tai duoc va DeepFace chay that trong container.
@@ -647,18 +649,48 @@ Unit test worker hien mock DeepFace. Dieu nay tot cho CI nhanh, nhung chua chung
 - `docs/ai-pipeline.md`
 - `docs/demo-checklist-bonus.md`
 
-### Nen Sua Nhu The Nao
+### Cach Chay Hien Tai
 
-Tao smoke test manual hoac script rieng:
+Chay smoke test container:
+
+```powershell
+.\scripts\smoke-deepface.ps1
+```
+
+Neu da build image moi gan day va chi muon chay lai nhanh:
+
+```powershell
+.\scripts\smoke-deepface.ps1 -SkipBuild
+```
+
+Script se:
 
 ```text
-1. Seed DB.
-2. Tao employee A.
-3. Queue embedding voi data/smoke/employee_a_ref.jpg.
-4. Check access voi employee_a_ok.jpg -> mong doi granted.
-5. Check access voi employee_b_ok.jpg -> mong doi denied.
-6. Check no_face.jpg -> mong doi error.
-7. Neu bat anti-spoof, test spoof_a.jpg.
+1. Build backend va worker image neu khong dung -SkipBuild.
+2. Start rieng database va qdrant.
+3. Khoi tao schema bang backend container.
+4. Chay `python -m app.smoke.deepface_smoke` trong worker container.
+5. Tao employee/camera smoke toi thieu trong PostgreSQL.
+6. Tao embedding that tu employee_a_ref.jpg bang DeepFace.
+7. Upsert embedding vao Qdrant.
+8. Kiem tra employee_a_ok.jpg -> granted.
+9. Kiem tra employee_b_ok.jpg -> denied.
+10. Kiem tra no_face.jpg -> error.
+```
+
+Script dung Qdrant collection rieng theo timestamp, vi du `deepface_smoke_20260516143000`, de tranh bi anh huong boi du lieu cu trong collection demo. Script cung mount named volume `deepface_weights` vao `/root/.deepface` de cache model weight DeepFace giua cac lan chay.
+
+### Nen Sua Nhu The Nao / Da Lam
+
+Da tao smoke test script rieng:
+
+```text
+[x] Tao employee A.
+[x] Tao embedding voi data/smoke/employee_a_ref.jpg.
+[x] Check access voi employee_a_ok.jpg -> mong doi granted.
+[x] Check access voi employee_b_ok.jpg -> mong doi denied.
+[x] Check no_face.jpg -> mong doi error.
+[ ] Neu bat anti-spoof, test spoof_a.jpg.
 ```
 
 Nen ghi lai score that de chinh:
@@ -678,7 +710,7 @@ employee_b_ok.jpg  -> denied, score khoang 0.393336
 no_face.jpg        -> error
 ```
 
-Can dua flow nay vao script hoac checklist chinh thuc de ca nhom lap lai duoc truoc demo.
+Flow nay da duoc dua vao `scripts/smoke-deepface.ps1` va `worker/app/smoke/deepface_smoke.py` de ca nhom lap lai duoc truoc demo.
 
 ## 12. Webcam/Camera Capture Tren Frontend User
 

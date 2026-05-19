@@ -63,8 +63,8 @@ export default function CameraView({
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: "user",
-          width: { ideal: 1080 },
-          height: { ideal: 1440 },
+          width: { ideal: 640 },
+          height: { ideal: 480 },
         },
         audio: false,
       });
@@ -98,8 +98,12 @@ export default function CameraView({
 
     setCameraError(null);
     const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth || 1280;
-    canvas.height = video.videoHeight || 720;
+    const sourceWidth = video.videoWidth || 640;
+    const sourceHeight = video.videoHeight || 480;
+    const maxWidth = 640;
+    const scale = Math.min(1, maxWidth / sourceWidth);
+    canvas.width = Math.round(sourceWidth * scale);
+    canvas.height = Math.round(sourceHeight * scale);
     const context = canvas.getContext("2d");
     if (!context) {
       setCameraError("Cannot capture this frame.");

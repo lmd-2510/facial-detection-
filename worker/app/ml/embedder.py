@@ -61,3 +61,34 @@ def create_face_embedding(
         model_name=model_name,
         dimensions=len(vector),
     )
+
+
+def create_face_embedding_from_face(
+    face_image: Any,
+    *,
+    source_image_path: str,
+    model_name: str = settings.deepface_model_name,
+    normalization: str = settings.deepface_normalization,
+) -> FaceEmbeddingResult:
+    if face_image is None:
+        raise ValueError("Face crop is empty.")
+
+    source_path = source_image_path.strip()
+    if not source_path:
+        raise ValueError("Image path is empty.")
+
+    represent_result = load_deepface().represent(
+        img_path=face_image,
+        model_name=model_name,
+        detector_backend="skip",
+        enforce_detection=False,
+        align=False,
+        normalization=normalization,
+    )
+    vector = _extract_embedding_vector(represent_result)
+    return FaceEmbeddingResult(
+        image_path=source_path,
+        vector=vector,
+        model_name=model_name,
+        dimensions=len(vector),
+    )

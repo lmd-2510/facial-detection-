@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.db.schema import employees, face_embeddings
 from app.ml.anti_spoof import require_live_face
 from app.ml.detector import require_face
-from app.ml.embedder import create_face_embedding
+from app.ml.embedder import create_face_embedding, create_face_embedding_from_face
 from app.services.storage_service import resolved_image_file
 from app.services.vector_store_service import upsert_face_embedding
 
@@ -38,9 +38,17 @@ def create_employee_embedding(
         raise EmployeeNotFoundError(f"Employee not found: {employee_id}")
 
     with resolved_image_file(image_path) as resolved_image:
-        require_face(resolved_image.normalized_path)
+        detection = require_face(resolved_image.normalized_path)
         require_live_face(resolved_image.normalized_path)
-        embedding = create_face_embedding(resolved_image.normalized_path)
+        face_image = getattr(detection, "face_image", None)
+        embedding = (
+            create_face_embedding_from_face(
+                face_image,
+                source_image_path=resolved_image.normalized_path,
+            )
+            if face_image is not None
+            else create_face_embedding(resolved_image.normalized_path)
+        )
 
     result = db.execute(
         insert(face_embeddings).values(

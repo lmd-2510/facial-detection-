@@ -1,7 +1,7 @@
 import pytest
 
 from app.ml import embedder
-from app.ml.embedder import create_face_embedding
+from app.ml.embedder import create_face_embedding, create_face_embedding_from_face
 
 
 class FakeDeepFace:
@@ -32,9 +32,32 @@ def test_create_face_embedding_calls_deepface_represent(monkeypatch):
         {
             "img_path": "/app/storage/uploads/employee_1.jpg",
             "model_name": "Facenet512",
-            "detector_backend": "opencv",
+            "detector_backend": "mtcnn",
             "enforce_detection": True,
             "align": True,
+            "normalization": "base",
+        }
+    ]
+
+
+def test_create_face_embedding_from_face_skips_second_detection(monkeypatch):
+    FakeDeepFace.calls = []
+    monkeypatch.setattr(embedder, "load_deepface", lambda: FakeDeepFace)
+
+    result = create_face_embedding_from_face(
+        object(),
+        source_image_path="/tmp/cropped-source.jpg",
+    )
+
+    assert result.image_path == "/tmp/cropped-source.jpg"
+    assert result.vector == [0.1, 0.2, 0.3]
+    assert FakeDeepFace.calls == [
+        {
+            "img_path": FakeDeepFace.calls[0]["img_path"],
+            "model_name": "Facenet512",
+            "detector_backend": "skip",
+            "enforce_detection": False,
+            "align": False,
             "normalization": "base",
         }
     ]

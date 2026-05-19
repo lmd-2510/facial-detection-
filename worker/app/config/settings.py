@@ -27,13 +27,18 @@ class Settings:
         "postgresql://deepface:deepface@localhost:5432/deepface_access",
     )
     deepface_model_name: str = getenv("DEEPFACE_MODEL_NAME", "Facenet512")
-    deepface_detector_backend: str = getenv("DEEPFACE_DETECTOR_BACKEND", "retinaface")
+    deepface_detector_backend: str = getenv("DEEPFACE_DETECTOR_BACKEND", "mtcnn")
+    deepface_access_detector_backend: str = getenv(
+        "DEEPFACE_ACCESS_DETECTOR_BACKEND",
+        getenv("DEEPFACE_DETECTOR_BACKEND", "mtcnn"),
+    )
     deepface_face_count_backend: str = getenv("DEEPFACE_FACE_COUNT_BACKEND", "")
     deepface_enforce_detection: bool = _get_bool("DEEPFACE_ENFORCE_DETECTION", True)
     deepface_align: bool = _get_bool("DEEPFACE_ALIGN", True)
     deepface_normalization: str = getenv("DEEPFACE_NORMALIZATION", "base")
     deepface_match_threshold: float = _get_float("DEEPFACE_MATCH_THRESHOLD", 0.70)
     deepface_anti_spoofing: bool = _get_bool("DEEPFACE_ANTI_SPOOFING", False)
+    deepface_warmup_on_start: bool = _get_bool("DEEPFACE_WARMUP_ON_START", True)
 
 
 settings = Settings()

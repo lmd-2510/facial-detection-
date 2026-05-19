@@ -276,8 +276,3 @@ Nhung phan nen uu tien sau khi da nam tong quan:
 
 
 
-
-
-
-
-load ảnh và test xem nó rât là nặng và lâu, có cách nào làm nhanh hơn repo hiện tại của tôi không

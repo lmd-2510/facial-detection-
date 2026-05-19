@@ -35,19 +35,12 @@ def test_detect_face_uses_deepface_extract_faces(monkeypatch):
     assert result.face_count == 1
     assert result.message == "Face detected by DeepFace."
     assert FakeDeepFace.calls == [
-        {
-            "img_path": "/app/storage/uploads/employee_1.jpg",
-            "detector_backend": "retinaface",
-            "enforce_detection": False,
-            "align": True,
-            "anti_spoofing": False,
-        },
-        {
-            "img_path": "/app/storage/uploads/employee_1.jpg",
-            "detector_backend": "opencv",
-            "enforce_detection": True,
-            "align": True,
-            "anti_spoofing": False,
+            {
+                "img_path": "/app/storage/uploads/employee_1.jpg",
+                "detector_backend": "mtcnn",
+                "enforce_detection": True,
+                "align": True,
+                "anti_spoofing": False,
         }
     ]
 
@@ -134,7 +127,10 @@ def test_detect_face_rejects_multiple_faces(monkeypatch):
 
     monkeypatch.setattr(detector, "load_deepface", lambda: MultipleFacesDeepFace)
 
-    result = detect_face("/app/storage/uploads/two_faces.jpg")
+    result = detect_face(
+        "/app/storage/uploads/two_faces.jpg",
+        face_count_backend="retinaface",
+    )
 
     assert result.detected is False
     assert result.face_count == 2
@@ -169,7 +165,10 @@ def test_detect_face_rejects_when_count_backend_finds_multiple_faces(monkeypatch
 
     monkeypatch.setattr(detector, "load_deepface", lambda: CountBackendDeepFace)
 
-    result = detect_face("/app/storage/uploads/two_faces.jpg")
+    result = detect_face(
+        "/app/storage/uploads/two_faces.jpg",
+        face_count_backend="retinaface",
+    )
 
     assert result.detected is False
     assert result.face_count == 2

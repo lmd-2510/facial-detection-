@@ -10,3 +10,16 @@ def load_deepface() -> Any:
         ) from exc
 
     return DeepFace
+
+
+def warm_up_deepface_model(*, model_name: str, normalization: str) -> None:
+    import numpy as np
+
+    load_deepface().represent(
+        img_path=np.zeros((160, 160, 3), dtype=np.uint8),
+        model_name=model_name,
+        detector_backend="skip",
+        enforce_detection=False,
+        align=False,
+        normalization=normalization,
+    )

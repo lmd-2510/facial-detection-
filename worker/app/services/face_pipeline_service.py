@@ -4,9 +4,10 @@ from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from app.db.schema import access_logs, employees, face_embeddings
+from app.config.settings import settings
 from app.ml.anti_spoof import require_live_face
 from app.ml.detector import require_face
-from app.ml.embedder import create_face_embedding
+from app.ml.embedder import create_face_embedding, create_face_embedding_from_face
 from app.ml.matcher import DEFAULT_MATCH_THRESHOLD, MatchResult
 from app.services.storage_service import resolved_image_file
 from app.services.vector_store_service import VectorSearchCandidate, search_face_embeddings
@@ -124,9 +125,20 @@ def process_access_check(
 
     try:
         with resolved_image_file(image_path) as resolved_image:
-            require_face(resolved_image.normalized_path)
+            detection = require_face(
+                resolved_image.normalized_path,
+                detector_backend=settings.deepface_access_detector_backend,
+            )
             require_live_face(resolved_image.normalized_path)
-            embedding = create_face_embedding(resolved_image.normalized_path)
+            face_image = getattr(detection, "face_image", None)
+            embedding = (
+                create_face_embedding_from_face(
+                    face_image,
+                    source_image_path=resolved_image.normalized_path,
+                )
+                if face_image is not None
+                else create_face_embedding(resolved_image.normalized_path)
+            )
             match = _find_best_active_qdrant_match(
                 db,
                 query_vector=embedding.vector,

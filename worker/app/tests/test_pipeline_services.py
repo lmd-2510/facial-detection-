@@ -13,6 +13,7 @@ from app.services.face_pipeline_service import (
     AccessLogNotFoundError,
     process_access_check,
 )
+from app.config.settings import settings
 from app.services.vector_store_service import VectorSearchCandidate
 
 
@@ -102,7 +103,7 @@ def deepface_embedding_stub(monkeypatch):
     )
     monkeypatch.setattr(
         "app.services.embedding_service.require_face",
-        lambda image_path: DetectionResult(),
+        lambda image_path, **_kwargs: DetectionResult(),
     )
     monkeypatch.setattr(
         "app.services.embedding_service.require_live_face",
@@ -110,7 +111,7 @@ def deepface_embedding_stub(monkeypatch):
     )
     monkeypatch.setattr(
         "app.services.face_pipeline_service.require_face",
-        lambda image_path: DetectionResult(),
+        lambda image_path, **_kwargs: DetectionResult(),
     )
     monkeypatch.setattr(
         "app.services.face_pipeline_service.require_live_face",
@@ -235,7 +236,7 @@ def test_process_access_check_denies_when_no_embeddings_exist(
 
 
 def test_process_access_check_marks_log_error_when_pipeline_fails(db_session, monkeypatch):
-    def raise_no_face(image_path: str):
+    def raise_no_face(image_path: str, **_kwargs):
         raise ValueError("No face detected by DeepFace.")
 
     monkeypatch.setattr(
@@ -262,6 +263,45 @@ def test_process_access_check_marks_log_error_when_pipeline_fails(db_session, mo
     assert row.employee_id is None
     assert row.score is None
     assert "No face detected" in row.message
+
+
+def test_process_access_check_uses_access_detector_backend(
+    db_session,
+    deepface_embedding_stub,
+    monkeypatch,
+):
+    detector_backends = []
+
+    class DetectionResult:
+        detected = True
+        face_image = object()
+
+    monkeypatch.setattr(
+        "app.services.face_pipeline_service.require_face",
+        lambda image_path, **kwargs: detector_backends.append(
+            kwargs.get("detector_backend")
+        )
+        or DetectionResult(),
+    )
+    seed_employee(db_session)
+    create_employee_embedding(
+        db_session,
+        employee_id=1,
+        image_path="/app/storage/uploads/employee_1.jpg",
+    )
+    seed_access_log(
+        db_session,
+        log_id=1,
+        image_path="/app/storage/uploads/employee_1.jpg",
+    )
+
+    process_access_check(
+        db_session,
+        log_id=1,
+        image_path="/app/storage/uploads/employee_1.jpg",
+    )
+
+    assert detector_backends == [settings.deepface_access_detector_backend]
 
 
 def test_process_access_check_raises_for_missing_log(db_session):

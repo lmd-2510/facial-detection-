@@ -66,7 +66,7 @@ def test_check_liveness_uses_deepface_anti_spoofing(monkeypatch):
     assert LiveDeepFace.calls == [
         {
             "img_path": "/app/storage/uploads/employee_1.jpg",
-            "detector_backend": "opencv",
+            "detector_backend": "mtcnn",
             "enforce_detection": True,
             "align": True,
             "anti_spoofing": True,

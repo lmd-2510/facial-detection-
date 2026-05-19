@@ -15,15 +15,22 @@ const emptyForm: UserPayload = {
   role: "user",
 };
 
+const PAGE_SIZE = 7;
+
 
 export default function UserPage({ currentUser, token }: UserPageProps) {
   const [users, setUsers] = useState<User[]>([]);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [form, setForm] = useState<UserPayload>(emptyForm);
+  const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const pageCount = Math.max(1, Math.ceil(users.length / PAGE_SIZE));
+  const normalizedPage = Math.min(currentPage, pageCount);
+  const pageStart = (normalizedPage - 1) * PAGE_SIZE;
+  const visibleUsers = users.slice(pageStart, pageStart + PAGE_SIZE);
 
   async function loadUsers() {
     setIsLoading(true);
@@ -31,7 +38,7 @@ export default function UserPage({ currentUser, token }: UserPageProps) {
     try {
       setUsers(await listUsers(token));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Cannot load users");
+      setError(err instanceof Error ? err.message : "Cannot load roles");
     } finally {
       setIsLoading(false);
     }
@@ -40,6 +47,10 @@ export default function UserPage({ currentUser, token }: UserPageProps) {
   useEffect(() => {
     void loadUsers();
   }, [token]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [users]);
 
   function startEdit(user: User) {
     setEditingUser(user);
@@ -72,19 +83,19 @@ export default function UserPage({ currentUser, token }: UserPageProps) {
           payload.password = form.password;
         }
         await updateUser(token, editingUser.id, payload);
-        setMessage("User updated.");
+        setMessage("Role updated.");
       } else {
         await createUser(token, {
           username: form.username.trim(),
           password: form.password,
           role: form.role,
         });
-        setMessage("User created.");
+        setMessage("Role created.");
       }
       cancelEdit();
       await loadUsers();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Cannot save user");
+      setError(err instanceof Error ? err.message : "Cannot save role");
     } finally {
       setIsSaving(false);
     }
@@ -95,13 +106,13 @@ export default function UserPage({ currentUser, token }: UserPageProps) {
     setMessage(null);
     try {
       await deleteUser(token, userId);
-      setMessage("User deleted.");
+      setMessage("Role deleted.");
       if (editingUser?.id === userId) {
         cancelEdit();
       }
       await loadUsers();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Cannot delete user");
+      setError(err instanceof Error ? err.message : "Cannot delete role");
     }
   }
 
@@ -109,8 +120,8 @@ export default function UserPage({ currentUser, token }: UserPageProps) {
     <section className="page-stack">
       <div className="page-header">
         <div>
-          <p className="eyebrow">Accounts</p>
-          <h2>User management</h2>
+          <p className="eyebrow">Roles</p>
+          <h2>Role management</h2>
         </div>
         <button className="secondary-button" onClick={() => void loadUsers()}>
           Refresh
@@ -125,7 +136,7 @@ export default function UserPage({ currentUser, token }: UserPageProps) {
           <div className="panel-heading">
             <div>
               <p className="eyebrow">{editingUser ? "Edit" : "Create"}</p>
-              <h2>{editingUser ? editingUser.username : "New user"}</h2>
+              <h2>{editingUser ? editingUser.username : "New Role"}</h2>
             </div>
             {editingUser ? (
               <button className="ghost-button" type="button" onClick={cancelEdit}>
@@ -180,51 +191,82 @@ export default function UserPage({ currentUser, token }: UserPageProps) {
           </label>
 
           <button className="primary-button" disabled={isSaving} type="submit">
-            {isSaving ? "Saving..." : editingUser ? "Update user" : "Create user"}
+            {isSaving ? "Saving..." : editingUser ? "Update role" : "Create role"}
           </button>
         </form>
 
         <div className="panel table-panel">
           {isLoading ? (
-            <div className="state-panel">Loading users...</div>
+            <div className="state-panel">Loading roles...</div>
           ) : users.length === 0 ? (
-            <div className="state-panel">No users yet.</div>
+            <div className="state-panel">No roles yet.</div>
           ) : (
-            <table>
-              <thead>
-                <tr>
-                  <th>Username</th>
-                  <th>Role</th>
-                  <th>Created</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((user) => (
-                  <tr key={user.id}>
-                    <td>{user.username}</td>
-                    <td>
-                      <span className={`status-pill ${user.role}`}>
-                        {user.role}
-                      </span>
-                    </td>
-                    <td>{new Date(user.created_at).toLocaleString()}</td>
-                    <td className="row-actions">
-                      <button className="small-button" onClick={() => startEdit(user)}>
-                        Edit
-                      </button>
-                      <button
-                        className="danger-button"
-                        disabled={user.id === currentUser.id}
-                        onClick={() => void handleDelete(user.id)}
-                      >
-                        Delete
-                      </button>
-                    </td>
+            <>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Username</th>
+                    <th>Role</th>
+                    <th>Created</th>
+                    <th>Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {visibleUsers.map((user) => (
+                    <tr key={user.id}>
+                      <td>{user.username}</td>
+                      <td>
+                        <span className={`status-pill ${user.role}`}>
+                          {user.role}
+                        </span>
+                      </td>
+                      <td>{new Date(user.created_at).toLocaleString()}</td>
+                      <td className="row-actions">
+                        <button className="small-button" onClick={() => startEdit(user)}>
+                          Edit
+                        </button>
+                        <button
+                          className="danger-button"
+                          disabled={user.id === currentUser.id}
+                          onClick={() => void handleDelete(user.id)}
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="pagination-bar">
+                <span>
+                  Showing {pageStart + 1}-{Math.min(pageStart + PAGE_SIZE, users.length)}{" "}
+                  of {users.length}
+                </span>
+                <div className="pagination-actions">
+                  <button
+                    className="secondary-button compact-button"
+                    disabled={normalizedPage === 1}
+                    onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                    type="button"
+                  >
+                    Previous
+                  </button>
+                  <strong>
+                    {normalizedPage} / {pageCount}
+                  </strong>
+                  <button
+                    className="secondary-button compact-button"
+                    disabled={normalizedPage === pageCount}
+                    onClick={() =>
+                      setCurrentPage((page) => Math.min(pageCount, page + 1))
+                    }
+                    type="button"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            </>
           )}
         </div>
       </div>

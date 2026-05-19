@@ -20,7 +20,7 @@ const items: Array<{ id: AdminView; label: string }> = [
   { id: "employees", label: "Employees" },
   { id: "cameras", label: "Cameras" },
   { id: "logs", label: "Access logs" },
-  { id: "users", label: "Users" },
+  { id: "users", label: "Roles" },
   { id: "settings", label: "Settings" },
 ];
 

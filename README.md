@@ -281,6 +281,6 @@ Nhung phan nen uu tien sau khi da nam tong quan:
 
 đọc cho tôi tổng quan repo, chú tâm vào phần docs và readme để nhanh chóng hiểu repo, đừng đọc từng file một vì rất lâu và nặng, đọc các ý chính và hiểu các folder nhỏ thôi cũng là đủ rồi, sau đó quay lại đợi tôi giao việc
 
-ở phần access logs, làm cho tôi thành cái hiện ra UI trước sau đi, vì nó dài quá thành ra không đẹp cho UI, làm tương tự history của UI user, sửa cho tôi tương tự cái list cả ở users của admin UI phần danh sách đấy nhé
+ở phần access logs, làm cho tôi thành cái hiện ra UI list trước sau đi, vì nó dài quá thành ra không đẹp cho UI, làm tương tự history của UI user, sau đó sửa cho tôi tương tự cái list ở users của admin UI phần danh sách đấy nhé
 
 tôi nghĩ nên đổi tên users trogn admin UI thành role sẽ hợp lí hơn, vì nó tạo acc cho cả admin và user 

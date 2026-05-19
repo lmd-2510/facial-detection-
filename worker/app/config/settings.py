@@ -27,8 +27,8 @@ class Settings:
         "postgresql://deepface:deepface@localhost:5432/deepface_access",
     )
     deepface_model_name: str = getenv("DEEPFACE_MODEL_NAME", "Facenet512")
-    deepface_detector_backend: str = getenv("DEEPFACE_DETECTOR_BACKEND", "opencv")
-    deepface_face_count_backend: str = getenv("DEEPFACE_FACE_COUNT_BACKEND", "retinaface")
+    deepface_detector_backend: str = getenv("DEEPFACE_DETECTOR_BACKEND", "retinaface")
+    deepface_face_count_backend: str = getenv("DEEPFACE_FACE_COUNT_BACKEND", "")
     deepface_enforce_detection: bool = _get_bool("DEEPFACE_ENFORCE_DETECTION", True)
     deepface_align: bool = _get_bool("DEEPFACE_ALIGN", True)
     deepface_normalization: str = getenv("DEEPFACE_NORMALIZATION", "base")

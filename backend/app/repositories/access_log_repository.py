@@ -9,7 +9,7 @@ def list_access_logs(db: Session) -> list[AccessLog]:
         db.scalars(
             select(AccessLog)
             .options(selectinload(AccessLog.employee))
-            .order_by(AccessLog.created_at.desc())
+            .order_by(AccessLog.created_at.desc(), AccessLog.id.desc())
         )
     )
 

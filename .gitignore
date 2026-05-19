@@ -16,3 +16,4 @@ backup/*
 !backup/minio/.gitkeep
 !backup/qdrant/
 !backup/qdrant/.gitkeep
+.env

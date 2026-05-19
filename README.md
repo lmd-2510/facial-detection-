@@ -279,10 +279,8 @@ Nhung phan nen uu tien sau khi da nam tong quan:
 - Hoan thien kenh gui alert ra email/Slack neu can.
 
 
+đọc cho tôi tổng quan repo, chú tâm vào phần docs và readme để nhanh chóng hiểu repo, đừng đọc từng file một vì rất lâu và nặng, đọc các ý chính và hiểu các folder nhỏ thôi cũng là đủ rồi, sau đó quay lại đợi tôi giao việc
 
-ở phần cameras UI của admin, tôi nghĩ nên xóa hết phần active camera đi, chỉ để phần coming later thôi, tại vì cái active kia của tôi cũng chưa đúng, xóa hết đi để ở phần coming later thôi 
+ở phần access logs, làm cho tôi thành cái hiện ra UI trước sau đi, vì nó dài quá thành ra không đẹp cho UI, làm tương tự history của UI user, sửa cho tôi tương tự cái list cả ở users của admin UI phần danh sách đấy nhé
 
-ở phần employees của admin UI, tôi muốn bạn chia ra hai nhánh, một nhánh để tạo employees với các chức năng add và gộp cả phần lưu ảnh chứng minh (embedding image) và thay tên là nộp ảnh gì đó đi, còn phần còn lại là danh sách employees, nếu dài quá lại có thể dùng cái hiện trước sau để đảm bảo UI không bị dài quá lố
-
-ở phần access logs, làm cho tôi thành cái hiện ra UI trước sau đi, vì nó dài quá thành ra không đẹp cho UI, làm tương tự history của UI user, sửa cho tôi tương tự cả ở user và employees của admin, phần danh sách đấy nhé 
-
+tôi nghĩ nên đổi tên users trogn admin UI thành role sẽ hợp lí hơn, vì nó tạo acc cho cả admin và user 

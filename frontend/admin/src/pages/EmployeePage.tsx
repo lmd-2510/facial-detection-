@@ -16,16 +16,20 @@ interface EmployeePageProps {
   onEmployeesChange: (employees: Employee[]) => void;
 }
 
+type EmployeeView = "form" | "list";
+
 export default function EmployeePage({
   token,
   onEmployeesChange,
 }: EmployeePageProps) {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
+  const [employeeView, setEmployeeView] = useState<EmployeeView>("form");
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const activeEmployees = employees.filter((employee) => employee.status === "active");
 
   async function loadEmployees() {
     setIsLoading(true);
@@ -45,20 +49,38 @@ export default function EmployeePage({
     void loadEmployees();
   }, [token]);
 
-  async function handleSubmit(payload: EmployeePayload) {
+  async function queueFaceImage(employeeId: number, file: File) {
+    const upload = await uploadEmployeeFaceImage(token, employeeId, file);
+    if (upload.job_id) {
+      return `Face photo submitted and embedding job queued: ${upload.job_id}`;
+    }
+
+    const job = await queueEmbeddingJob(token, employeeId, upload.object_key);
+    return `Face photo submitted and embedding job queued: ${job.job_id}`;
+  }
+
+  async function handleSubmit(payload: EmployeePayload, faceImage: File | null) {
     setIsSaving(true);
     setError(null);
     setMessage(null);
     try {
+      let savedEmployee: Employee;
       if (editingEmployee) {
-        await updateEmployee(token, editingEmployee.id, payload);
-        setMessage("Employee updated.");
+        savedEmployee = await updateEmployee(token, editingEmployee.id, payload);
       } else {
-        await createEmployee(token, payload);
-        setMessage("Employee created.");
+        savedEmployee = await createEmployee(token, payload);
       }
+
+      const imageMessage = faceImage
+        ? await queueFaceImage(savedEmployee.id, faceImage)
+        : null;
+      setMessage(
+        imageMessage ??
+          (editingEmployee ? "Employee updated." : "Employee created."),
+      );
       setEditingEmployee(null);
       await loadEmployees();
+      setEmployeeView("list");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Cannot save employee");
     } finally {
@@ -71,27 +93,16 @@ export default function EmployeePage({
     setMessage(null);
     try {
       await deleteEmployee(token, employeeId);
-      setMessage("Employee disabled.");
+      setMessage("Employee deleted.");
       await loadEmployees();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Cannot disable employee");
+      setError(err instanceof Error ? err.message : "Cannot delete employee");
     }
   }
 
-  async function handleQueueEmbedding(employeeId: number, file: File) {
-    setError(null);
-    setMessage(null);
-    try {
-      const upload = await uploadEmployeeFaceImage(token, employeeId, file);
-      if (upload.job_id) {
-        setMessage(`Image uploaded and embedding job queued: ${upload.job_id}`);
-      } else {
-        const job = await queueEmbeddingJob(token, employeeId, upload.object_key);
-        setMessage(`Embedding job queued: ${job.job_id}`);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Cannot queue embedding job");
-    }
+  function handleEdit(employee: Employee) {
+    setEditingEmployee(employee);
+    setEmployeeView("form");
   }
 
   return (
@@ -106,24 +117,47 @@ export default function EmployeePage({
         </button>
       </div>
 
+      <div className="section-tabs" aria-label="Employee management sections">
+        <button
+          className={employeeView === "form" ? "active" : ""}
+          onClick={() => {
+            setEmployeeView("form");
+            setEditingEmployee(null);
+          }}
+          type="button"
+        >
+          Add employee
+        </button>
+        <button
+          className={employeeView === "list" ? "active" : ""}
+          onClick={() => setEmployeeView("list")}
+          type="button"
+        >
+          Employee list
+        </button>
+      </div>
+
       {error ? <div className="alert error">{error}</div> : null}
       {message ? <div className="alert success">{message}</div> : null}
 
-      <div className="split-layout">
+      {employeeView === "form" ? (
         <EmployeeForm
           employee={editingEmployee}
           isSaving={isSaving}
-          onCancelEdit={() => setEditingEmployee(null)}
+          onCancelEdit={() => {
+            setEditingEmployee(null);
+            setEmployeeView("list");
+          }}
           onSubmit={handleSubmit}
         />
+      ) : (
         <EmployeeTable
-          employees={employees}
+          employees={activeEmployees}
           isLoading={isLoading}
           onDelete={handleDelete}
-          onEdit={setEditingEmployee}
-          onQueueEmbedding={handleQueueEmbedding}
+          onEdit={handleEdit}
         />
-      </div>
+      )}
     </section>
   );
 }

@@ -1,4 +1,4 @@
-import { FormEvent, useState } from "react";
+import { useEffect, useState } from "react";
 import type { Employee } from "../types/employee";
 
 interface EmployeeTableProps {
@@ -6,30 +6,25 @@ interface EmployeeTableProps {
   isLoading: boolean;
   onEdit: (employee: Employee) => void;
   onDelete: (employeeId: number) => Promise<void>;
-  onQueueEmbedding: (employeeId: number, file: File) => Promise<void>;
 }
+
+const PAGE_SIZE = 5;
 
 export default function EmployeeTable({
   employees,
   isLoading,
   onEdit,
   onDelete,
-  onQueueEmbedding,
 }: EmployeeTableProps) {
-  const [imageFiles, setImageFiles] = useState<Record<number, File | null>>({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageCount = Math.max(1, Math.ceil(employees.length / PAGE_SIZE));
+  const normalizedPage = Math.min(currentPage, pageCount);
+  const pageStart = (normalizedPage - 1) * PAGE_SIZE;
+  const visibleEmployees = employees.slice(pageStart, pageStart + PAGE_SIZE);
 
-  async function handleEmbeddingSubmit(
-    event: FormEvent<HTMLFormElement>,
-    employeeId: number,
-  ) {
-    event.preventDefault();
-    const imageFile = imageFiles[employeeId];
-    if (!imageFile) {
-      return;
-    }
-    await onQueueEmbedding(employeeId, imageFile);
-    setImageFiles({ ...imageFiles, [employeeId]: null });
-  }
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [employees]);
 
   if (isLoading) {
     return <div className="panel state-panel">Loading employees...</div>;
@@ -49,12 +44,11 @@ export default function EmployeeTable({
             <th>Department</th>
             <th>Status</th>
             <th>Embedding</th>
-            <th>Embedding image</th>
-            <th>Actions</th>
+            <th className="actions-header">Actions</th>
           </tr>
         </thead>
         <tbody>
-          {employees.map((employee) => (
+          {visibleEmployees.map((employee) => (
             <tr key={employee.id}>
               <td>{employee.code}</td>
               <td>{employee.name}</td>
@@ -72,41 +66,50 @@ export default function EmployeeTable({
                   <p className="cell-note">{employee.embedding_error}</p>
                 ) : null}
               </td>
-              <td>
-                <form
-                  className="inline-form"
-                  onSubmit={(event) => handleEmbeddingSubmit(event, employee.id)}
-                >
-                  <input
-                    accept="image/*"
-                    type="file"
-                    onChange={(event) =>
-                      setImageFiles({
-                        ...imageFiles,
-                        [employee.id]: event.target.files?.[0] ?? null,
-                      })
-                    }
-                  />
-                  <button className="small-button" type="submit">
-                    Queue
+              <td className="actions-cell">
+                <div className="row-actions">
+                  <button className="small-button" onClick={() => onEdit(employee)}>
+                    Edit
                   </button>
-                </form>
-              </td>
-              <td className="row-actions">
-                <button className="small-button" onClick={() => onEdit(employee)}>
-                  Edit
-                </button>
-                <button
-                  className="danger-button"
-                  onClick={() => void onDelete(employee.id)}
-                >
-                  Disable
-                </button>
+                  <button
+                    className="danger-button"
+                    onClick={() => void onDelete(employee.id)}
+                  >
+                    Delete
+                  </button>
+                </div>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+      <div className="pagination-bar">
+        <span>
+          Showing {pageStart + 1}-{Math.min(pageStart + PAGE_SIZE, employees.length)} of{" "}
+          {employees.length}
+        </span>
+        <div className="pagination-actions">
+          <button
+            className="secondary-button compact-button"
+            disabled={normalizedPage === 1}
+            onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+            type="button"
+          >
+            Previous
+          </button>
+          <strong>
+            {normalizedPage} / {pageCount}
+          </strong>
+          <button
+            className="secondary-button compact-button"
+            disabled={normalizedPage === pageCount}
+            onClick={() => setCurrentPage((page) => Math.min(pageCount, page + 1))}
+            type="button"
+          >
+            Next
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

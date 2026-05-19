@@ -220,6 +220,26 @@ th {
   gap: 10px;
 }
 
+.section-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.section-tabs button {
+  border: 0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: var(--accent-strong);
+  background: #dcefe7;
+  font-weight: 800;
+}
+
+.section-tabs button.active {
+  color: white;
+  background: var(--accent);
+}
+
 .metric-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -253,6 +273,11 @@ th {
   align-items: start;
 }
 
+.camera-coming-layout {
+  display: grid;
+  width: min(620px, 100%);
+}
+
 .panel {
   padding: 20px;
 }
@@ -264,6 +289,27 @@ th {
 
 .table-panel {
   overflow-x: auto;
+}
+
+.pagination-bar {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  font-size: 13px;
+  font-weight: 800;
+  justify-content: space-between;
+  padding: 16px 6px 0;
+}
+
+.pagination-actions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.compact-button {
+  min-width: 92px;
+  padding: 10px 14px;
 }
 
 .camera-list-summary {
@@ -309,8 +355,16 @@ th {
 }
 
 .row-actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(82px, auto));
   gap: 8px;
+  justify-content: end;
+}
+
+.actions-header,
+.actions-cell {
+  text-align: right;
+  width: 190px;
 }
 
 .status-pill {
@@ -470,12 +524,34 @@ th {
   .panel-heading,
   .row-actions,
   .page-header-actions,
-  .camera-list-summary {
+  .camera-list-summary,
+  .section-tabs {
     align-items: stretch;
     flex-direction: column;
   }
 
+  .row-actions {
+    grid-template-columns: 1fr;
+    justify-content: stretch;
+  }
+
+  .actions-header,
+  .actions-cell {
+    text-align: left;
+    width: auto;
+  }
+
   .inline-form {
     grid-template-columns: 1fr;
+  }
+
+  .pagination-bar {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .pagination-actions {
+    justify-content: space-between;
   }
 }

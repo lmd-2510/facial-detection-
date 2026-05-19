@@ -28,5 +28,8 @@ class Settings:
     access_token_expire_minutes: int = int(
         getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "1440")
     )
+    max_processing_access_logs_per_camera: int = int(
+        getenv("MAX_PROCESSING_ACCESS_LOGS_PER_CAMERA", "3")
+    )
 
 settings = Settings()

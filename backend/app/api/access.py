@@ -6,7 +6,11 @@ from app.schemas.access import (
     AccessCheckResponse,
     AccessSnapshotUploadResponse,
 )
-from app.services.access_service import CameraNotFoundError, check_access
+from app.services.access_service import (
+    AccessQueueFullError,
+    CameraNotFoundError,
+    check_access,
+)
 from app.services.storage_service import UnsupportedImageTypeError, upload_fastapi_image
 
 
@@ -29,6 +33,11 @@ def check_access_record(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Camera not found",
+        ) from exc
+    except AccessQueueFullError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=str(exc),
         ) from exc
 
     return AccessCheckResponse(
@@ -100,6 +109,11 @@ def check_access_image(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Camera not found",
+        ) from exc
+    except AccessQueueFullError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=str(exc),
         ) from exc
     except UnsupportedImageTypeError as exc:
         raise HTTPException(

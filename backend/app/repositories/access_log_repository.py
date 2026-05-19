@@ -1,4 +1,4 @@
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session, selectinload
 
 from app.models.access_log import AccessLog
@@ -36,3 +36,19 @@ def create_access_log(
     db.commit()
     db.refresh(access_log)
     return access_log
+
+
+def count_processing_access_logs(
+    db: Session,
+    *,
+    camera_id: int,
+) -> int:
+    return int(
+        db.scalar(
+            select(func.count(AccessLog.id)).where(
+                AccessLog.camera_id == camera_id,
+                AccessLog.status == "processing",
+            )
+        )
+        or 0
+    )

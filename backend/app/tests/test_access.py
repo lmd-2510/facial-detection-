@@ -9,6 +9,7 @@ from app.core.security import hash_password
 from app.db.base import Base
 from app.db.session import get_db
 from app.main import app
+from app.models.access_log import AccessLog
 from app.models.camera import Camera
 from app.models.user import User
 
@@ -288,3 +289,45 @@ def test_user_role_can_check_access_image(client, user_headers, monkeypatch):
 
     assert response.status_code == 202
     assert response.json()["job_id"] == "user-access-job-123"
+
+
+def test_access_check_returns_429_when_processing_queue_is_full(client, auth_headers):
+    db = next(app.dependency_overrides[get_db]())
+    try:
+        db.add_all(
+            [
+                AccessLog(
+                    camera_id=1,
+                    status="processing",
+                    image_path="access-snapshots/pending-1.jpg",
+                    message="pending",
+                ),
+                AccessLog(
+                    camera_id=1,
+                    status="processing",
+                    image_path="access-snapshots/pending-2.jpg",
+                    message="pending",
+                ),
+                AccessLog(
+                    camera_id=1,
+                    status="processing",
+                    image_path="access-snapshots/pending-3.jpg",
+                    message="pending",
+                ),
+            ]
+        )
+        db.commit()
+    finally:
+        db.close()
+
+    response = client.post(
+        "/access/check",
+        headers=auth_headers,
+        json={
+            "camera_id": 1,
+            "image_path": "/app/storage/uploads/snapshot.jpg",
+        },
+    )
+
+    assert response.status_code == 429
+    assert "too many frames waiting to be processed" in response.json()["detail"]

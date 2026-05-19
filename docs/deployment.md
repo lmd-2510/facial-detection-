@@ -7,16 +7,16 @@ Tai lieu nay ghi cach chay DeepFace Access Control sau Giai Doan 8.
 Chay stack local:
 
 ```powershell
-.\scripts\dev.ps1 -Build
+docker compose up --build -d
 ```
 
-Seed tai khoan demo:
+Compose tu chay service `db-seed` mot lan de tao bang, seed tai khoan demo va du lieu mau toi thieu. Neu can chay seed lai thu cong:
 
 ```powershell
-.\scripts\seed.ps1
+docker compose run --rm db-seed
 ```
 
-Hoac vua start vua seed:
+Hoac dung script dev neu muon luong PowerShell cu:
 
 ```powershell
 .\scripts\dev.ps1 -Build -Seed

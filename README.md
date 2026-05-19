@@ -116,24 +116,20 @@ Nen doc project theo thu tu nay de tranh bi lac:
 ## Quick Start Cho Giang Vien
 
 Day la luong ngan nhat de clone repo va chay lai he thong tren may co Docker Desktop.
+Mac dinh `docker-compose.yml` da co gia tri fallback cho bien moi truong dev, tu tao bang database va seed du lieu demo toi thieu.
 
-1. Tao file `.env` tu mau:
+1. Start stack:
+
+```powershell
+docker compose up --build -d
+```
+
+Lenh nay se build/start toan bo service va chay service `db-seed` mot lan de tao bang, seed tai khoan demo, camera/employee/log mau.
+
+2. Neu muon tuy bien port, secret hoac tai khoan seed, tao file `.env` tu mau truoc khi start:
 
 ```powershell
 Copy-Item .env.example .env
-```
-
-2. Start stack va seed tai khoan demo:
-
-```powershell
-.\scripts\dev.ps1 -Build -Seed
-```
-
-Neu khong dung PowerShell script, co the chay tuong duong:
-
-```powershell
-docker compose up -d --build
-docker compose run --rm backend python -m app.db.seed
 ```
 
 3. Kiem tra baseline khi stack da chay:
@@ -166,7 +162,7 @@ docker compose run --rm backend python -m app.db.seed
 
 Ghi chu: lan dau worker DeepFace co the mat thoi gian tai model weight. Smoke script co cache weight trong Docker volume `deepface_weights`.
 
-Neu may da co tien trinh dung port `8080`, doi cong nginx trong `.env`, vi du `NGINX_PORT=8081`, roi chay lai `.\scripts\dev.ps1 -Build -Seed`.
+Neu may da co tien trinh dung port `8080`, doi cong nginx trong `.env`, vi du `NGINX_PORT=8081`, roi chay lai `docker compose up --build -d`.
 
 ## Chay Local
 
@@ -175,7 +171,7 @@ Yeu cau may co Docker va Docker Compose.
 Chay toan bo he thong:
 
 ```powershell
-docker compose up --build
+docker compose up --build -d
 ```
 
 Hoac dung script dev:
@@ -186,27 +182,27 @@ Hoac dung script dev:
 
 Sau khi chay, co the mo:
 
+- User UI: http://localhost:5173
+- Admin UI: http://localhost:5174/admin/
 - Backend health: http://localhost:8000/health
-- Backend API docs: http://localhost:8000/docs
-- User app: http://localhost:5173
-- Admin app: http://localhost:5174
-- Nginx entrypoint: http://localhost:8080
+- Backend docs: http://localhost:8000/docs
+- Nginx gateway: http://localhost:8080
+- MinIO console: http://localhost:9001
 - Prometheus: http://localhost:9090
 - Alertmanager: http://localhost:9093
 - Grafana: http://localhost:3000
-- MinIO console: http://localhost:9001
 - Qdrant HTTP: http://localhost:6333
 
-Tao bang va seed tai khoan demo:
+Service `db-seed` tu dong tao bang va seed du lieu demo khi chay `docker compose up`. Tai khoan demo mac dinh:
+
+- Admin: `admin` / `admin123`
+- User: `user` / `user123`
+
+Neu can chay seed lai thu cong:
 
 ```powershell
-docker compose run --rm backend python -m app.db.seed
+docker compose run --rm db-seed
 ```
-
-Tai khoan demo mac dinh:
-
-- `admin` / `admin123`
-- `user` / `user123`
 
 Admin UI co trang Users de tao tai khoan demo moi, doi role `admin`/`user`, reset password va xoa user khac.
 
@@ -266,7 +262,7 @@ Backup toi thieu database va thu muc `data/`:
 - Schema va mo ta bang du lieu nen doc trong `docs/db-schema.md`.
 - Logic model/database cua backend nam trong `backend/app/models/` va `backend/app/db/`.
 - Worker giu schema/doc DB toi thieu rieng phuc vu xu ly job trong `worker/app/db/schema.py`.
-- Seed tai khoan demo hien duoc thuc hien qua `backend/app/db/seed.py` va `scripts/seed.ps1`.
+- Seed tai khoan va du lieu demo toi thieu duoc thuc hien qua `backend/app/db/seed.py`; Docker Compose tu chay service `db-seed` khi start stack.
 
 ## Huong Phat Trien Tiep Theo
 
@@ -277,10 +273,3 @@ Nhung phan nen uu tien sau khi da nam tong quan:
 - Smoke test DeepFace voi bo anh that nho, roi tinh chinh `DEEPFACE_MATCH_THRESHOLD`.
 - Bo sung reindex Qdrant khi doi model hoac can rebuild collection.
 - Hoan thien kenh gui alert ra email/Slack neu can.
-
-
-đọc cho tôi tổng quan repo, chú tâm vào phần docs và readme để nhanh chóng hiểu repo, đừng đọc từng file một vì rất lâu và nặng, đọc các ý chính và hiểu các folder nhỏ thôi cũng là đủ rồi, sau đó quay lại đợi tôi giao việc
-
-ở phần access logs, làm cho tôi thành cái hiện ra UI list trước sau đi, vì nó dài quá thành ra không đẹp cho UI, làm tương tự history của UI user, sau đó sửa cho tôi tương tự cái list ở users của admin UI phần danh sách đấy nhé
-
-tôi nghĩ nên đổi tên users trogn admin UI thành role sẽ hợp lí hơn, vì nó tạo acc cho cả admin và user 

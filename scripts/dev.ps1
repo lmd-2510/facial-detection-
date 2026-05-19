@@ -33,5 +33,5 @@ Write-Host "- Grafana:        http://localhost:$GrafanaPort"
 if ($Seed) {
     Write-Host ""
     Write-Host "Seeding demo users..." -ForegroundColor Cyan
-    docker compose run --rm backend python -m app.db.seed
+    docker compose run --rm db-seed
 }

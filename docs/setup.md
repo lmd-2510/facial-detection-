@@ -16,10 +16,11 @@ Trong may dev hien tai, co the dung conda env `ltxldl` cho Python/Node/Helm.
 Luong nhanh cho nguoi moi clone repo:
 
 ```powershell
-Copy-Item .env.example .env
-.\scripts\dev.ps1 -Build -Seed
+docker compose up --build -d
 .\scripts\demo-baseline-check.ps1
 ```
+
+Lenh `docker compose up --build -d` da tu chay service `db-seed` mot lan de tao bang, seed tai khoan demo va du lieu mau toi thieu. Chi can copy `.env.example` thanh `.env` neu muon doi port, secret hoac thong tin seed.
 
 Tai khoan demo mac dinh:
 
@@ -35,7 +36,7 @@ Neu muon chay tung buoc:
 Seed tai khoan demo:
 
 ```powershell
-.\scripts\seed.ps1
+docker compose run --rm db-seed
 ```
 
 Mo nhanh:

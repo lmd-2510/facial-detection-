@@ -25,6 +25,24 @@ services:
       timeout: 5s
       retries: 5
 
+  db-seed:
+    image: ${DOCKERHUB_NAMESPACE:-your-dockerhub-username}/deepface-backend:${IMAGE_TAG:-latest}
+    build:
+      context: ./backend
+    environment:
+      APP_ENV: ${APP_ENV:-dev}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://deepface:deepface@database:5432/deepface_access}
+      SEED_ADMIN_USERNAME: ${SEED_ADMIN_USERNAME:-admin}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-admin123}
+      SEED_USER_USERNAME: ${SEED_USER_USERNAME:-user}
+      SEED_USER_PASSWORD: ${SEED_USER_PASSWORD:-user123}
+      SEED_DEMO_DATA: ${SEED_DEMO_DATA:-true}
+    depends_on:
+      database:
+        condition: service_healthy
+    command: python -m app.db.seed
+    restart: "no"
+
   backend:
     image: ${DOCKERHUB_NAMESPACE:-your-dockerhub-username}/deepface-backend:${IMAGE_TAG:-latest}
     build:
@@ -48,6 +66,8 @@ services:
     ports:
       - "8000:8000"
     depends_on:
+      db-seed:
+        condition: service_completed_successfully
       database:
         condition: service_healthy
       redis:
@@ -130,6 +150,8 @@ services:
       - ./data/smoke:/app/data/smoke
       - deepface_weights:/root/.deepface/weights
     depends_on:
+      db-seed:
+        condition: service_completed_successfully
       database:
         condition: service_healthy
       redis:

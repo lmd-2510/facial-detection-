@@ -273,3 +273,11 @@ Nhung phan nen uu tien sau khi da nam tong quan:
 - Smoke test DeepFace voi bo anh that nho, roi tinh chinh `DEEPFACE_MATCH_THRESHOLD`.
 - Bo sung reindex Qdrant khi doi model hoac can rebuild collection.
 - Hoan thien kenh gui alert ra email/Slack neu can.
+
+
+
+
+giới hạn cho tôi số lượt processing không để quá nhiều, chỉ tầm 2 hoặc 3 ảnh cùng processing thôi
+
+
+load ảnh và test xem nó rât là nặng và lâu, có cách nào làm nhanh hơn repo hiện tại của tôi không

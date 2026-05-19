@@ -146,7 +146,12 @@ export default function App() {
     ) : activeView === "users" ? (
       <UserPage currentUser={user} token={token} />
     ) : activeView === "settings" ? (
-      <SettingsPage user={user} />
+      <SettingsPage
+        camerasCount={cameras.length}
+        employeesCount={employees.length}
+        logsCount={logs.length}
+        user={user}
+      />
     ) : (
       <AdminDashboard
         cameras={cameras}

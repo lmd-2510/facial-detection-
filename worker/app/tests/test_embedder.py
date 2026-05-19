@@ -34,7 +34,7 @@ def test_create_face_embedding_calls_deepface_represent(monkeypatch):
             "model_name": "Facenet512",
             "detector_backend": "mtcnn",
             "enforce_detection": True,
-            "align": True,
+            "align": False,
             "normalization": "base",
         }
     ]

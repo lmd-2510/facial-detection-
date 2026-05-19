@@ -34,7 +34,7 @@ class Settings:
     )
     deepface_face_count_backend: str = getenv("DEEPFACE_FACE_COUNT_BACKEND", "")
     deepface_enforce_detection: bool = _get_bool("DEEPFACE_ENFORCE_DETECTION", True)
-    deepface_align: bool = _get_bool("DEEPFACE_ALIGN", True)
+    deepface_align: bool = _get_bool("DEEPFACE_ALIGN", False)
     deepface_normalization: str = getenv("DEEPFACE_NORMALIZATION", "base")
     deepface_match_threshold: float = _get_float("DEEPFACE_MATCH_THRESHOLD", 0.70)
     deepface_anti_spoofing: bool = _get_bool("DEEPFACE_ANTI_SPOOFING", False)

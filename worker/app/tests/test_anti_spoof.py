@@ -68,7 +68,7 @@ def test_check_liveness_uses_deepface_anti_spoofing(monkeypatch):
             "img_path": "/app/storage/uploads/employee_1.jpg",
             "detector_backend": "mtcnn",
             "enforce_detection": True,
-            "align": True,
+            "align": False,
             "anti_spoofing": True,
         }
     ]

@@ -39,7 +39,7 @@ def test_detect_face_uses_deepface_extract_faces(monkeypatch):
                 "img_path": "/app/storage/uploads/employee_1.jpg",
                 "detector_backend": "mtcnn",
                 "enforce_detection": True,
-                "align": True,
+                "align": False,
                 "anti_spoofing": False,
         }
     ]

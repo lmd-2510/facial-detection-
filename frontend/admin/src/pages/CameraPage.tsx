@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { createCamera, deleteCamera, listCameras, updateCamera } from "../api/cameras";
+import { listCameras } from "../api/cameras";
 import CameraForm from "../components/CameraForm";
-import type { Camera, CameraPayload } from "../types/camera";
+import type { Camera } from "../types/camera";
 
 interface CameraPageProps {
   token: string;
@@ -10,11 +10,15 @@ interface CameraPageProps {
 
 export default function CameraPage({ token, onCamerasChange }: CameraPageProps) {
   const [cameras, setCameras] = useState<Camera[]>([]);
-  const [editingCamera, setEditingCamera] = useState<Camera | null>(null);
+  const [showInactive, setShowInactive] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+
+  const visibleCameras = showInactive
+    ? cameras
+    : cameras.filter((camera) => camera.status === "active");
+  const activeCount = cameras.filter((camera) => camera.status === "active").length;
+  const inactiveCount = cameras.length - activeCount;
 
   async function loadCameras() {
     setIsLoading(true);
@@ -34,42 +38,6 @@ export default function CameraPage({ token, onCamerasChange }: CameraPageProps) 
     void loadCameras();
   }, [token]);
 
-  async function handleSubmitCamera(payload: CameraPayload) {
-    setIsSaving(true);
-    setError(null);
-    setMessage(null);
-    try {
-      if (editingCamera) {
-        await updateCamera(token, editingCamera.id, payload);
-        setMessage("Camera updated.");
-      } else {
-        await createCamera(token, payload);
-        setMessage("Camera created.");
-      }
-      setEditingCamera(null);
-      await loadCameras();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Cannot save camera");
-    } finally {
-      setIsSaving(false);
-    }
-  }
-
-  async function handleDeleteCamera(cameraId: number) {
-    setError(null);
-    setMessage(null);
-    try {
-      await deleteCamera(token, cameraId);
-      setMessage("Camera disabled.");
-      if (editingCamera?.id === cameraId) {
-        setEditingCamera(null);
-      }
-      await loadCameras();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Cannot disable camera");
-    }
-  }
-
   return (
     <section className="page-stack">
       <div className="page-header">
@@ -77,66 +45,60 @@ export default function CameraPage({ token, onCamerasChange }: CameraPageProps) 
           <p className="eyebrow">Entry points</p>
           <h2>Camera management</h2>
         </div>
-        <button className="secondary-button" onClick={() => void loadCameras()}>
-          Refresh
-        </button>
+        <div className="page-header-actions">
+          <button
+            className="secondary-button"
+            onClick={() => setShowInactive((current) => !current)}
+            type="button"
+          >
+            {showInactive ? "Hide inactive" : `Show inactive (${inactiveCount})`}
+          </button>
+          <button className="secondary-button" onClick={() => void loadCameras()}>
+            Refresh
+          </button>
+        </div>
       </div>
 
       {error ? <div className="alert error">{error}</div> : null}
-      {message ? <div className="alert success">{message}</div> : null}
 
       <div className="split-layout">
-        <CameraForm
-          camera={editingCamera}
-          isSaving={isSaving}
-          onCancelEdit={() => setEditingCamera(null)}
-          onSubmit={handleSubmitCamera}
-        />
+        <CameraForm />
         <div className="panel table-panel">
           {isLoading ? (
             <div className="state-panel">Loading cameras...</div>
-          ) : cameras.length === 0 ? (
+          ) : visibleCameras.length === 0 ? (
             <div className="state-panel">No cameras yet.</div>
           ) : (
-            <table>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Location</th>
-                  <th>Stream</th>
-                  <th>Status</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {cameras.map((camera) => (
-                  <tr key={camera.id}>
-                    <td>{camera.name}</td>
-                    <td>{camera.location ?? "-"}</td>
-                    <td className="path-cell">{camera.stream_url ?? "-"}</td>
-                    <td>
-                      <span className={`status-pill ${camera.status}`}>
-                        {camera.status}
-                      </span>
-                    </td>
-                    <td className="row-actions">
-                      <button
-                        className="small-button"
-                        onClick={() => setEditingCamera(camera)}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="danger-button"
-                        onClick={() => void handleDeleteCamera(camera.id)}
-                      >
-                        Disable
-                      </button>
-                    </td>
+            <>
+              <div className="camera-list-summary">
+                <span>{activeCount} active camera(s)</span>
+                <span>{inactiveCount} archived camera(s)</span>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Location</th>
+                    <th>Stream</th>
+                    <th>Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {visibleCameras.map((camera) => (
+                    <tr key={camera.id}>
+                      <td>{camera.name}</td>
+                      <td>{camera.location ?? "-"}</td>
+                      <td className="path-cell">{camera.stream_url ?? "-"}</td>
+                      <td>
+                        <span className={`status-pill ${camera.status}`}>
+                          {camera.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
           )}
         </div>
       </div>

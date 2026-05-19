@@ -36,11 +36,12 @@ def check_access_record(
         job_id=job.job_id,
         status=access_log.status,
         employee_id=access_log.employee_id,
+        employee_name=access_log.employee_name,
         camera_id=access_log.camera_id,
         score=access_log.score,
         image_key=access_log.image_path,
         image_path=access_log.image_path,
-        message="Access check queued. Worker will process it in background.",
+        message=access_log.message or "Access check queued. Worker will process it in background.",
         created_at=access_log.created_at,
     )
 
@@ -116,10 +117,11 @@ def check_access_image(
         job_id=job.job_id,
         status=access_log.status,
         employee_id=access_log.employee_id,
+        employee_name=access_log.employee_name,
         camera_id=access_log.camera_id,
         score=access_log.score,
         image_key=access_log.image_path,
         image_path=access_log.image_path,
-        message="Image uploaded and access check queued.",
+        message=access_log.message or "Image uploaded and access check queued.",
         created_at=access_log.created_at,
     )

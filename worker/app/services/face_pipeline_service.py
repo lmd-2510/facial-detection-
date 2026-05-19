@@ -95,11 +95,12 @@ def _update_access_log(
     status: str,
     employee_id: int | None,
     score: float | None,
+    message: str,
 ) -> None:
     result = db.execute(
         update(access_logs)
         .where(access_logs.c.id == log_id)
-        .values(status=status, employee_id=employee_id, score=score)
+        .values(status=status, employee_id=employee_id, score=score, message=message)
     )
     if result.rowcount == 0:
         db.rollback()
@@ -146,6 +147,7 @@ def process_access_check(
             status=status,
             employee_id=employee_id,
             score=match.score,
+            message=match.message,
         )
         return AccessDecision(
             log_id=log_id,
@@ -162,6 +164,7 @@ def process_access_check(
             status="error",
             employee_id=None,
             score=None,
+            message=str(exc),
         )
         return AccessDecision(
             log_id=log_id,

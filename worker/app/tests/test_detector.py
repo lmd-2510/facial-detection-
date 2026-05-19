@@ -32,8 +32,16 @@ def test_detect_face_uses_deepface_extract_faces(monkeypatch):
     assert result.face_box.width == 120
     assert result.face_box.height == 140
     assert result.confidence == 0.97
+    assert result.face_count == 1
     assert result.message == "Face detected by DeepFace."
     assert FakeDeepFace.calls == [
+        {
+            "img_path": "/app/storage/uploads/employee_1.jpg",
+            "detector_backend": "retinaface",
+            "enforce_detection": False,
+            "align": True,
+            "anti_spoofing": False,
+        },
         {
             "img_path": "/app/storage/uploads/employee_1.jpg",
             "detector_backend": "opencv",
@@ -107,6 +115,68 @@ def test_detect_face_rejects_unexpected_deepface_format(monkeypatch):
 
     assert result.detected is False
     assert "facial area" in result.message
+
+
+def test_detect_face_rejects_multiple_faces(monkeypatch):
+    class MultipleFacesDeepFace:
+        @staticmethod
+        def extract_faces(**kwargs):
+            return [
+                {
+                    "facial_area": {"x": 10, "y": 20, "w": 120, "h": 140},
+                    "face_confidence": 0.97,
+                },
+                {
+                    "facial_area": {"x": 150, "y": 20, "w": 110, "h": 130},
+                    "face_confidence": 0.96,
+                },
+            ]
+
+    monkeypatch.setattr(detector, "load_deepface", lambda: MultipleFacesDeepFace)
+
+    result = detect_face("/app/storage/uploads/two_faces.jpg")
+
+    assert result.detected is False
+    assert result.face_count == 2
+    assert "Multiple faces detected" in result.message
+
+
+def test_detect_face_rejects_when_count_backend_finds_multiple_faces(monkeypatch):
+    class CountBackendDeepFace:
+        calls = []
+
+        @staticmethod
+        def extract_faces(**kwargs):
+            CountBackendDeepFace.calls.append(kwargs)
+            if kwargs["detector_backend"] == "retinaface":
+                return [
+                    {
+                        "facial_area": {"x": 10, "y": 20, "w": 120, "h": 140},
+                        "face_confidence": 0.97,
+                    },
+                    {
+                        "facial_area": {"x": 150, "y": 20, "w": 110, "h": 130},
+                        "face_confidence": 0.96,
+                    },
+                ]
+
+            return [
+                {
+                    "facial_area": {"x": 10, "y": 20, "w": 120, "h": 140},
+                    "face_confidence": 0.97,
+                }
+            ]
+
+    monkeypatch.setattr(detector, "load_deepface", lambda: CountBackendDeepFace)
+
+    result = detect_face("/app/storage/uploads/two_faces.jpg")
+
+    assert result.detected is False
+    assert result.face_count == 2
+    assert "Frame rejected" in result.message
+    assert [call["detector_backend"] for call in CountBackendDeepFace.calls] == [
+        "retinaface"
+    ]
 
 
 def test_require_face_returns_detection_for_supported_image_path(monkeypatch):

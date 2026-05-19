@@ -1,17 +1,33 @@
 from fastapi import APIRouter, HTTPException, Response, status
 
-from app.core.deps import AdminUser, DbSession
+from app.core.deps import AdminUser, CurrentUser, DbSession
 from app.schemas.camera import CameraCreate, CameraRead, CameraUpdate
 from app.services.camera_service import (
     add_camera,
     delete_camera,
     edit_camera,
+    get_default_active_camera,
     get_camera,
     get_cameras,
 )
 
 
 router = APIRouter(prefix="/cameras", tags=["cameras"])
+
+
+@router.get("/active-default", response_model=CameraRead)
+def read_default_active_camera(
+    db: DbSession,
+    current_user: CurrentUser,
+) -> CameraRead:
+    camera = get_default_active_camera(db)
+    if camera is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No active camera is configured",
+        )
+
+    return camera
 
 
 @router.get("", response_model=list[CameraRead])

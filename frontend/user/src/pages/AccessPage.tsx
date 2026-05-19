@@ -1,57 +1,62 @@
-import { FormEvent, useState } from "react";
+import { useEffect, useState } from "react";
 import { checkAccessImage } from "../api/access";
+import { getDefaultActiveCamera } from "../api/cameras";
 import CameraView from "../components/CameraView";
 import ResultCard from "../components/ResultCard";
 import type { AccessCheckResponse } from "../types/access";
+import type { CameraRecord } from "../types/camera";
+import type { AccessLog } from "../types/log";
 
 interface AccessPageProps {
+  logs: AccessLog[];
   token: string;
   onAccessQueued: () => Promise<void>;
 }
 
-export default function AccessPage({ token, onAccessQueued }: AccessPageProps) {
-  const [cameraId, setCameraId] = useState("1");
-  const [mode, setMode] = useState<"manual" | "realtime">("manual");
-  const [snapshotFile, setSnapshotFile] = useState<File | null>(null);
+export default function AccessPage({ logs, token, onAccessQueued }: AccessPageProps) {
   const [imageKey, setImageKey] = useState("");
   const [result, setResult] = useState<AccessCheckResponse | null>(null);
-  const [isChecking, setIsChecking] = useState(false);
-  const [isRealtimeActive, setIsRealtimeActive] = useState(false);
   const [isSubmittingFrame, setIsSubmittingFrame] = useState(false);
   const [lastRealtimeAt, setLastRealtimeAt] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [camera, setCamera] = useState<CameraRecord | null>(null);
+  const [isLoadingCamera, setIsLoadingCamera] = useState(true);
   const realtimeIntervalMs = 2000;
+  const latestCameraLog = camera
+    ? logs.find((log) => log.camera_id === camera.id) ?? null
+    : null;
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setIsChecking(true);
-    setError(null);
-    try {
-      if (!snapshotFile) {
-        setError("Choose a snapshot image first.");
-        return;
+  useEffect(() => {
+    async function loadCamera() {
+      setIsLoadingCamera(true);
+      setError(null);
+      try {
+        const activeCamera = await getDefaultActiveCamera(token);
+        setCamera(activeCamera);
+      } catch (err) {
+        setCamera(null);
+        setError(
+          err instanceof Error
+            ? err.message
+            : "No active camera is configured for this gate.",
+        );
+      } finally {
+        setIsLoadingCamera(false);
       }
-      const response = await checkAccessImage(token, Number(cameraId), snapshotFile);
-      setImageKey(response.image_key);
-      setResult(response);
-      await onAccessQueued();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Cannot check access");
-    } finally {
-      setIsChecking(false);
     }
-  }
+
+    void loadCamera();
+  }, [token]);
 
   async function handleRealtimeFrame(file: File) {
-    if (isSubmittingFrame) {
+    if (isSubmittingFrame || !camera) {
       return;
     }
 
     setIsSubmittingFrame(true);
     setError(null);
     try {
-      const response = await checkAccessImage(token, Number(cameraId), file);
-      setSnapshotFile(file);
+      const response = await checkAccessImage(token, camera.id, file);
       setImageKey(response.image_key || file.name);
       setResult(response);
       setLastRealtimeAt(new Date().toLocaleTimeString());
@@ -63,114 +68,48 @@ export default function AccessPage({ token, onAccessQueued }: AccessPageProps) {
     }
   }
 
-  function stopRealtime() {
-    setIsRealtimeActive(false);
-  }
-
   return (
-    <section className="page-grid">
-      <div className="page-stack">
-        <div className="page-header">
-          <div>
-            <p className="eyebrow">Check access</p>
-            <h2>Snapshot verification</h2>
-          </div>
+    <section className="access-terminal">
+      <div className="page-header access-heading">
+        <div>
+          <p className="eyebrow">Check access</p>
+          <h2>Face verification</h2>
         </div>
-
-        {error ? <div className="alert error">{error}</div> : null}
-
-        <form className="panel form-panel" onSubmit={handleSubmit}>
-          <div className="segmented-control" aria-label="Access check mode">
-            <button
-              className={mode === "manual" ? "active" : ""}
-              type="button"
-              onClick={() => {
-                setMode("manual");
-                stopRealtime();
-              }}
-            >
-              Manual
-            </button>
-            <button
-              className={mode === "realtime" ? "active" : ""}
-              type="button"
-              onClick={() => {
-                setMode("realtime");
-                setError(null);
-              }}
-            >
-              Realtime
-            </button>
-          </div>
-          <label>
-            Camera ID
-            <input
-              min={1}
-              required
-              type="number"
-              value={cameraId}
-              onChange={(event) => setCameraId(event.target.value)}
-            />
-          </label>
-          <label>
-            Snapshot image
-            <input
-              accept="image/*"
-              disabled={mode === "realtime"}
-              type="file"
-              onChange={(event) => {
-                const file = event.target.files?.[0] ?? null;
-                setSnapshotFile(file);
-                setImageKey(file?.name ?? "");
-                setResult(null);
-                setError(null);
-              }}
-            />
-          </label>
-          {mode === "realtime" ? (
-            <button
-              className={isRealtimeActive ? "secondary-button" : "primary-button"}
-              type="button"
-              onClick={() => setIsRealtimeActive((current) => !current)}
-            >
-              {isRealtimeActive ? "Stop realtime" : "Start realtime"}
-            </button>
-          ) : (
-            <button className="primary-button" disabled={isChecking} type="submit">
-            {isChecking ? "Queueing..." : "Check access"}
-            </button>
-          )}
-          {mode === "realtime" ? (
-            <div className="scan-summary">
-              <span>{isRealtimeActive ? "Scanning" : "Ready"}</span>
-              <strong>
-                {isSubmittingFrame
-                  ? "Sending frame..."
-                  : lastRealtimeAt
-                    ? `Last frame ${lastRealtimeAt}`
-                    : "No realtime frame yet"}
-              </strong>
-            </div>
-          ) : null}
-        </form>
+        <div className="scan-summary compact">
+          <span>{isLoadingCamera ? "Loading camera" : isSubmittingFrame ? "Scanning" : "Auto scan"}</span>
+          <strong>
+            {camera
+              ? lastRealtimeAt
+                ? `Last frame ${lastRealtimeAt}`
+                : `${camera.name} ready`
+              : "No active camera"}
+          </strong>
+        </div>
       </div>
 
-      <div className="page-stack">
-        <CameraView
-          intervalMs={realtimeIntervalMs}
-          imagePath={imageKey || snapshotFile?.name || ""}
-          isRealtimeActive={mode === "realtime" && isRealtimeActive}
+      {error ? <div className="alert error">{error}</div> : null}
+
+      <div className="access-main-grid">
+        {camera ? (
+          <CameraView
+            cameraId={camera.id}
+            cameraName={camera.name}
+            intervalMs={realtimeIntervalMs}
+            imagePath={imageKey}
+            isSubmittingFrame={isSubmittingFrame}
+            onRealtimeFrame={handleRealtimeFrame}
+          />
+        ) : (
+          <section className="panel state-panel">
+            No active camera is configured in admin yet.
+          </section>
+        )}
+        <ResultCard
+          cameraName={camera?.name ?? null}
           isSubmittingFrame={isSubmittingFrame}
-          onCapture={(file) => {
-            setSnapshotFile(file);
-            setImageKey(file.name);
-            setResult(null);
-            setError(null);
-          }}
-          onRealtimeFrame={handleRealtimeFrame}
-          onRealtimeStop={stopRealtime}
+          latestLog={latestCameraLog}
+          result={result}
         />
-        <ResultCard result={result} />
       </div>
     </section>
   );

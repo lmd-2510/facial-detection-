@@ -28,6 +28,7 @@ class AccessLog(Base):
     status: Mapped[str] = mapped_column(String(50), index=True)
     score: Mapped[float | None] = mapped_column(Float, nullable=True)
     image_path: Mapped[str | None] = mapped_column(Text, nullable=True)
+    message: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -36,3 +37,7 @@ class AccessLog(Base):
 
     employee: Mapped["Employee | None"] = relationship(back_populates="access_logs")
     camera: Mapped["Camera | None"] = relationship(back_populates="access_logs")
+
+    @property
+    def employee_name(self) -> str | None:
+        return self.employee.name if self.employee is not None else None

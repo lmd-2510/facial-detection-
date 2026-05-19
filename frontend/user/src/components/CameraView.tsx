@@ -1,30 +1,27 @@
 import { useEffect, useRef, useState } from "react";
 
 interface CameraViewProps {
+  cameraId: number;
+  cameraName: string;
   imagePath: string;
   intervalMs: number;
-  isRealtimeActive: boolean;
   isSubmittingFrame: boolean;
-  onCapture: (file: File) => void;
   onRealtimeFrame: (file: File) => Promise<void>;
-  onRealtimeStop: () => void;
 }
 
 export default function CameraView({
+  cameraId,
+  cameraName,
   imagePath,
   intervalMs,
-  isRealtimeActive,
   isSubmittingFrame,
-  onCapture,
   onRealtimeFrame,
-  onRealtimeStop,
 }: CameraViewProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const isSubmittingFrameRef = useRef(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isCameraOn, setIsCameraOn] = useState(false);
-  const [isCapturing, setIsCapturing] = useState(false);
 
   useEffect(() => {
     isSubmittingFrameRef.current = isSubmittingFrame;
@@ -37,7 +34,7 @@ export default function CameraView({
   }, []);
 
   useEffect(() => {
-    if (!isCameraOn || !isRealtimeActive) {
+    if (!isCameraOn) {
       return;
     }
 
@@ -53,7 +50,7 @@ export default function CameraView({
     }, intervalMs);
 
     return () => window.clearInterval(timer);
-  }, [intervalMs, isCameraOn, isRealtimeActive, onRealtimeFrame]);
+  }, [intervalMs, isCameraOn, onRealtimeFrame]);
 
   async function startCamera() {
     setCameraError(null);
@@ -66,8 +63,8 @@ export default function CameraView({
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: "user",
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
+          width: { ideal: 1080 },
+          height: { ideal: 1440 },
         },
         audio: false,
       });
@@ -90,7 +87,6 @@ export default function CameraView({
       videoRef.current.srcObject = null;
     }
     setIsCameraOn(false);
-    onRealtimeStop();
   }
 
   async function createFrameFile() {
@@ -110,6 +106,8 @@ export default function CameraView({
       return null;
     }
 
+    context.translate(canvas.width, 0);
+    context.scale(-1, 1);
     context.drawImage(video, 0, 0, canvas.width, canvas.height);
     const blob = await new Promise<Blob | null>((resolve) => {
       canvas.toBlob(resolve, "image/jpeg", 0.88);
@@ -124,58 +122,50 @@ export default function CameraView({
     });
   }
 
-  async function captureFrame() {
-    setIsCapturing(true);
-    try {
-      const file = await createFrameFile();
-      if (file) {
-        onCapture(file);
-      }
-    } finally {
-      setIsCapturing(false);
-    }
-  }
-
   return (
     <section className="panel camera-view">
-      <div className="scan-frame">
-        <video
-          ref={videoRef}
-          autoPlay
-          muted
-          playsInline
-          className={isCameraOn ? "camera-preview active" : "camera-preview"}
-        />
-        <span />
-        <span />
-        <span />
-        <span />
+      <div className="camera-meta">
+        <div>
+          <p className="eyebrow">Live gate camera</p>
+          <h3>{cameraName}</h3>
+          <p className="camera-id-label">Camera ID #{cameraId}</p>
+        </div>
+        <span className={isCameraOn ? "status-pill processing" : "status-pill denied"}>
+          {isCameraOn ? "Scanning" : "Idle"}
+        </span>
       </div>
-      <div className="camera-actions">
-        {isCameraOn ? (
-          <button className="secondary-button" type="button" onClick={stopCamera}>
-            Stop camera
-          </button>
-        ) : (
-          <button className="secondary-button" type="button" onClick={startCamera}>
-            Start camera
-          </button>
-        )}
-        <button
-          className="primary-button"
-          disabled={!isCameraOn || isCapturing || isRealtimeActive}
-          type="button"
-          onClick={captureFrame}
-        >
-          {isCapturing ? "Capturing..." : "Capture frame"}
-        </button>
-      </div>
-      <div className={isRealtimeActive ? "realtime-status active" : "realtime-status"}>
-        <span>{isRealtimeActive ? "Realtime scanning" : "Realtime idle"}</span>
-        <strong>{isSubmittingFrame ? "Sending frame..." : `${intervalMs / 1000}s interval`}</strong>
+      <div className="camera-stage">
+        <div className="scan-frame">
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
+            playsInline
+            className={isCameraOn ? "camera-preview active" : "camera-preview"}
+          />
+          <span />
+          <span />
+          <span />
+          <span />
+        </div>
+        <div className="camera-actions">
+          {isCameraOn ? (
+            <button className="primary-button camera-toggle-button" type="button" onClick={stopCamera}>
+              Stop camera
+            </button>
+          ) : (
+            <button className="primary-button camera-toggle-button" type="button" onClick={startCamera}>
+              Start camera
+            </button>
+          )}
+        </div>
+        <div className={isCameraOn ? "realtime-status active" : "realtime-status"}>
+          <span>{isCameraOn ? "Realtime scanning" : "Realtime idle"}</span>
+          <strong>{isSubmittingFrame ? "Sending frame..." : `${intervalMs / 1000}s interval`}</strong>
+        </div>
       </div>
       {cameraError ? <div className="alert error">{cameraError}</div> : null}
-      <div>
+      <div className="snapshot-path">
         <p className="eyebrow">Snapshot path</p>
         <strong>{imagePath || "/app/storage/uploads/snapshot.jpg"}</strong>
       </div>

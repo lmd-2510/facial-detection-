@@ -9,6 +9,16 @@ def list_cameras(db: Session) -> list[Camera]:
     return list(db.scalars(select(Camera).order_by(Camera.id)))
 
 
+def get_latest_active_camera(db: Session) -> Camera | None:
+    statement = (
+        select(Camera)
+        .where(Camera.status == "active")
+        .order_by(Camera.id.desc())
+        .limit(1)
+    )
+    return db.scalar(statement)
+
+
 def get_camera_by_id(db: Session, camera_id: int) -> Camera | None:
     return db.get(Camera, camera_id)
 

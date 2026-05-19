@@ -12,8 +12,10 @@ class AccessLogRead(BaseModel):
 
     id: int
     employee_id: int | None
+    employee_name: str | None
     camera_id: int | None
     status: AccessLogStatus
     score: float | None
     image_path: str | None
+    message: str | None
     created_at: datetime

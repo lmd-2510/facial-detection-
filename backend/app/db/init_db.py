@@ -12,6 +12,7 @@ def create_tables() -> None:
     Base.metadata.create_all(bind=engine)
     ensure_employee_embedding_status_columns()
     ensure_face_embedding_source_image_column()
+    ensure_access_log_message_column()
 
 
 def ensure_employee_embedding_status_columns() -> None:
@@ -62,6 +63,21 @@ def ensure_face_embedding_source_image_column() -> None:
         connection.execute(
             text("ALTER TABLE face_embeddings ADD COLUMN source_image_key TEXT")
         )
+
+
+def ensure_access_log_message_column() -> None:
+    inspector = inspect(engine)
+    if not inspector.has_table("access_logs"):
+        return
+
+    existing_columns = {
+        column["name"] for column in inspector.get_columns("access_logs")
+    }
+    if "message" in existing_columns:
+        return
+
+    with engine.begin() as connection:
+        connection.execute(text("ALTER TABLE access_logs ADD COLUMN message TEXT"))
 
 
 def main() -> None:

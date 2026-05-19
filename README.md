@@ -277,3 +277,12 @@ Nhung phan nen uu tien sau khi da nam tong quan:
 - Smoke test DeepFace voi bo anh that nho, roi tinh chinh `DEEPFACE_MATCH_THRESHOLD`.
 - Bo sung reindex Qdrant khi doi model hoac can rebuild collection.
 - Hoan thien kenh gui alert ra email/Slack neu can.
+
+
+
+ở phần cameras UI của admin, tôi nghĩ nên xóa hết phần active camera đi, chỉ để phần coming later thôi, tại vì cái active kia của tôi cũng chưa đúng, xóa hết đi để ở phần coming later thôi 
+
+ở phần employees của admin UI, tôi muốn bạn chia ra hai nhánh, một nhánh để tạo employees với các chức năng add và gộp cả phần lưu ảnh chứng minh (embedding image) và thay tên là nộp ảnh gì đó đi, còn phần còn lại là danh sách employees, nếu dài quá lại có thể dùng cái hiện trước sau để đảm bảo UI không bị dài quá lố
+
+ở phần access logs, làm cho tôi thành cái hiện ra UI trước sau đi, vì nó dài quá thành ra không đẹp cho UI, làm tương tự history của UI user, sửa cho tôi tương tự cả ở user và employees của admin, phần danh sách đấy nhé 
+

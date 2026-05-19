@@ -10,6 +10,7 @@ export interface AccessCheckResponse {
   job_id: string | null;
   status: AccessLogStatus;
   employee_id: number | null;
+  employee_name: string | null;
   camera_id: number;
   score: number | null;
   image_key: string;

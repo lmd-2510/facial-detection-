@@ -113,6 +113,7 @@ services:
       REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
       DEEPFACE_MODEL_NAME: ${DEEPFACE_MODEL_NAME:-Facenet512}
       DEEPFACE_DETECTOR_BACKEND: ${DEEPFACE_DETECTOR_BACKEND:-opencv}
+      DEEPFACE_FACE_COUNT_BACKEND: ${DEEPFACE_FACE_COUNT_BACKEND:-retinaface}
       DEEPFACE_ENFORCE_DETECTION: ${DEEPFACE_ENFORCE_DETECTION:-true}
       DEEPFACE_ALIGN: ${DEEPFACE_ALIGN:-true}
       DEEPFACE_NORMALIZATION: ${DEEPFACE_NORMALIZATION:-base}
@@ -127,6 +128,7 @@ services:
       QDRANT_COLLECTION: ${QDRANT_COLLECTION:-deepface_embeddings}
     volumes:
       - ./data/smoke:/app/data/smoke
+      - deepface_weights:/root/.deepface/weights
     depends_on:
       database:
         condition: service_healthy
@@ -236,3 +238,4 @@ volumes:
   grafana_data:
   minio_data:
   qdrant_data:
+  deepface_weights:

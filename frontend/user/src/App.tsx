@@ -15,13 +15,14 @@ const TOKEN_STORAGE_KEY = "deepface_user_token";
 const navItems: Array<{ id: UserView; label: string }> = [
   { id: "access", label: "Access" },
   { id: "history", label: "History" },
-  { id: "profile", label: "Profile" },
+  { id: "profile", label: "Session" },
 ];
 
 export default function App() {
   const [token, setToken] = useState<string | null>(() =>
     localStorage.getItem(TOKEN_STORAGE_KEY),
   );
+  const [signedInAt, setSignedInAt] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [activeView, setActiveView] = useState<UserView>("access");
   const [logs, setLogs] = useState<AccessLog[]>([]);
@@ -55,11 +56,13 @@ export default function App() {
       try {
         const currentUser = await getCurrentUser(currentToken);
         setUser(currentUser);
+        setSignedInAt((current) => current ?? new Date().toISOString());
         await refreshLogs(currentToken);
       } catch (err) {
         localStorage.removeItem(TOKEN_STORAGE_KEY);
         setToken(null);
         setUser(null);
+        setSignedInAt(null);
         setError(err instanceof Error ? err.message : "Session expired");
       } finally {
         setIsLoadingSession(false);
@@ -69,6 +72,18 @@ export default function App() {
     void bootstrapSession();
   }, [token]);
 
+  useEffect(() => {
+    if (!token || !user) {
+      return;
+    }
+
+    const intervalId = window.setInterval(() => {
+      void refreshLogs(token);
+    }, 3000);
+
+    return () => window.clearInterval(intervalId);
+  }, [token, user]);
+
   async function handleLogin(username: string, password: string) {
     setIsLoggingIn(true);
     setError(null);
@@ -77,6 +92,7 @@ export default function App() {
       localStorage.setItem(TOKEN_STORAGE_KEY, response.access_token);
       setToken(response.access_token);
       setUser(response.user);
+      setSignedInAt(new Date().toISOString());
       await refreshLogs(response.access_token);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Cannot sign in");
@@ -89,6 +105,7 @@ export default function App() {
     localStorage.removeItem(TOKEN_STORAGE_KEY);
     setToken(null);
     setUser(null);
+    setSignedInAt(null);
     setLogs([]);
   }
 
@@ -106,13 +123,21 @@ export default function App() {
     activeView === "history" ? (
       <HistoryPage
         isLoading={isLoadingLogs}
-        logs={logs}
+        logs={logs.filter((log) => !log.image_path?.startsWith("/app/data/smoke"))}
         onRefresh={() => refreshLogs()}
       />
     ) : activeView === "profile" ? (
-      <ProfilePage user={user} />
+      <ProfilePage
+        logs={logs.filter((log) => !log.image_path?.startsWith("/app/data/smoke"))}
+        signedInAt={signedInAt}
+        user={user}
+      />
     ) : (
-      <AccessPage token={token} onAccessQueued={() => refreshLogs()} />
+      <AccessPage
+        logs={logs.filter((log) => !log.image_path?.startsWith("/app/data/smoke"))}
+        token={token}
+        onAccessQueued={() => refreshLogs()}
+      />
     );
 
   return (

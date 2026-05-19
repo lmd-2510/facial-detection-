@@ -23,6 +23,7 @@ def check_access(db: Session, payload: AccessCheckRequest) -> tuple[AccessLog, A
         status="processing",
         score=None,
         image_path=payload.resolved_image_key,
+        message="Access check queued. Worker will process it in background.",
     )
     job = enqueue_access_job(access_log.id, camera.id, payload.resolved_image_key)
     return access_log, job

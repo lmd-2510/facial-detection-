@@ -1,11 +1,17 @@
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 
 from app.models.access_log import AccessLog
 
 
 def list_access_logs(db: Session) -> list[AccessLog]:
-    return list(db.scalars(select(AccessLog).order_by(AccessLog.created_at.desc())))
+    return list(
+        db.scalars(
+            select(AccessLog)
+            .options(selectinload(AccessLog.employee))
+            .order_by(AccessLog.created_at.desc())
+        )
+    )
 
 
 def create_access_log(
@@ -16,6 +22,7 @@ def create_access_log(
     status: str,
     score: float | None,
     image_path: str | None,
+    message: str | None = None,
 ) -> AccessLog:
     access_log = AccessLog(
         employee_id=employee_id,
@@ -23,6 +30,7 @@ def create_access_log(
         status=status,
         score=score,
         image_path=image_path,
+        message=message,
     )
     db.add(access_log)
     db.commit()

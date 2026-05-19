@@ -31,6 +31,7 @@ class AccessCheckResponse(BaseModel):
     job_id: str | None = None
     status: AccessDecision
     employee_id: int | None
+    employee_name: str | None = None
     camera_id: int
     score: float | None
     image_key: str

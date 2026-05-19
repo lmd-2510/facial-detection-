@@ -7,6 +7,10 @@ from app.ml.deepface_client import load_deepface
 
 
 SUPPORTED_IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".bmp"}
+MULTIPLE_FACE_REJECTION_MESSAGE = (
+    "Multiple faces detected. Frame rejected. "
+    "Please keep exactly one face in the camera frame."
+)
 
 
 @dataclass(frozen=True)
@@ -24,11 +28,20 @@ class FaceDetectionResult:
     face_box: FaceBox | None
     confidence: float
     message: str
+    face_count: int = 0
 
 
-def _extract_first_face_area(extract_faces_result: Any) -> tuple[FaceBox, float]:
+def _extract_face_count(extract_faces_result: Any) -> int:
     if not isinstance(extract_faces_result, list) or not extract_faces_result:
         raise ValueError("No face detected by DeepFace.")
+
+    return len(extract_faces_result)
+
+
+def _extract_single_face_area(extract_faces_result: Any) -> tuple[FaceBox, float, int]:
+    face_count = _extract_face_count(extract_faces_result)
+    if face_count > 1:
+        raise ValueError(MULTIPLE_FACE_REJECTION_MESSAGE)
 
     first_face = extract_faces_result[0]
     if not isinstance(first_face, dict):
@@ -49,13 +62,14 @@ def _extract_first_face_area(extract_faces_result: Any) -> tuple[FaceBox, float]
         raise ValueError("DeepFace facial area is incomplete.") from exc
 
     confidence = first_face.get("face_confidence", first_face.get("confidence", 0.0))
-    return face_box, float(confidence or 0.0)
+    return face_box, float(confidence or 0.0), face_count
 
 
 def detect_face(
     image_path: str,
     *,
     detector_backend: str = settings.deepface_detector_backend,
+    face_count_backend: str = settings.deepface_face_count_backend,
     enforce_detection: bool = settings.deepface_enforce_detection,
     align: bool = settings.deepface_align,
 ) -> FaceDetectionResult:
@@ -80,6 +94,26 @@ def detect_face(
         )
 
     try:
+        count_faces = None
+        if face_count_backend and face_count_backend != detector_backend:
+            count_faces = load_deepface().extract_faces(
+                img_path=normalized_path,
+                detector_backend=face_count_backend,
+                enforce_detection=False,
+                align=align,
+                anti_spoofing=False,
+            )
+            count = _extract_face_count(count_faces)
+            if count > 1:
+                return FaceDetectionResult(
+                    detected=False,
+                    image_path=normalized_path,
+                    face_box=None,
+                    confidence=0.0,
+                    message=MULTIPLE_FACE_REJECTION_MESSAGE,
+                    face_count=count,
+                )
+
         faces = load_deepface().extract_faces(
             img_path=normalized_path,
             detector_backend=detector_backend,
@@ -87,7 +121,7 @@ def detect_face(
             align=align,
             anti_spoofing=False,
         )
-        face_box, confidence = _extract_first_face_area(faces)
+        face_box, confidence, face_count = _extract_single_face_area(faces)
     except Exception as exc:
         return FaceDetectionResult(
             detected=False,
@@ -95,6 +129,13 @@ def detect_face(
             face_box=None,
             confidence=0.0,
             message=str(exc),
+            face_count=(
+                len(faces)
+                if isinstance(locals().get("faces"), list)
+                else len(count_faces)
+                if isinstance(locals().get("count_faces"), list)
+                else 0
+            ),
         )
 
     return FaceDetectionResult(
@@ -103,6 +144,7 @@ def detect_face(
         face_box=face_box,
         confidence=confidence,
         message="Face detected by DeepFace.",
+        face_count=face_count,
     )
 
 

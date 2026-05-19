@@ -213,6 +213,13 @@ th {
   gap: 16px;
 }
 
+.page-header-actions,
+.camera-list-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 .metric-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -257,6 +264,14 @@ th {
 
 .table-panel {
   overflow-x: auto;
+}
+
+.camera-list-summary {
+  justify-content: space-between;
+  margin-bottom: 14px;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
 }
 
 .state-panel {
@@ -368,6 +383,12 @@ th {
   background: #dff4e8;
 }
 
+.camera-coming-soon {
+  color: var(--accent-strong);
+  background: #e8f4ef;
+  line-height: 1.6;
+}
+
 .path-cell {
   max-width: 280px;
   word-break: break-word;
@@ -447,7 +468,9 @@ th {
 
   .page-header,
   .panel-heading,
-  .row-actions {
+  .row-actions,
+  .page-header-actions,
+  .camera-list-summary {
     align-items: stretch;
     flex-direction: column;
   }

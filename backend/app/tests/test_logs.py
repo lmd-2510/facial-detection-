@@ -98,8 +98,10 @@ def test_list_logs(client, auth_headers):
     body = response.json()
     assert len(body) == 1
     assert body[0]["employee_id"] == 1
+    assert body[0]["employee_name"] == "Nguyen Van A"
     assert body[0]["camera_id"] == 1
     assert body[0]["status"] == "granted"
     assert body[0]["score"] == 0.91
     assert body[0]["image_path"] == "/app/storage/uploads/snapshot.jpg"
+    assert body[0]["message"] is None
     assert body[0]["created_at"]

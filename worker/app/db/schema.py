@@ -48,5 +48,6 @@ access_logs = Table(
     Column("status", String(50), nullable=False),
     Column("score", Float, nullable=True),
     Column("image_path", Text, nullable=True),
+    Column("message", Text, nullable=True),
     Column("created_at", DateTime(timezone=True), server_default=func.now()),
 )

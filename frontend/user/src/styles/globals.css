@@ -188,6 +188,36 @@ p {
   align-items: start;
 }
 
+.access-terminal {
+  display: grid;
+  width: min(1280px, 100%);
+  margin: 0 auto;
+  gap: 18px;
+}
+
+.access-heading {
+  align-items: end;
+}
+
+.scan-summary.compact {
+  min-width: 260px;
+}
+
+.access-camera-stack {
+  width: 100%;
+}
+
+.access-main-grid {
+  align-items: start;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
+}
+
+.access-main-grid .camera-view {
+  width: 100%;
+}
+
 .page-stack,
 .form-panel,
 .result-card {
@@ -208,12 +238,43 @@ p {
 
 .camera-view {
   display: grid;
-  gap: 18px;
+  gap: 16px;
+  padding: 28px;
+}
+
+.camera-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.camera-meta h3 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.camera-id-label {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.camera-stage {
+  --camera-frame-height: clamp(340px, 54vh, 520px);
+  --camera-frame-width: min(100%, calc(var(--camera-frame-height) * 16 / 9));
+  display: grid;
+  gap: 16px;
+  width: 100%;
 }
 
 .scan-frame {
   position: relative;
-  min-height: 260px;
+  aspect-ratio: 16 / 9;
+  width: var(--camera-frame-width);
+  height: var(--camera-frame-height);
+  min-height: 0;
   border: 1px solid #96b7aa;
   border-radius: 8px;
   background:
@@ -236,6 +297,7 @@ p {
   height: 100%;
   object-fit: cover;
   opacity: 0;
+  transform: scaleX(-1);
 }
 
 .camera-preview.active {
@@ -249,28 +311,28 @@ p {
   border-color: var(--accent);
 }
 
-.scan-frame span:nth-child(1) {
+.scan-frame span:nth-of-type(1) {
   top: 18px;
   left: 18px;
   border-top: 4px solid;
   border-left: 4px solid;
 }
 
-.scan-frame span:nth-child(2) {
+.scan-frame span:nth-of-type(2) {
   top: 18px;
   right: 18px;
   border-top: 4px solid;
   border-right: 4px solid;
 }
 
-.scan-frame span:nth-child(3) {
+.scan-frame span:nth-of-type(3) {
   bottom: 18px;
   left: 18px;
   border-bottom: 4px solid;
   border-left: 4px solid;
 }
 
-.scan-frame span:nth-child(4) {
+.scan-frame span:nth-of-type(4) {
   right: 18px;
   bottom: 18px;
   border-right: 4px solid;
@@ -279,8 +341,13 @@ p {
 
 .camera-actions {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: 1fr;
+  width: var(--camera-frame-width);
+}
+
+.camera-toggle-button {
+  min-height: 58px;
+  font-size: 18px;
 }
 
 .realtime-status,
@@ -291,6 +358,10 @@ p {
   border-radius: 8px;
   padding: 10px 12px;
   background: #f5faf8;
+}
+
+.camera-stage .realtime-status {
+  width: var(--camera-frame-width);
 }
 
 .realtime-status span,
@@ -307,6 +378,10 @@ p {
   font-size: 14px;
 }
 
+.snapshot-path strong {
+  word-break: break-word;
+}
+
 .realtime-status.active {
   border-color: #91cdbb;
   background: #e6f5ef;
@@ -319,7 +394,14 @@ p {
 }
 
 .result-card strong {
-  font-size: 28px;
+  font-size: 22px;
+}
+
+.result-card {
+  align-content: start;
+  align-self: start;
+  gap: 12px;
+  padding: 18px;
 }
 
 .result-card span,
@@ -342,11 +424,26 @@ p {
   border-color: #e5a4a4;
 }
 
+.result-card.idle,
+.result-card.processing {
+  border-color: #a9d4c7;
+}
+
 .result-card dl {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: 1fr;
+  gap: 8px;
   margin: 0;
+}
+
+.result-guide-list {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+  padding-left: 20px;
+  color: var(--muted);
+  font-weight: 700;
+  line-height: 1.35;
 }
 
 .result-card div,
@@ -368,6 +465,32 @@ dd {
 
 .table-panel {
   overflow-x: auto;
+}
+
+.pagination-bar {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  font-size: 13px;
+  font-weight: 800;
+  justify-content: space-between;
+  padding: 16px 6px 0;
+}
+
+.pagination-actions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.compact-button {
+  min-width: 92px;
+  padding: 10px 14px;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 
 .state-panel {
@@ -425,11 +548,104 @@ dd {
   gap: 18px;
 }
 
+.profile-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  background:
+    linear-gradient(135deg, rgba(15, 107, 92, 0.12), transparent 42%),
+    rgba(255, 255, 255, 0.96);
+}
+
+.profile-hero-copy {
+  display: grid;
+  gap: 8px;
+  max-width: 720px;
+}
+
+.profile-hero-copy h3,
+.profile-side-card h3 {
+  margin: 0;
+  font-size: 32px;
+}
+
+.profile-hero-badges {
+  display: grid;
+  justify-items: end;
+  gap: 10px;
+}
+
+.profile-summary-grid,
+.profile-detail-grid {
+  display: grid;
+  gap: 18px;
+}
+
+.profile-summary-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.profile-detail-grid {
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  align-items: start;
+}
+
+.summary-card {
+  display: grid;
+  gap: 10px;
+}
+
+.summary-card p,
+.profile-note {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.summary-card strong {
+  font-size: 24px;
+}
+
+.profile-grid-expanded {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.profile-side-card {
+  display: grid;
+  gap: 14px;
+}
+
+.profile-latest-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 @media (max-width: 920px) {
   .topbar,
   .page-grid,
-  .profile-grid {
+  .access-main-grid,
+  .access-heading,
+  .profile-grid,
+  .profile-summary-grid,
+  .profile-detail-grid,
+  .profile-grid-expanded {
     grid-template-columns: 1fr;
+  }
+
+  .access-heading {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .profile-hero {
+    flex-direction: column;
+  }
+
+  .profile-hero-badges {
+    justify-items: start;
   }
 }
 
@@ -444,11 +660,34 @@ dd {
     flex-direction: column;
   }
 
+  .pagination-bar {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .pagination-actions {
+    justify-content: space-between;
+  }
+
   .result-card dl {
     grid-template-columns: 1fr;
   }
 
   .camera-actions {
     grid-template-columns: 1fr;
+  }
+
+  .camera-view {
+    padding: 18px;
+  }
+
+  .scan-frame {
+    --camera-frame-height: clamp(320px, 52vh, 440px);
+  }
+
+  .camera-meta {
+    align-items: stretch;
+    flex-direction: column;
   }
 }

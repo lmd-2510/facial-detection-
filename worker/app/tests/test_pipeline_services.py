@@ -208,6 +208,7 @@ def test_process_access_check_grants_matching_active_employee(
     assert row.status == "granted"
     assert row.employee_id == 1
     assert row.score == 1.0
+    assert row.message == "Face matched embedding from Qdrant."
 
 
 def test_process_access_check_denies_when_no_embeddings_exist(
@@ -230,6 +231,7 @@ def test_process_access_check_denies_when_no_embeddings_exist(
     assert row.status == "denied"
     assert row.employee_id is None
     assert row.score is None
+    assert row.message == "No active Qdrant face embeddings available for matching."
 
 
 def test_process_access_check_marks_log_error_when_pipeline_fails(db_session, monkeypatch):
@@ -259,6 +261,7 @@ def test_process_access_check_marks_log_error_when_pipeline_fails(db_session, mo
     assert row.status == "error"
     assert row.employee_id is None
     assert row.score is None
+    assert "No face detected" in row.message
 
 
 def test_process_access_check_raises_for_missing_log(db_session):

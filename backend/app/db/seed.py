@@ -33,11 +33,12 @@ DEMO_CAMERAS = [
         "stream_url": "rtsp://demo.local/main-gate",
         "status": "active",
     },
+]
+
+OBSOLETE_DEMO_CAMERAS = [
     {
         "name": "Back Door",
-        "location": "Service entrance",
         "stream_url": "rtsp://demo.local/back-door",
-        "status": "active",
     },
 ]
 
@@ -76,10 +77,10 @@ DEMO_ACCESS_LOGS = [
     },
     {
         "employee_code": None,
-        "camera_name": "Back Door",
+        "camera_name": "Main Gate",
         "status": "denied",
         "score": 0.42,
-        "image_path": "demo/access-snapshots/denied-back-door.jpg",
+        "image_path": "demo/access-snapshots/denied-main-gate.jpg",
         "message": "Demo denied access log.",
     },
     {
@@ -118,6 +119,17 @@ def seed_users(db: Session) -> int:
 
 def seed_demo_records(db: Session) -> dict[str, int]:
     created_counts = {"cameras": 0, "employees": 0, "access_logs": 0}
+
+    for obsolete_camera in OBSOLETE_DEMO_CAMERAS:
+        existing_camera = db.scalar(
+            select(Camera).where(Camera.name == obsolete_camera["name"])
+        )
+        if (
+            existing_camera is not None
+            and existing_camera.stream_url == obsolete_camera["stream_url"]
+            and existing_camera.status != "inactive"
+        ):
+            existing_camera.status = "inactive"
 
     for demo_camera in DEMO_CAMERAS:
         existing_camera = db.scalar(

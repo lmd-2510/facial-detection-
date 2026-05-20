@@ -99,6 +99,11 @@ export default function App() {
     setLogs([]);
   }
 
+  const activeEmployees = employees.filter(
+    (employee) => employee.status === "active",
+  );
+  const activeCameras = cameras.filter((camera) => camera.status === "active");
+
   if (isLoadingSession) {
     return <main className="login-shell">Loading admin session...</main>;
   }
@@ -147,16 +152,16 @@ export default function App() {
       <UserPage currentUser={user} token={token} />
     ) : activeView === "settings" ? (
       <SettingsPage
-        camerasCount={cameras.length}
-        employeesCount={employees.length}
+        camerasCount={activeCameras.length}
+        employeesCount={activeEmployees.length}
         logsCount={logs.length}
         token={token}
         user={user}
       />
     ) : (
       <AdminDashboard
-        cameras={cameras}
-        employees={employees}
+        cameras={activeCameras}
+        employees={activeEmployees}
         logs={logs}
         onRefresh={() => void refreshOverview()}
       />

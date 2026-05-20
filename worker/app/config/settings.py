@@ -45,6 +45,10 @@ class Settings:
     deepface_align: bool = _get_bool("DEEPFACE_ALIGN", False)
     deepface_normalization: str = getenv("DEEPFACE_NORMALIZATION", "base")
     deepface_match_threshold: float = _get_float("DEEPFACE_MATCH_THRESHOLD", 0.70)
+    deepface_duplicate_threshold: float = _get_float(
+        "DEEPFACE_DUPLICATE_THRESHOLD",
+        0.95,
+    )
     deepface_anti_spoofing: bool = _get_bool("DEEPFACE_ANTI_SPOOFING", False)
     deepface_warmup_on_start: bool = _get_bool("DEEPFACE_WARMUP_ON_START", True)
     photo_check_enabled: bool = _get_bool("PHOTO_CHECK_ENABLED", False)

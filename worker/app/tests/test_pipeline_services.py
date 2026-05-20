@@ -6,6 +6,7 @@ from sqlalchemy.pool import StaticPool
 from app.db.schema import access_logs, employees, face_embeddings, metadata
 from app.ml.embedder import FaceEmbeddingResult
 from app.services.embedding_service import (
+    DuplicateFaceRegistrationError,
     EmployeeNotFoundError,
     create_employee_embedding,
 )
@@ -81,6 +82,8 @@ def deepface_embedding_stub(monkeypatch):
 
     class DetectionResult:
         detected = True
+        face_box = {"x": 0, "y": 0, "w": 64, "h": 64}
+        face_image = None
 
     class LivenessResult:
         passed = True
@@ -132,6 +135,10 @@ def deepface_embedding_stub(monkeypatch):
         "app.services.embedding_service.upsert_face_embedding",
         lambda **payload: indexed_embeddings.append(payload),
     )
+    monkeypatch.setattr(
+        "app.services.embedding_service.ensure_embedding_collection",
+        lambda vector_size: None,
+    )
 
     def fake_search_face_embeddings(
         *,
@@ -152,6 +159,10 @@ def deepface_embedding_stub(monkeypatch):
 
     monkeypatch.setattr(
         "app.services.face_pipeline_service.search_face_embeddings",
+        fake_search_face_embeddings,
+    )
+    monkeypatch.setattr(
+        "app.services.embedding_service.search_face_embeddings",
         fake_search_face_embeddings,
     )
 
@@ -188,6 +199,29 @@ def test_create_employee_embedding_rejects_missing_employee(db_session):
             employee_id=999,
             image_path="/app/storage/uploads/employee_1.jpg",
         )
+
+
+def test_create_employee_embedding_rejects_duplicate_active_face(
+    db_session,
+    deepface_embedding_stub,
+):
+    seed_employee(db_session, employee_id=1)
+    create_employee_embedding(
+        db_session,
+        employee_id=1,
+        image_path="/app/storage/uploads/employee_1.jpg",
+    )
+    seed_employee(db_session, employee_id=2)
+
+    with pytest.raises(DuplicateFaceRegistrationError, match="already registered"):
+        create_employee_embedding(
+            db_session,
+            employee_id=2,
+            image_path="/app/storage/uploads/employee_2.jpg",
+        )
+
+    rows = db_session.execute(select(face_embeddings)).all()
+    assert len(rows) == 1
 
 
 def test_process_access_check_grants_matching_active_employee(

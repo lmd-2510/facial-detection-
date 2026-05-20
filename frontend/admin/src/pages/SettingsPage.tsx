@@ -128,8 +128,6 @@ export default function SettingsPage({
     { label: "Detector backend", value: "mtcnn" },
     { label: "Embedding model", value: "Facenet512" },
     { label: "Match threshold", value: "0.70" },
-    { label: "Anti-spoofing", value: "Off" },
-    { label: "Face alignment", value: "Off" },
   ];
 
   const ruleItems = [

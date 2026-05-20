@@ -64,12 +64,9 @@ export default function EmployeePage({
     setError(null);
     setMessage(null);
     try {
-      let savedEmployee: Employee;
-      if (editingEmployee) {
-        savedEmployee = await updateEmployee(token, editingEmployee.id, payload);
-      } else {
-        savedEmployee = await createEmployee(token, payload);
-      }
+      const savedEmployee = editingEmployee
+        ? await updateEmployee(token, editingEmployee.id, payload)
+        : await createEmployee(token, payload);
 
       const imageMessage = faceImage
         ? await queueFaceImage(savedEmployee.id, faceImage)

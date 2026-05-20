@@ -1,85 +1,147 @@
-# Backup And Restore
+# Sao Lưu Và Khôi Phục
 
-Giai Doan 8 co backup toi thieu cho PostgreSQL va thu muc `data/` local.
+Tài liệu này mô tả đầy đủ luồng sao lưu và khôi phục dữ liệu cho hệ thống. TẤT CẢ lệnh bên dưới phù hợp trên Windows PowerShell.
 
-Tai lieu nay la nguon huong dan backup/restore chinh cua repo. Thu muc `backup/` duoc dung de chua output backup local do script tao ra, khong can them mot file README rieng trong thu muc do.
+## 1. Sao Lưu Local (PostgreSQL + data/)
 
-## Tao Backup
-
-Chay:
+Chạy script:
 
 ```powershell
 .\scripts\backup.ps1
 ```
 
-Script se tao thu muc:
+Kết quả được tạo trong thư mục:
 
 ```text
 backup/<yyyyMMdd-HHmmss>/
+  postgres.sql
+  data.zip
+  manifest.txt
 ```
 
-Ben trong co:
+Ghi chú:
 
-- `postgres.sql`: dump PostgreSQL bang `pg_dump`.
-- `data.zip`: archive thu muc `data/` neu ton tai.
-- `manifest.txt`: thong tin backup va goi y restore.
+- `postgres.sql` là dump DB Postgres.
+- `data.zip` là thư mục `data/` nếu tồn tại.
+- `manifest.txt` ghi thông tin và gợi ý restore.
 
-Ghi chu:
-
-- Thu muc `backup/` co the chua cac ban backup timestamp do script tao ra.
-- Co the an toan xoa cac file tai lieu placeholder trong `backup/` neu docs da duoc giu tai day.
-
-Mac dinh script giu 10 backup moi nhat. Doi so luong:
+Mặc định giữ 10 bản mới nhất, có thể đổi số lượng:
 
 ```powershell
 .\scripts\backup.ps1 -Keep 20
 ```
 
-## Restore PostgreSQL
+## 2. Sao Lưu PostgreSQL Lên S3 (MinIO/AWS)
 
-Dam bao database container dang chay:
+Script chỉ dump PostgreSQL và upload lên S3 (không gồm `data/`). Hỗ trợ AWS S3 và S3-compatible (MinIO/R2).
+
+### 2.1. Cấu hình biến môi trường
+
+Tạo file `scripts/backup-s3.env`, script sẽ tự động load nếu file tồn tại:
+
+```text
+S3_BUCKET=
+S3_PREFIX=deepface-db-backups
+S3_ENDPOINT_URL=
+S3_USE_DOCKER_CLI=
+AWS_REGION=
+AWS_PROFILE=
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+```
+
+Ghi chú quan trọng:
+
+- **MinIO local**: đặt `S3_ENDPOINT_URL=http://host.docker.internal:9000`.
+- **AWS S3**: để trống `S3_ENDPOINT_URL`.
+- Nếu máy không cài AWS CLI, đặt `S3_USE_DOCKER_CLI=true`.
+
+### 2.2. Chạy backup
+
+```powershell
+./scripts/backup-s3.ps1
+```
+
+Nếu không cài AWS CLI:
+
+```powershell
+./scripts/backup-s3.ps1 -UseDockerAwsCli
+```
+
+Output trên S3:
+
+```text
+s3://<bucket>/<prefix>/<yyyyMMdd-HHmmss>/postgres.sql
+s3://<bucket>/<prefix>/<yyyyMMdd-HHmmss>/manifest.txt
+```
+
+Nếu muốn giữ file local (không xóa thư mục tạm):
+
+```powershell
+./scripts/backup-s3.ps1 -KeepLocal 5
+```
+
+## 3. Tự Động Sao Lưu Mỗi 5 Ngày (Windows)
+
+Tạo scheduled task (mặc định 02:00) và log:
+
+```powershell
+./scripts/schedule-backup-s3.ps1 -StartTime 02:00 -LogPath logs\backup-s3.log
+```
+
+Chạy thử ngay:
+
+```powershell
+schtasks /Run /TN DeepFaceBackupS3
+```
+
+Kiểm tra log:
+
+```powershell
+Get-Content logs\backup-s3.log -Tail 50
+```
+
+Kiểm tra trạng thái task:
+
+```powershell
+schtasks /Query /TN DeepFaceBackupS3 /V /FO LIST | Select-String "Next Run Time|Last Run Time|Last Result|Status"
+```
+
+## 4. Khôi Phục PostgreSQL Từ Local Dump
+
+Đảm bảo database container đang chạy:
 
 ```powershell
 docker compose up -d database
 ```
 
-Restore tu file dump:
+Restore từ file dump:
 
 ```powershell
 Get-Content backup\<timestamp>\postgres.sql | docker compose exec -T database sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"'
 ```
 
-Neu database da co du lieu cu, can can nhac xoa/recreate database truoc khi restore de tranh trung khoa.
+## 5. Khôi Phục PostgreSQL Từ S3
 
-## Restore Local Data
+```powershell
+aws s3 cp s3://<bucket>/<prefix>/<timestamp>/postgres.sql - | docker compose exec -T database sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"'
+```
 
-Giai nen `data.zip` ve thu muc `data/`.
+## 6. Khôi Phục Thư Mục data/
 
 ```powershell
 Expand-Archive backup\<timestamp>\data.zip -DestinationPath data -Force
 ```
 
-## MinIO
+## 7. Ghi Chú MinIO
 
-Compose da co service MinIO va flow upload employee face image/access snapshot da dung bucket MinIO. Neu self-host MinIO, can backup bucket bang `mc mirror` hoac co che snapshot volume.
+Nếu cần backup bucket MinIO, có thể dùng `mc mirror` hoặc snapshot volume.
 
-Nhung bucket can backup sau khi noi flow:
+## 8. Ghi Chú Qdrant
 
-- `MINIO_BUCKET`, mac dinh `deepface-images`.
+Qdrant là index. Có thể backup snapshot/volume hoặc rebuild từ PostgreSQL.
 
-## Qdrant
+## 9. Giới Hạn Hiện Tại
 
-Compose da co service Qdrant va access matching hien dung Qdrant lam search index.
-
-Backup Qdrant can chon mot trong hai chien luoc:
-
-- backup Qdrant snapshot/volume;
-- hoac coi Qdrant la index co the rebuild tu PostgreSQL.
-
-PostgreSQL van luu vector trong `face_embeddings`, nen co the rebuild Qdrant tu DB khi co script reindex day du. Neu doi model DeepFace, can reindex vector theo `model_name` moi.
-
-## Gioi Han Con Lai
-
-- Chua co restore script tu dong day du.
-- Chua co backup scheduler.
-- Chua co retention theo dung luong/tuan/thang.
+- Chưa có restore script tự động đầy đủ.
+- Chưa có retention theo dung lượng/tuần/tháng.

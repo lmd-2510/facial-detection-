@@ -16,4 +16,7 @@ backup/*
 !backup/minio/.gitkeep
 !backup/qdrant/
 !backup/qdrant/.gitkeep
+backup-s3/
+logs/
+scripts/backup-s3.env
 .env

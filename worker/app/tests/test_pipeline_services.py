@@ -85,6 +85,9 @@ def deepface_embedding_stub(monkeypatch):
     class LivenessResult:
         passed = True
 
+    class PhotoSpoofResult:
+        passed = True
+
     def fake_create_face_embedding(image_path: str) -> FaceEmbeddingResult:
         return FaceEmbeddingResult(
             image_path=image_path,
@@ -110,12 +113,20 @@ def deepface_embedding_stub(monkeypatch):
         lambda image_path: LivenessResult(),
     )
     monkeypatch.setattr(
+        "app.services.embedding_service.require_not_photo",
+        lambda image_path, **_kwargs: PhotoSpoofResult(),
+    )
+    monkeypatch.setattr(
         "app.services.face_pipeline_service.require_face",
         lambda image_path, **_kwargs: DetectionResult(),
     )
     monkeypatch.setattr(
         "app.services.face_pipeline_service.require_live_face",
         lambda image_path: LivenessResult(),
+    )
+    monkeypatch.setattr(
+        "app.services.face_pipeline_service.require_not_photo",
+        lambda image_path, **_kwargs: PhotoSpoofResult(),
     )
     monkeypatch.setattr(
         "app.services.embedding_service.upsert_face_embedding",

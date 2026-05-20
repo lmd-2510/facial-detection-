@@ -18,6 +18,14 @@ def _get_float(name: str, default: float) -> float:
     return float(value)
 
 
+def _get_int(name: str, default: int) -> int:
+    value = getenv(name)
+    if value is None:
+        return default
+
+    return int(value)
+
+
 @dataclass(frozen=True)
 class Settings:
     app_env: str = getenv("APP_ENV", "dev")
@@ -39,6 +47,14 @@ class Settings:
     deepface_match_threshold: float = _get_float("DEEPFACE_MATCH_THRESHOLD", 0.70)
     deepface_anti_spoofing: bool = _get_bool("DEEPFACE_ANTI_SPOOFING", False)
     deepface_warmup_on_start: bool = _get_bool("DEEPFACE_WARMUP_ON_START", True)
+    photo_check_enabled: bool = _get_bool("PHOTO_CHECK_ENABLED", False)
+    photo_brightness_gap_threshold: float = _get_float("PHOTO_BRIGHTNESS_GAP_THRESHOLD", 40.0)
+    photo_background_color_bins_threshold: int = _get_int(
+        "PHOTO_BACKGROUND_COLOR_BINS_THRESHOLD",
+        80,
+    )
+    photo_background_min_ratio: float = _get_float("PHOTO_BACKGROUND_MIN_RATIO", 0.25)
+    photo_sample_stride: int = _get_int("PHOTO_SAMPLE_STRIDE", 2)
 
 
 settings = Settings()

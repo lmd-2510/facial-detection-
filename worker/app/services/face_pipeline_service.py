@@ -9,6 +9,7 @@ from app.ml.anti_spoof import require_live_face
 from app.ml.detector import require_face
 from app.ml.embedder import create_face_embedding, create_face_embedding_from_face
 from app.ml.matcher import DEFAULT_MATCH_THRESHOLD, MatchResult
+from app.ml.photo_spoof import require_not_photo
 from app.services.storage_service import resolved_image_file
 from app.services.vector_store_service import VectorSearchCandidate, search_face_embeddings
 
@@ -128,6 +129,12 @@ def process_access_check(
             detection = require_face(
                 resolved_image.normalized_path,
                 detector_backend=settings.deepface_access_detector_backend,
+            )
+            if detection.face_box is None:
+                raise ValueError("Face bounding box is missing for photo check.")
+            require_not_photo(
+                resolved_image.normalized_path,
+                face_box=detection.face_box,
             )
             require_live_face(resolved_image.normalized_path)
             face_image = getattr(detection, "face_image", None)

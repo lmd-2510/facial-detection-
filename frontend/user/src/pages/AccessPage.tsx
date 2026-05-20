@@ -3,7 +3,7 @@ import { checkAccessImage } from "../api/access";
 import { getDefaultActiveCamera } from "../api/cameras";
 import CameraView from "../components/CameraView";
 import ResultCard from "../components/ResultCard";
-import type { AccessCheckResponse } from "../types/access";
+import type { AccessCheckResponse, AccessLogStatus } from "../types/access";
 import type { CameraRecord } from "../types/camera";
 import type { AccessLog } from "../types/log";
 
@@ -25,6 +25,16 @@ export default function AccessPage({ logs, token, onAccessQueued }: AccessPagePr
   const latestCameraLog = camera
     ? logs.find((log) => log.camera_id === camera.id) ?? null
     : null;
+  const activeCameraLog =
+    result && latestCameraLog?.id === result.log_id
+      ? latestCameraLog
+      : result && latestCameraLog && latestCameraLog.id > result.log_id
+        ? latestCameraLog
+        : !result
+          ? latestCameraLog
+          : null;
+  const cameraFrameStatus: AccessLogStatus | null =
+    activeCameraLog?.status ?? result?.status ?? null;
 
   useEffect(() => {
     async function loadCamera() {
@@ -97,6 +107,7 @@ export default function AccessPage({ logs, token, onAccessQueued }: AccessPagePr
             intervalMs={realtimeIntervalMs}
             imagePath={imageKey}
             isSubmittingFrame={isSubmittingFrame}
+            resultStatus={cameraFrameStatus}
             onRealtimeFrame={handleRealtimeFrame}
           />
         ) : (

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import type { AccessLogStatus } from "../types/access";
 
 interface CameraViewProps {
   cameraId: number;
@@ -6,7 +7,30 @@ interface CameraViewProps {
   imagePath: string;
   intervalMs: number;
   isSubmittingFrame: boolean;
+  resultStatus: AccessLogStatus | null;
   onRealtimeFrame: (file: File) => Promise<void>;
+}
+
+function getScanFrameClass(
+  status: AccessLogStatus | null,
+  isSubmittingFrame: boolean,
+  isCameraOn: boolean,
+) {
+  const classes = ["scan-frame"];
+
+  if (status === "granted") {
+    classes.push("granted");
+  } else if (status === "denied" || status === "error") {
+    classes.push("rejected");
+  } else if (status === "processing" || isSubmittingFrame) {
+    classes.push("processing");
+  }
+
+  if (isCameraOn) {
+    classes.push("camera-on");
+  }
+
+  return classes.join(" ");
 }
 
 export default function CameraView({
@@ -15,6 +39,7 @@ export default function CameraView({
   imagePath,
   intervalMs,
   isSubmittingFrame,
+  resultStatus,
   onRealtimeFrame,
 }: CameraViewProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -139,7 +164,7 @@ export default function CameraView({
         </span>
       </div>
       <div className="camera-stage">
-        <div className="scan-frame">
+        <div className={getScanFrameClass(resultStatus, isSubmittingFrame, isCameraOn)}>
           <video
             ref={videoRef}
             autoPlay

@@ -8,7 +8,7 @@ Muc tieu hien tai cua README nay la giup nguoi doc co ban do tong quan truoc khi
 
 He thong co the hieu theo cac khoi lon sau:
 
-- `frontend/`: giao dien nguoi dung va giao dien admin.
+- `frontend/`: giao dien home, nguoi dung va admin.
 - `backend/`: FastAPI backend, nhan request tu frontend va dieu phoi nghiep vu.
 - `worker/`: tien trinh nen xu ly anh, embedding va matching khuon mat.
 - `data/`: noi luu tru file local duoc mount vao container.
@@ -23,6 +23,7 @@ He thong co the hieu theo cac khoi lon sau:
 
 Trong `docker-compose.yml`, he thong duoc chay bang cac service chinh:
 
+- `frontend-home`: trang chon vai tro truoc khi vao user/admin.
 - `frontend-user`: ung dung React cho nguoi dung.
 - `frontend-admin`: ung dung React cho quan tri vien.
 - `backend`: FastAPI API server.
@@ -76,6 +77,7 @@ Bang nay giup doi chieu nhanh giua cac yeu cau he thong va phan hien co trong re
 
 | Yeu cau / thanh phan | Repo hien co | Bang chung nhanh |
 | --- | --- | --- |
+| Frontend home | `frontend/home` | Trang chon vai tro, dieu huong vao admin hoac user |
 | Frontend user | `frontend/user` | User UI login, upload file/chup webcam snapshot, realtime nhe, check access, xem history/profile |
 | Frontend admin | `frontend/admin` | Admin UI login, quan ly employee, camera, user va access logs |
 | Backend API | `backend` | FastAPI routes cho auth, employees, cameras, users, logs, access, health, metrics |
@@ -86,7 +88,7 @@ Bang nay giup doi chieu nhanh giua cac yeu cau he thong va phan hien co trong re
 | AI inference | `worker/app/ml`, `worker/app/services` | DeepFace detect face, optional anti-spoofing, embedding Facenet512, matching |
 | Frontend webcam/camera capture | `frontend/user/src/components/CameraView.tsx` | User UI chup frame JPEG bang browser webcam hoac gui frame dinh ky trong mode realtime nhe qua `/access/check-image` |
 | Authentication / roles | `backend/app/core/deps.py`, `backend/app/api/admin.py`, `frontend/admin/src/pages/UserPage.tsx` | Bearer token, role `admin`/`user`, admin user management |
-| Reverse proxy / load balancer baseline | `nginx/nginx.conf` | Route `/`, `/admin/`, `/api/`, `/health`, `/docs`, `/metrics` |
+| Reverse proxy / load balancer baseline | `nginx/nginx.conf` | Route `/`, `/user/`, `/admin/`, `/api/`, `/health`, `/docs`, `/metrics` |
 | Docker Compose | `docker-compose.yml` | Chay local multi-service bang `docker compose up --build` |
 | Monitoring | `monitoring/prometheus`, `monitoring/grafana`, `monitoring/alertmanager` | Prometheus scrape `/metrics`, Grafana dashboard, Alertmanager UI |
 | Backup | `scripts/backup.ps1`, `docs/backup.md` | Backup PostgreSQL dump va archive thu muc `data/` |
@@ -140,7 +142,8 @@ Copy-Item .env.example .env
 
 4. Mo cac URL chinh:
 
-- User UI: http://localhost:5173
+- Home: http://localhost:8080
+- User UI: http://localhost:8080/user/ hoặc http://localhost:5173/user/
 - Admin UI: http://localhost:5174/admin/
 - Backend health: http://localhost:8000/health
 - Backend docs: http://localhost:8000/docs
@@ -182,7 +185,8 @@ Hoac dung script dev:
 
 Sau khi chay, co the mo:
 
-- User UI: http://localhost:5173
+- Home: http://localhost:8080
+- User UI: http://localhost:8080/user/ hoặc http://localhost:5173/user/
 - Admin UI: http://localhost:5174/admin/
 - Backend health: http://localhost:8000/health
 - Backend docs: http://localhost:8000/docs
@@ -253,6 +257,7 @@ Backup toi thieu database va thu muc `data/`:
 - `.github/workflows/ci.yml`: GitHub Actions test/build va publish Docker images len Docker Hub.
 - `backend/Dockerfile`: cach build backend image.
 - `worker/Dockerfile`: cach build worker image.
+- `frontend/home/Dockerfile`: cach serve home frontend.
 - `frontend/user/Dockerfile`: cach build user frontend.
 - `frontend/admin/Dockerfile`: cach build admin frontend.
 - `helm/deepface-access/values.yaml`: cau hinh image registry/tag khi deploy Kubernetes, mac dinh theo format Docker Hub `<dockerhub-username>/deepface-<service>:<tag>`.

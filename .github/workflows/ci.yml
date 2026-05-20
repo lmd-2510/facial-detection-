@@ -115,6 +115,14 @@ jobs:
             -t "$DOCKERHUB_NAMESPACE/deepface-frontend-user:latest" \
             frontend/user
 
+      - name: Build home frontend image
+        run: |
+          docker build \
+            -t deepface-frontend-home:test \
+            -t "$DOCKERHUB_NAMESPACE/deepface-frontend-home:$IMAGE_TAG" \
+            -t "$DOCKERHUB_NAMESPACE/deepface-frontend-home:latest" \
+            frontend/home
+
       - name: Build admin frontend image
         run: |
           docker build \
@@ -132,5 +140,7 @@ jobs:
           docker push "$DOCKERHUB_NAMESPACE/deepface-worker:latest"
           docker push "$DOCKERHUB_NAMESPACE/deepface-frontend-user:$IMAGE_TAG"
           docker push "$DOCKERHUB_NAMESPACE/deepface-frontend-user:latest"
+          docker push "$DOCKERHUB_NAMESPACE/deepface-frontend-home:$IMAGE_TAG"
+          docker push "$DOCKERHUB_NAMESPACE/deepface-frontend-home:latest"
           docker push "$DOCKERHUB_NAMESPACE/deepface-frontend-admin:$IMAGE_TAG"
           docker push "$DOCKERHUB_NAMESPACE/deepface-frontend-admin:latest"

@@ -42,7 +42,8 @@ docker compose run --rm db-seed
 Mo nhanh:
 
 - Backend: `http://localhost:8000`
-- User app: `http://localhost:5173`
+- Home: `http://localhost:8080`
+- User app: `http://localhost:8080/user/` hoac `http://localhost:5173/user/`
 - Admin app: `http://localhost:5174`
 - Nginx: `http://localhost:8080`
 - MinIO console: `http://localhost:9001`

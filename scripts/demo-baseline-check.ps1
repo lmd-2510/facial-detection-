@@ -48,6 +48,8 @@ Run-Step "Static project files" {
     @(
         "docker-compose.yml",
         "README.md",
+        "frontend/home/index.html",
+        "frontend/home/Dockerfile",
         "docs/demo-checklist.md",
         "docs/final-fixes.md",
         "docs/setup.md",
@@ -81,7 +83,9 @@ Run-Step "Backend health and metrics" {
 }
 
 Run-Step "Frontend and nginx routes" {
-    Test-HttpEndpoint -Name "user frontend" -Url "http://localhost:5173"
+    Test-HttpEndpoint -Name "home frontend" -Url "http://localhost:$NginxPort" -ExpectedText @("DeepFace", "ADMIN", "Nhan Vien")
+    Test-HttpEndpoint -Name "user frontend" -Url "http://localhost:5173/user/"
+    Test-HttpEndpoint -Name "nginx user route" -Url "http://localhost:$NginxPort/user/"
     Test-HttpEndpoint -Name "admin frontend" -Url "http://localhost:5174/admin/"
     Test-HttpEndpoint -Name "nginx health route" -Url "http://localhost:$NginxPort/health" -ExpectedText @('"database":"ok"', '"redis":"ok"')
     Test-HttpEndpoint -Name "nginx api route" -Url "http://localhost:$NginxPort/api/health" -ExpectedText @('"database":"ok"', '"redis":"ok"')

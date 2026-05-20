@@ -26,7 +26,8 @@ URL mac dinh:
 
 - Backend health: `http://localhost:8000/health`
 - Backend docs: `http://localhost:8000/docs`
-- User app: `http://localhost:5173`
+- Home: `http://localhost:8080`
+- User app: `http://localhost:8080/user/` hoac `http://localhost:5173/user/`
 - Admin app: `http://localhost:5174`
 - Nginx entrypoint: `http://localhost:8080`
 - Prometheus: `http://localhost:9090`
@@ -43,6 +44,7 @@ URL mac dinh:
 - `redis`: queue cho embedding/access jobs.
 - `backend`: FastAPI API.
 - `worker`: DeepFace background worker.
+- `frontend-home`: static role selection home UI served by nginx.
 - `frontend-user`: static user UI served by nginx.
 - `frontend-admin`: static admin UI served by nginx.
 - `nginx`: reverse proxy.
@@ -63,7 +65,8 @@ URL mac dinh:
 
 Nginx lang nghe port `8080` mac dinh:
 
-- `/`: user frontend.
+- `/`: home frontend.
+- `/user/`: user frontend.
 - `/admin/`: admin frontend.
 - `/api/`: proxy sang backend, strip prefix `/api`.
 - `/docs`: Swagger.

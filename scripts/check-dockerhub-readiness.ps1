@@ -6,7 +6,15 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$repositories = @(
+$composeRepositories = @(
+    "deepface-backend",
+    "deepface-worker",
+    "deepface-frontend-user",
+    "deepface-frontend-home",
+    "deepface-frontend-admin"
+)
+
+$helmRepositories = @(
     "deepface-backend",
     "deepface-worker",
     "deepface-frontend-user",
@@ -46,13 +54,13 @@ try {
     $env:DOCKERHUB_NAMESPACE = $previousNamespace
     $env:IMAGE_TAG = $previousImageTag
 }
-foreach ($repo in $repositories) {
+foreach ($repo in $composeRepositories) {
     Assert-TextContains -Text $composeImages -Expected "$Namespace/${repo}:$ImageTag"
 }
 
 Write-Step "Helm image names"
 $helmOutput = docker run --rm -v "${PWD}:/workspace" -w /workspace alpine/helm:3.15.4 template deepface-access helm/deepface-access --set global.imageRegistry=$Namespace --set global.imageTag=$ImageTag | Out-String
-foreach ($repo in $repositories) {
+foreach ($repo in $helmRepositories) {
     Assert-TextContains -Text $helmOutput -Expected "$Namespace/${repo}:$ImageTag"
 }
 
@@ -63,7 +71,7 @@ if ($SkipRemote) {
 }
 
 Write-Step "Docker Hub remote repositories"
-foreach ($repo in $repositories) {
+foreach ($repo in $composeRepositories) {
     $tagUrl = "https://hub.docker.com/v2/repositories/$Namespace/$repo/tags/$ImageTag/"
     try {
         $response = Invoke-WebRequest -UseBasicParsing -Uri $tagUrl -TimeoutSec 15

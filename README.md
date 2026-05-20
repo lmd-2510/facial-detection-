@@ -1,318 +1,454 @@
-# DeepFace Access Control MVP
+<p align="center">
+  <img
+    src="https://capsule-render.vercel.app/api?type=waving&height=245&color=0:0F172A,42:0EA5E9,100:14B8A6&text=DeepFace%20Access%20Control&fontColor=FFFFFF&fontSize=46&fontAlignY=36&desc=Biometric%20Access%20Control%20Platform&descAlignY=58&descSize=18&animation=fadeIn"
+    alt="DeepFace Access Control banner"
+    width="100%"
+  />
+</p>
 
-Day la repository MVP cho he thong kiem soat ra vao bang nhan dien khuon mat. Project duoc to chuc theo huong nhieu service chay bang Docker, gom frontend, backend API, worker xu ly AI, database va cac thanh phan ha tang phu tro.
+<div align="center">
 
-Muc tieu hien tai cua README nay la giup nguoi doc co ban do tong quan truoc khi di vao code chi tiet.
+**Nền tảng kiểm soát ra vào bằng nhận diện khuôn mặt, xây dựng theo kiến trúc nhiều dịch vụ với giao diện quản trị, terminal người dùng, worker AI và lớp hạ tầng demo đầy đủ.**
 
-## Tong Quan He Thong
+<br>
 
-He thong co the hieu theo cac khoi lon sau:
+<img alt="Status" src="https://img.shields.io/badge/Status-Demo%20Ready-14B8A6?style=for-the-badge">
+<img alt="Architecture" src="https://img.shields.io/badge/Architecture-Multi--Service-0EA5E9?style=for-the-badge">
+<img alt="Runtime" src="https://img.shields.io/badge/Runtime-Docker%20Compose-2563EB?style=for-the-badge&logo=docker&logoColor=white">
+<img alt="AI" src="https://img.shields.io/badge/AI-DeepFace%20%2B%20Qdrant-DC244C?style=for-the-badge">
 
-- `frontend/`: giao dien home, nguoi dung va admin.
-- `backend/`: FastAPI backend, nhan request tu frontend va dieu phoi nghiep vu.
-- `worker/`: tien trinh nen xu ly anh, embedding va matching khuon mat.
-- `data/`: noi luu tru file local duoc mount vao container.
-- `nginx/`: cau hinh reverse proxy/web server.
-- `monitoring/`: cau hinh theo doi he thong.
-- `backup/`: noi mac dinh de script luu output backup local.
-- `helm/`: cau hinh deploy len Kubernetes.
-- `scripts/`: cac script ho tro dev, test, seed data va backup.
-- `docs/`: tai lieu giai thich kien truc, API, database, AI pipeline, CI/CD va van hanh.
+<br><br>
 
-## Cac Service Chinh
+<img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-0.115-009688?style=flat-square&logo=fastapi&logoColor=white">
+<img alt="React" src="https://img.shields.io/badge/React%20%2F%20Vite-61DAFB?style=flat-square&logo=react&logoColor=111111">
+<img alt="Python" src="https://img.shields.io/badge/Python-3.12-3776AB?style=flat-square&logo=python&logoColor=white">
+<img alt="PostgreSQL" src="https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white">
+<img alt="Redis" src="https://img.shields.io/badge/Redis-Queue-DC382D?style=flat-square&logo=redis&logoColor=white">
+<img alt="MinIO" src="https://img.shields.io/badge/MinIO-Object%20Storage-C72E49?style=flat-square&logo=minio&logoColor=white">
+<img alt="Prometheus" src="https://img.shields.io/badge/Prometheus-Metrics-E6522C?style=flat-square&logo=prometheus&logoColor=white">
+<img alt="Grafana" src="https://img.shields.io/badge/Grafana-Dashboard-F46800?style=flat-square&logo=grafana&logoColor=white">
 
-Trong `docker-compose.yml`, he thong duoc chay bang cac service chinh:
+<br><br>
 
-- `frontend-home`: trang chon vai tro truoc khi vao user/admin.
-- `frontend-user`: ung dung React cho nguoi dung.
-- `frontend-admin`: ung dung React cho quan tri vien.
-- `backend`: FastAPI API server.
-- `worker`: background worker xu ly cac job AI.
-- `database`: PostgreSQL, luu user, employee, camera, access log va embedding.
-- `redis`: queue trung gian giua backend va worker.
-- `nginx`: reverse proxy prod-like cho frontend/backend.
-- `prometheus`: scrape metric toi thieu cua backend.
-- `alertmanager`: nhan alert tu Prometheus trong local monitoring.
-- `grafana`: dashboard truc quan hoa metric Prometheus.
-- `minio`: object storage cho anh employee/access snapshot trong flow upload moi.
-- `qdrant`: vector database dung lam search index cho access matching; PostgreSQL van la source of truth.
+<a href="#giao-diện">Giao diện</a>
+<span> • </span>
+<a href="#điểm-nổi-bật">Điểm nổi bật</a>
+<span> • </span>
+<a href="#kiến-trúc">Kiến trúc</a>
+<span> • </span>
+<a href="#chạy-nhanh">Chạy nhanh</a>
+<span> • </span>
+<a href="#kiểm-thử">Kiểm thử</a>
+<span> • </span>
+<a href="#ghi-chú-production">Production</a>
 
-Co the hinh dung luong tong quat nhu sau:
+</div>
+
+---
+
+## Giao Diện
+
+<p align="center">
+  <img src="docs/screenshots/home.png" alt="Màn hình chọn vai trò DeepFace Access" width="900">
+</p>
+
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <strong>User Access Terminal</strong>
+      <br>
+      <sub>Terminal người dùng để gửi ảnh, kiểm tra quyền ra vào và xem lịch sử.</sub>
+    </td>
+    <td align="center" width="50%">
+      <strong>Admin Control Dashboard</strong>
+      <br>
+      <sub>Bảng điều khiển quản trị employee, camera, user và access logs.</sub>
+    </td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/user-access.png" alt="User access terminal" width="100%"></td>
+    <td><img src="docs/screenshots/admin-dashboard.png" alt="Admin dashboard" width="100%"></td>
+  </tr>
+</table>
+
+## Điểm Nổi Bật
+
+<table>
+  <tr>
+    <td width="25%">
+      <strong>Nhận diện khuôn mặt</strong>
+      <br>
+      <sub>DeepFace tạo embedding, worker xử lý job nền và cập nhật kết quả truy cập.</sub>
+    </td>
+    <td width="25%">
+      <strong>Vector search</strong>
+      <br>
+      <sub>Qdrant tìm embedding gần nhất, PostgreSQL vẫn là source of truth.</sub>
+    </td>
+    <td width="25%">
+      <strong>Upload ảnh qua MinIO</strong>
+      <br>
+      <sub>Ảnh enrollment và snapshot access được lưu bằng object key.</sub>
+    </td>
+    <td width="25%">
+      <strong>Quan sát vận hành</strong>
+      <br>
+      <sub>Health check, Prometheus metrics, Grafana dashboard và Alertmanager baseline.</sub>
+    </td>
+  </tr>
+</table>
+
+## Kiến Trúc
 
 ```text
-Frontend User/Admin
-        |
-        v
-Backend API
-        |
-        +--> PostgreSQL
-        |
-        +--> Redis Queue
-                  |
-                  v
-                Worker
-                  |
-                  +--> xu ly face embedding / matching
-                  +--> cap nhat ket qua vao database
+Frontend Home / User / Admin
+          |
+          v
+      Nginx Gateway
+          |
+          v
+      Backend API
+          |
+          +--> PostgreSQL        users, employees, cameras, logs, embeddings
+          +--> MinIO             enrollment images and access snapshots
+          +--> Redis             embedding_jobs and access_jobs
+                    |
+                    v
+                AI Worker
+                    |
+                    +--> DeepFace detection / embedding / liveness
+                    +--> Qdrant vector search
+                    +--> PostgreSQL access log update
 ```
 
-## MVP Flow
+### Luồng Demo Chính
 
-Flow chinh cua MVP:
+<table>
+  <tr>
+    <td align="center" width="140">
+      <img src="https://img.shields.io/badge/Bước-01-0EA5E9?style=for-the-badge" alt="Bước 01">
+    </td>
+    <td>
+      <strong>Khởi tạo dữ liệu vận hành</strong>
+      <br>
+      Admin tạo employee và camera trong Admin Console.
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="https://img.shields.io/badge/Bước-02-14B8A6?style=for-the-badge" alt="Bước 02">
+    </td>
+    <td>
+      <strong>Enrollment khuôn mặt</strong>
+      <br>
+      Admin upload ảnh khuôn mặt cho employee, backend lưu object vào MinIO.
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="https://img.shields.io/badge/Bước-03-6366F1?style=for-the-badge" alt="Bước 03">
+    </td>
+    <td>
+      <strong>Tạo embedding job</strong>
+      <br>
+      Backend đẩy job vào Redis queue <code>embedding_jobs</code> để worker xử lý nền.
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="https://img.shields.io/badge/Bước-04-8B5CF6?style=for-the-badge" alt="Bước 04">
+    </td>
+    <td>
+      <strong>Index vector nhận diện</strong>
+      <br>
+      Worker tạo embedding, lưu PostgreSQL và index vector vào Qdrant.
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="https://img.shields.io/badge/Bước-05-F59E0B?style=for-the-badge" alt="Bước 05">
+    </td>
+    <td>
+      <strong>Check access tại cổng</strong>
+      <br>
+      User upload snapshot hoặc chụp frame webcam tại User Terminal.
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="https://img.shields.io/badge/Bước-06-EF4444?style=for-the-badge" alt="Bước 06">
+    </td>
+    <td>
+      <strong>Ra quyết định truy cập</strong>
+      <br>
+      Worker so khớp khuôn mặt và cập nhật access log thành
+      <code>granted</code>, <code>denied</code>, <code>processing</code> hoặc <code>error</code>.
+    </td>
+  </tr>
+</table>
 
-1. Admin tao employee.
-2. Admin upload anh khuon mat cho employee len MinIO va nhan `image_key`.
-3. Backend tao embedding job trong Redis.
-4. Worker doc job tu Redis.
-5. Worker tao embedding cho anh khuon mat.
-6. User upload anh/snapshot len MinIO va gui `image_key` de kiem tra quyen ra vao.
-7. Worker so sanh embedding cua snapshot voi embedding da dang ky.
-8. He thong ghi access log voi ket qua `granted`, `denied` hoac `error`.
+## Chạy Nhanh
 
-Hien tai project da hoan thanh phan code cot loi cua Giai Doan 7 va lop van hanh Giai Doan 8. Backend co API cot loi cho auth, employees, cameras, logs, upload anh len MinIO, va day duoc `embedding_jobs` / `access_jobs` vao Redis bang object key. Worker nghe Redis queue, tai anh tu MinIO ve temp file, dung DeepFace cho face detection, anti-spoofing/liveness, embedding va cosine matching, luu vector vao `face_embeddings`, va cap nhat `access_logs` thanh `granted`, `denied` hoac `error`. Admin/user frontend da co login, thao tac flow chinh theo API, hien thi loading/error/empty state co ban; user UI co the upload snapshot, chup frame webcam thu cong, hoac bat realtime nhe de gui frame dinh ky qua `/access/check-image`.
+<p>
+  <img src="https://img.shields.io/badge/Yêu%20cầu-Docker%20Desktop%20đang%20chạy-0EA5E9?style=for-the-badge" alt="Docker Desktop đang chạy">
+  <img src="https://img.shields.io/badge/Yêu%20cầu-Docker%20Compose-14B8A6?style=for-the-badge" alt="Docker Compose">
+  <img src="https://img.shields.io/badge/Lưu%20ý-Lần%20đầu%20worker%20có%20thể%20khởi%20động%20lâu-F59E0B?style=for-the-badge" alt="Lần đầu worker có thể khởi động lâu">
+</p>
 
-## Mapping Theo Yeu Cau De Bai
+<table>
+  <tr>
+    <th width="33%">
+      <img src="https://img.shields.io/badge/01-Chuẩn%20bị%20env-0EA5E9?style=for-the-badge" alt="Chuẩn bị env">
+    </th>
+    <th width="33%">
+      <img src="https://img.shields.io/badge/02-Chạy%20stack-14B8A6?style=for-the-badge" alt="Chạy stack">
+    </th>
+    <th width="33%">
+      <img src="https://img.shields.io/badge/03-Kiểm%20tra-EF4444?style=for-the-badge" alt="Kiểm tra">
+    </th>
+  </tr>
+  <tr>
+    <td>
+      <pre><code>Copy-Item .env.example .env</code></pre>
+    </td>
+    <td>
+      <pre><code>docker compose up --build -d</code></pre>
+    </td>
+    <td>
+      <pre><code>docker compose ps
+.\scripts\demo-baseline-check.ps1</code></pre>
+    </td>
+  </tr>
+</table>
 
-Bang nay giup doi chieu nhanh giua cac yeu cau he thong va phan hien co trong repo.
+<details>
+  <summary><strong>Dừng stack</strong></summary>
 
-| Yeu cau / thanh phan | Repo hien co | Bang chung nhanh |
+```powershell
+docker compose down
+```
+
+</details>
+
+## URL Mặc Định
+
+| Thành phần | URL | Mục đích |
 | --- | --- | --- |
-| Frontend home | `frontend/home` | Trang chon vai tro, dieu huong vao admin hoac user |
-| Frontend user | `frontend/user` | User UI login, upload file/chup webcam snapshot, realtime nhe, check access, xem history/profile |
-| Frontend admin | `frontend/admin` | Admin UI login, quan ly employee, camera, user va access logs |
-| Backend API | `backend` | FastAPI routes cho auth, employees, cameras, users, logs, access, health, metrics |
-| Message queue | `redis` service, `backend/app/queues`, `worker/app/tasks` | Redis queues `embedding_jobs` va `access_jobs` |
-| Database | `database` PostgreSQL, `backend/app/models`, `worker/app/db/schema.py` | Luu users, employees, cameras, face_embeddings, access_logs |
-| Object storage | `minio` service, `backend/app/services/storage_service.py`, `worker/app/services/storage_service.py` | Upload employee face image va access snapshot vao MinIO/S3 flow |
-| Vector database | `qdrant` service, `worker/app/services/vector_store_service.py` | Worker upsert/search embedding bang Qdrant, PostgreSQL van la source of truth |
-| AI inference | `worker/app/ml`, `worker/app/services` | DeepFace detect face, optional anti-spoofing, embedding Facenet512, matching |
-| Frontend webcam/camera capture | `frontend/user/src/components/CameraView.tsx` | User UI chup frame JPEG bang browser webcam hoac gui frame dinh ky trong mode realtime nhe qua `/access/check-image` |
-| Authentication / roles | `backend/app/core/deps.py`, `backend/app/api/admin.py`, `frontend/admin/src/pages/UserPage.tsx` | Bearer token, role `admin`/`user`, admin user management |
-| Reverse proxy / load balancer baseline | `nginx/nginx.conf` | Route `/`, `/user/`, `/admin/`, `/api/`, `/health`, `/docs`, `/metrics` |
-| Docker Compose | `docker-compose.yml` | Chay local multi-service bang `docker compose up --build` |
-| Monitoring | `monitoring/prometheus`, `monitoring/grafana`, `monitoring/alertmanager` | Prometheus scrape `/metrics`, Grafana dashboard, Alertmanager UI |
-| Backup | `scripts/backup.ps1`, `docs/backup.md` | Backup PostgreSQL dump va archive thu muc `data/` |
-| CI/CD artifact publishing | `.github/workflows/ci.yml`, `docs/cicd.md` | Test/build va publish Docker images len Docker Hub khi push `main` |
-| Helm / Kubernetes packaging | `helm/deepface-access`, `docs/deployment.md` | Helm chart render/lint duoc; deploy cluster can secret va image registry dung |
-| Demo verification | `docs/demo-checklist.md`, `scripts/demo-baseline-check.ps1`, `scripts/smoke-deepface.ps1` | Checklist va script de chung minh cac thanh phan chay that |
+| Home gateway | `http://localhost:8080` | Trang chọn vai trò |
+| User UI | `http://localhost:8080/user/` | Terminal kiểm tra truy cập |
+| Admin UI | `http://localhost:8080/admin/` | Bảng điều khiển quản trị |
+| Backend health | `http://localhost:8000/health` | Health check API |
+| Backend docs | `http://localhost:8000/docs` | Swagger UI |
+| MinIO console | `http://localhost:9001` | Object storage |
+| Prometheus | `http://localhost:9090` | Metrics |
+| Alertmanager | `http://localhost:9093` | Alert routing |
+| Grafana | `http://localhost:3000` | Dashboard |
+| Qdrant HTTP | `http://localhost:6333` | Vector database |
 
-Ghi chu trung thuc khi demo:
+Nếu máy đang có tiến trình khác chiếm port mặc định, đặt port override trong `.env` trước khi chạy:
 
-- MinIO va Qdrant da duoc noi vao flow chinh; PostgreSQL van giu vai tro source of truth.
-- Helm chart la baseline packaging cho Kubernetes; can deploy len cluster that neu muon chung minh production runtime.
-- Anti-spoofing dang de optional voi `DEEPFACE_ANTI_SPOOFING=false` mac dinh de demo nhan dien chinh on dinh.
-
-## Cau Truc Thu Muc Nen Doc Truoc
-
-Nen doc project theo thu tu nay de tranh bi lac:
-
-1. `README.md`: nam muc tieu va ban do tong quan.
-2. `docker-compose.yml`: hieu cac service va cach chung ket noi voi nhau.
-3. `docs/`: doc cac tai lieu kien truc, AI pipeline, database, API.
-4. `backend/app/api/`: xem he thong co nhung API nao.
-5. `backend/app/services/`: xem logic nghiep vu chinh.
-6. `worker/app/tasks/`: xem worker nhan va xu ly job nao.
-7. `worker/app/ml/`: xem phan AI/face processing nam o dau.
-8. `frontend/user/` va `frontend/admin/`: xem cac man hinh su dung API nhu the nao.
-
-## Quick Start Cho Giang Vien
-
-Day la luong ngan nhat de clone repo va chay lai he thong tren may co Docker Desktop.
-Mac dinh `docker-compose.yml` da co gia tri fallback cho bien moi truong dev, tu tao bang database va seed du lieu demo toi thieu.
-
-1. Start stack:
-
-```powershell
-docker compose up --build -d
+```env
+POSTGRES_PORT=15432
+REDIS_PORT=16379
+BACKEND_PORT=18001
+FRONTEND_HOME_PORT=15172
+FRONTEND_USER_PORT=15173
+FRONTEND_ADMIN_PORT=15174
+NGINX_PORT=18081
+MINIO_API_PORT=19000
+MINIO_CONSOLE_PORT=19001
+QDRANT_HTTP_PORT=16333
+QDRANT_GRPC_PORT=16334
+PROMETHEUS_PORT=19090
+ALERTMANAGER_PORT=19093
+GRAFANA_PORT=13000
+VITE_API_BASE_URL=http://localhost:18001
 ```
 
-Lenh nay se build/start toan bo service va chay service `db-seed` mot lan de tao bang, seed tai khoan demo, camera/employee/log mau.
-
-2. Neu muon tuy bien port, secret hoac tai khoan seed, tao file `.env` tu mau truoc khi start:
+Khi đổi `VITE_API_BASE_URL`, cần rebuild lại frontend:
 
 ```powershell
-Copy-Item .env.example .env
+docker compose up --build -d frontend-user frontend-admin nginx
 ```
 
-3. Kiem tra baseline khi stack da chay:
+Nếu đổi port frontend hoặc gateway, thêm origin tương ứng vào `BACKEND_CORS_ORIGINS`.
 
-```powershell
-.\scripts\demo-baseline-check.ps1
+## Tài Khoản Demo
+
+| Vai trò | Username | Password |
+| --- | --- | --- |
+| Admin | `admin` | `admin123` |
+| User | `user` | `user123` |
+| Grafana | `admin` | Giá trị `GRAFANA_ADMIN_PASSWORD` |
+| MinIO | Giá trị `MINIO_ROOT_USER` | Giá trị `MINIO_ROOT_PASSWORD` |
+
+Tài khoản demo được tạo bởi service `db-seed`. Có thể đổi bằng `SEED_ADMIN_USERNAME`, `SEED_ADMIN_PASSWORD`, `SEED_USER_USERNAME`, `SEED_USER_PASSWORD`.
+
+## Services
+
+| Service | Vai trò | Port mặc định | Override |
+| --- | --- | --- | --- |
+| `database` | PostgreSQL source of truth | `5432` | `POSTGRES_PORT` |
+| `redis` | Job queue | `6379` | `REDIS_PORT` |
+| `db-seed` | Tạo bảng và seed dữ liệu demo | none | none |
+| `backend` | FastAPI server | `8000` | `BACKEND_PORT` |
+| `worker` | AI job processor | none | none |
+| `frontend-home` | Trang chọn vai trò | `5172` | `FRONTEND_HOME_PORT` |
+| `frontend-user` | User terminal | `5173` | `FRONTEND_USER_PORT` |
+| `frontend-admin` | Admin console | `5174` | `FRONTEND_ADMIN_PORT` |
+| `nginx` | Gateway | `8080` | `NGINX_PORT` |
+| `minio` | S3-compatible object storage | `9000`, `9001` | `MINIO_API_PORT`, `MINIO_CONSOLE_PORT` |
+| `qdrant` | Vector database | `6333`, `6334` | `QDRANT_HTTP_PORT`, `QDRANT_GRPC_PORT` |
+| `prometheus` | Metrics scrape | `9090` | `PROMETHEUS_PORT` |
+| `alertmanager` | Local alert routing | `9093` | `ALERTMANAGER_PORT` |
+| `grafana` | Metrics dashboard | `3000` | `GRAFANA_PORT` |
+
+## Cấu Trúc Repo
+
+```text
+.
+|-- backend/                 FastAPI API, models, schemas, repositories, tests
+|-- worker/                  DeepFace pipeline, job handlers, vector search, tests
+|-- frontend/
+|   |-- home/                Static home page
+|   |-- user/                React user terminal
+|   `-- admin/               React admin console
+|-- nginx/                   Gateway config
+|-- monitoring/              Prometheus, Alertmanager, Grafana provisioning
+|-- helm/deepface-access/    Kubernetes chart baseline
+|-- docs/                    Architecture, API, deployment and operations notes
+|-- docs/screenshots/        README preview screenshots
+|-- scripts/                 Test, seed, smoke, backup and readiness scripts
+|-- data/smoke/              Small smoke-test image set
+`-- docker-compose.yml       Local multi-service runtime
 ```
 
-4. Mo cac URL chinh:
+## Kiểm Thử
 
-- Home: http://localhost:8080
-- User UI: http://localhost:8080/user/ hoặc http://localhost:5173/user/
-- Admin UI: http://localhost:5174/admin/
-- Backend health: http://localhost:8000/health
-- Backend docs: http://localhost:8000/docs
-- Nginx gateway: http://localhost:8080
-- MinIO console: http://localhost:9001
-- Prometheus: http://localhost:9090
-- Grafana: http://localhost:3000
-
-5. Dang nhap tai khoan demo:
-
-- Admin: `admin` / `admin123`
-- User: `user` / `user123`
-
-6. Neu can chung minh AI runtime that, chay smoke test rieng:
-
-```powershell
-.\scripts\smoke-deepface.ps1 -SkipBuild
-```
-
-Ghi chu: lan dau worker DeepFace co the mat thoi gian tai model weight. Smoke script co cache weight trong Docker volume `deepface_weights`.
-
-Neu may da co tien trinh dung port `8080`, doi cong nginx trong `.env`, vi du `NGINX_PORT=8081`, roi chay lai `docker compose up --build -d`.
-
-## Chay Local
-
-Yeu cau may co Docker va Docker Compose.
-
-Chay toan bo he thong:
-
-```powershell
-docker compose up --build -d
-```
-
-Hoac dung script dev:
-
-```powershell
-.\scripts\dev.ps1 -Build
-```
-
-Sau khi chay, co the mo:
-
-- Home: http://localhost:8080
-- User UI: http://localhost:8080/user/ hoặc http://localhost:5173/user/
-- Admin UI: http://localhost:5174/admin/
-- Backend health: http://localhost:8000/health
-- Backend docs: http://localhost:8000/docs
-- Nginx gateway: http://localhost:8080
-- MinIO console: http://localhost:9001
-- Prometheus: http://localhost:9090
-- Alertmanager: http://localhost:9093
-- Grafana: http://localhost:3000
-- Qdrant HTTP: http://localhost:6333
-
-Service `db-seed` tu dong tao bang va seed du lieu demo khi chay `docker compose up`. Tai khoan demo mac dinh:
-
-- Admin: `admin` / `admin123`
-- User: `user` / `user123`
-
-Neu can chay seed lai thu cong:
-
-```powershell
-docker compose run --rm db-seed
-```
-
-Admin UI co trang Users de tao tai khoan demo moi, doi role `admin`/`user`, reset password va xoa user khac.
-
-Chay test tong hop:
+Chạy bộ kiểm thử tổng hợp:
 
 ```powershell
 .\scripts\test.ps1
 ```
 
-Ghi chu test va smoke test Giai Doan 6 nam trong `docs/phase6-testing.md`.
+| Phạm vi | Lệnh |
+| --- | --- |
+| Backend API tests | `python -m pytest backend\app\tests` |
+| Worker tests | `python -m pytest worker\app\tests` |
+| Admin frontend build | `npm run build` |
+| User frontend build | `npm run build` |
 
-Chay smoke test DeepFace that trong worker container, chi start cac thanh phan lien quan:
-
-```powershell
-.\scripts\smoke-deepface.ps1
-```
-
-Smoke test nay dung PostgreSQL, Qdrant va worker container de tao embedding that, matching same-person/different-person va case khong co mat, khong start frontend/nginx/monitoring.
-Script cache DeepFace model weight trong Docker volume `deepface_weights`, nen lan dau co the cham hon cac lan sau.
-
-Kiem tra baseline demo nhe khi stack da chay:
+Kiểm tra baseline khi stack đang chạy:
 
 ```powershell
 .\scripts\demo-baseline-check.ps1
 ```
 
-Neu chi muon kiem tra file/cau hinh ma khong goi endpoint runtime:
+Kiểm tra file và cấu hình, không gọi runtime:
 
 ```powershell
 .\scripts\demo-baseline-check.ps1 -StaticOnly
 ```
 
-Backup toi thieu database va thu muc `data/`:
+Smoke test DeepFace thật:
+
+```powershell
+.\scripts\smoke-deepface.ps1
+```
+
+Smoke test dùng PostgreSQL, Qdrant và worker container để tạo embedding thật và kiểm tra matching. Lần đầu có thể chậm vì model weights được cache vào Docker volume `deepface_weights`.
+
+## API Surface
+
+| Nhóm | Endpoint tiêu biểu | Mục đích |
+| --- | --- | --- |
+| Auth | `POST /auth/login`, `GET /auth/me` | Đăng nhập và lấy user hiện tại |
+| Admin users | `GET/POST/PUT/DELETE /admin/users` | Quản lý tài khoản |
+| Employees | `GET/POST/PUT/DELETE /employees` | Quản lý nhân viên |
+| Employee images | `POST /employees/{id}/face-image` | Upload ảnh enrollment và queue embedding job |
+| Cameras | `GET/POST/PUT/DELETE /cameras` | Quản lý camera |
+| Access | `POST /access/check`, `POST /access/check-image` | Queue access check |
+| Logs | `GET /logs` | Lịch sử ra vào |
+| Operations | `GET /health`, `GET /metrics`, `GET /admin/status` | Trạng thái runtime và metrics |
+
+Chi tiết hơn nằm trong `docs/api.md`.
+
+## Cấu Hình Chính
+
+| Biến | Ý nghĩa |
+| --- | --- |
+| `DATABASE_URL` | PostgreSQL connection string cho backend và worker |
+| `REDIS_URL` | Redis queue URL |
+| `AUTH_SECRET_KEY` | JWT signing secret |
+| `BACKEND_CORS_ORIGINS` | Danh sách frontend origins được phép gọi API |
+| `VITE_API_BASE_URL` | Backend URL được build vào frontend assets |
+| `MINIO_ENDPOINT` | MinIO endpoint nội bộ trong Docker network |
+| `MINIO_BUCKET` | Bucket lưu ảnh |
+| `QDRANT_URL` | Qdrant URL nội bộ |
+| `QDRANT_COLLECTION` | Collection lưu vector embedding |
+| `DEEPFACE_MODEL_NAME` | Model embedding, mặc định `Facenet512` |
+| `DEEPFACE_MATCH_THRESHOLD` | Threshold matching |
+| `DEEPFACE_ANTI_SPOOFING` | Bật hoặc tắt anti-spoofing |
+| `MAX_PROCESSING_ACCESS_LOGS_PER_CAMERA` | Giới hạn queue pressure theo từng camera |
+
+## Ghi Chú Production
+
+Các giá trị mặc định chỉ dành cho demo local. Trước khi deploy thật:
+
+- Đổi `AUTH_SECRET_KEY`, PostgreSQL password, MinIO credentials, Grafana password và seed passwords.
+- Không dùng `admin123`, `user123`, `minioadmin` ngoài demo.
+- Giới hạn `BACKEND_CORS_ORIGINS` đúng domain frontend thật.
+- Dùng image tag bất biến như commit SHA thay vì `latest`.
+- Đặt HTTPS/TLS ở public ingress hoặc reverse proxy.
+- Bổ sung giới hạn kích thước upload và validate nội dung ảnh thật, không chỉ dựa vào extension.
+- Rà lại quyền `GET /logs`; demo/operator dùng được, nhưng quá rộng nếu `user` là nhân viên cá nhân.
+- Chuyển migration sang Alembic khi schema ổn định.
+
+## CI/CD Và Deployment
+
+GitHub Actions hiện có:
+
+- Chạy backend tests trên Python 3.12.
+- Chạy worker tests trên Python 3.12.
+- Build user/admin frontend trên Node 22.
+- Build Docker images cho backend, worker, frontend-home, frontend-user và frontend-admin.
+- Publish Docker Hub images trên `main` khi có secrets `DOCKERHUB_USERNAME` và `DOCKERHUB_TOKEN`.
+
+Helm chart baseline nằm trong `helm/deepface-access`. Khi deploy lên cluster thật, cần tạo Kubernetes Secrets cho database/auth/minio và cấu hình image registry/tag rõ ràng.
+
+## Backup
 
 ```powershell
 .\scripts\backup.ps1
 ```
 
-## File Cau Hinh Quan Trong
+Backup output được ghi vào `backup/`. File backup sinh ra được ignore bởi Git, còn `.gitkeep` giữ cấu trúc thư mục.
 
-- `.env.example`: danh sach bien moi truong mau.
-- `docker-compose.yml`: khai bao service local.
-- `nginx/nginx.conf`: reverse proxy local/prod-like.
-- `monitoring/prometheus/prometheus.yml`: Prometheus scrape config.
-- `monitoring/prometheus/rules/`: Prometheus alert rules.
-- `monitoring/alertmanager/alertmanager.yml`: Alertmanager local routing config.
-- `monitoring/grafana/`: Grafana datasource provisioning va dashboard.
-- `.github/workflows/ci.yml`: GitHub Actions test/build va publish Docker images len Docker Hub.
-- `backend/Dockerfile`: cach build backend image.
-- `worker/Dockerfile`: cach build worker image.
-- `frontend/home/Dockerfile`: cach serve home frontend.
-- `frontend/user/Dockerfile`: cach build user frontend.
-- `frontend/admin/Dockerfile`: cach build admin frontend.
-- `helm/deepface-access/values.yaml`: cau hinh image registry/tag khi deploy Kubernetes, mac dinh theo format Docker Hub `<dockerhub-username>/deepface-<service>:<tag>`.
+## Troubleshooting
 
-## Ghi Chu Ve Database
+| Vấn đề | Cách kiểm tra |
+| --- | --- |
+| `Bind for 0.0.0.0:<port> failed` | Port đang bị app/container khác chiếm. Đặt biến port override trong `.env`. |
+| Không kết nối được Docker API | Mở Docker Desktop và đợi daemon sẵn sàng. |
+| Worker DeepFace khởi động chậm | Lần đầu cần tải/khởi tạo model weights. Các lần sau dùng lại volume `deepface_weights`. |
+| Frontend gọi sai backend URL | Kiểm tra `VITE_API_BASE_URL`, sau đó rebuild frontend images. |
+| Browser báo lỗi CORS | Thêm origin frontend/gateway hiện tại vào `BACKEND_CORS_ORIGINS`. |
 
-- Schema va mo ta bang du lieu nen doc trong `docs/db-schema.md`.
-- Logic model/database cua backend nam trong `backend/app/models/` va `backend/app/db/`.
-- Worker giu schema/doc DB toi thieu rieng phuc vu xu ly job trong `worker/app/db/schema.py`.
-- Seed tai khoan va du lieu demo toi thieu duoc thuc hien qua `backend/app/db/seed.py`; Docker Compose tu chay service `db-seed` khi start stack.
+## Roadmap
 
-## Huong Phat Trien Tiep Theo
+- Tách `image_key` / `object_key` thành field riêng thay vì lưu trong `image_path`.
+- Thêm Alembic migrations.
+- Thêm max upload size, MIME sniffing và image dimension validation.
+- Thêm Playwright E2E tests cho login, employee enrollment và access check.
+- Lưu nhiều embedding cho mỗi employee để ổn định hơn khi đổi ánh sáng/góc mặt.
+- Thêm báo cáo accuracy nhỏ: đúng, sai, reject và latency trung bình.
+- Thêm số liệu realtime: latency trung bình, worst-case latency, success rate và queue pressure.
+- Siết role/permission cho access logs nếu tách rõ user cá nhân và operator.
 
-Nhung phan nen uu tien sau khi da nam tong quan:
-
-- Hoan thien schema rieng cho `image_key`/`object_key` thay vi tam luu trong cot `image_path`.
-- Bo sung Playwright end-to-end test khi muon test UI tren browser that.
-- Smoke test DeepFace voi bo anh that nho, roi tinh chinh `DEEPFACE_MATCH_THRESHOLD`.
-- Bo sung reindex Qdrant khi doi model hoac can rebuild collection.
-- Hoan thien kenh gui alert ra email/Slack neu can.
-
-
-
-Thêm báo cáo test accuracy nhỏ nhưng rõ
-Không cần dataset lớn kiểu research. Chỉ cần một bộ test nội bộ có tổ chức:
-3-5 người
-mỗi người 5-10 ảnh
-có các trường hợp:
-chính diện
-nghiêng nhẹ
-ánh sáng yếu
-đeo kính
-sai người
-báo cáo:
-số ca đúng
-số ca sai
-số ca reject
-thời gian trung bình mỗi access
-Cái này tăng độ thuyết phục cực mạnh mà công sức không quá lớn.
-
-Chứng minh realtime bằng số
-Hiện tại bạn đã tối ưu được access xuống khoảng vài giây. Hãy biến nó thành evidence:
-latency trung bình
-latency worst-case
-tỷ lệ xử lý thành công
-queue limit hoạt động ra sao khi spam frame
-Giảng viên thường dễ nâng điểm khi thấy “không chỉ demo mồm”.
-
-Tăng độ ổn định nhận diện bằng dữ liệu enrollment
-Đây là hướng hiệu quả nhất nếu không muốn thay model lớn:
-mỗi nhân viên không chỉ 1 ảnh
-thêm 3-5 ảnh/embedding cho:
-chính diện
-nghiêng trái nhẹ
-nghiêng phải nhẹ
-ánh sáng khác
-lưu nhiều embedding cho cùng một người
-Cái này thường cải thiện thực chiến nhiều hơn đổi model lung tung.
+<p align="center">
+  <img
+    src="https://capsule-render.vercel.app/api?type=waving&section=footer&height=120&color=0:14B8A6,55:0EA5E9,100:0F172A"
+    alt="Footer wave"
+    width="100%"
+  />
+</p>

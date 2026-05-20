@@ -34,6 +34,15 @@ export default function EmployeeTable({
     return <div className="panel state-panel">No employees yet.</div>;
   }
 
+  function confirmDelete(employee: Employee) {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete ${employee.name}?`,
+    );
+    if (confirmed) {
+      void onDelete(employee.id);
+    }
+  }
+
   return (
     <div className="panel table-panel">
       <table>
@@ -42,7 +51,6 @@ export default function EmployeeTable({
             <th>Code</th>
             <th>Name</th>
             <th>Department</th>
-            <th>Status</th>
             <th>Embedding</th>
             <th className="actions-header">Actions</th>
           </tr>
@@ -53,11 +61,6 @@ export default function EmployeeTable({
               <td>{employee.code}</td>
               <td>{employee.name}</td>
               <td>{employee.department ?? "-"}</td>
-              <td>
-                <span className={`status-pill ${employee.status}`}>
-                  {employee.status}
-                </span>
-              </td>
               <td>
                 <span className={`status-pill ${employee.embedding_status}`}>
                   {employee.embedding_status}
@@ -73,7 +76,7 @@ export default function EmployeeTable({
                   </button>
                   <button
                     className="danger-button"
-                    onClick={() => void onDelete(employee.id)}
+                    onClick={() => confirmDelete(employee)}
                   >
                     Delete
                   </button>

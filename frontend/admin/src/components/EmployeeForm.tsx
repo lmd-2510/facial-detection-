@@ -1,5 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
-import type { Employee, EmployeePayload, EmployeeStatus } from "../types/employee";
+import type { Employee, EmployeePayload } from "../types/employee";
 
 interface EmployeeFormProps {
   employee?: Employee | null;
@@ -33,6 +33,10 @@ export default function EmployeeForm({
         department: employee.department ?? "",
         status: employee.status,
       });
+      setFaceImage(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
       return;
     }
 
@@ -118,19 +122,6 @@ export default function EmployeeForm({
             setFaceImage(event.target.files?.[0] ?? null)
           }
         />
-      </label>
-
-      <label>
-        Status
-        <select
-          value={form.status}
-          onChange={(event) =>
-            setForm({ ...form, status: event.target.value as EmployeeStatus })
-          }
-        >
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-        </select>
       </label>
 
       <button className="primary-button" disabled={isSaving} type="submit">

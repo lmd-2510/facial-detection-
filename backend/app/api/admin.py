@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 from fastapi import APIRouter, HTTPException, Response, status
 from sqlalchemy.exc import IntegrityError
 
@@ -16,6 +19,7 @@ from app.schemas.user import AdminUserCreate, AdminUserRead, AdminUserUpdate
 
 
 router = APIRouter(prefix="/admin", tags=["admin"])
+EVALUATION_REPORT_PATH = Path(__file__).resolve().parents[1] / "data" / "evaluation_report.json"
 
 
 @router.get("/status")
@@ -39,6 +43,26 @@ def read_admin_status(current_user: AdminUser) -> dict[str, object]:
         "redis_error": redis_error,
         "queue_lengths": queue_lengths,
     }
+
+
+@router.get("/evaluation-report")
+def read_evaluation_report(current_user: AdminUser) -> dict[str, object]:
+    if not EVALUATION_REPORT_PATH.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Evaluation report not found",
+        )
+
+    try:
+        with EVALUATION_REPORT_PATH.open(encoding="utf-8") as report_file:
+            report = json.load(report_file)
+    except json.JSONDecodeError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Evaluation report is invalid",
+        ) from exc
+
+    return report
 
 
 @router.get("/users", response_model=list[AdminUserRead])

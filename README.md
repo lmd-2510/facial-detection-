@@ -281,3 +281,38 @@ Nhung phan nen uu tien sau khi da nam tong quan:
 
 
 
+Thêm báo cáo test accuracy nhỏ nhưng rõ
+Không cần dataset lớn kiểu research. Chỉ cần một bộ test nội bộ có tổ chức:
+3-5 người
+mỗi người 5-10 ảnh
+có các trường hợp:
+chính diện
+nghiêng nhẹ
+ánh sáng yếu
+đeo kính
+sai người
+báo cáo:
+số ca đúng
+số ca sai
+số ca reject
+thời gian trung bình mỗi access
+Cái này tăng độ thuyết phục cực mạnh mà công sức không quá lớn.
+
+Chứng minh realtime bằng số
+Hiện tại bạn đã tối ưu được access xuống khoảng vài giây. Hãy biến nó thành evidence:
+latency trung bình
+latency worst-case
+tỷ lệ xử lý thành công
+queue limit hoạt động ra sao khi spam frame
+Giảng viên thường dễ nâng điểm khi thấy “không chỉ demo mồm”.
+
+Tăng độ ổn định nhận diện bằng dữ liệu enrollment
+Đây là hướng hiệu quả nhất nếu không muốn thay model lớn:
+mỗi nhân viên không chỉ 1 ảnh
+thêm 3-5 ảnh/embedding cho:
+chính diện
+nghiêng trái nhẹ
+nghiêng phải nhẹ
+ánh sáng khác
+lưu nhiều embedding cho cùng một người
+Cái này thường cải thiện thực chiến nhiều hơn đổi model lung tung.

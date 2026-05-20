@@ -150,6 +150,7 @@ export default function App() {
         camerasCount={cameras.length}
         employeesCount={employees.length}
         logsCount={logs.length}
+        token={token}
         user={user}
       />
     ) : (

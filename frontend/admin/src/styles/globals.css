@@ -543,6 +543,75 @@ th {
   line-height: 1.5;
 }
 
+.evaluation-card {
+  gap: 18px;
+}
+
+.evaluation-summary,
+.evaluation-metrics {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.evaluation-summary div,
+.evaluation-metrics div {
+  display: grid;
+  gap: 7px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 14px;
+  background: #fbfdfb;
+}
+
+.evaluation-summary span,
+.evaluation-metrics span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.evaluation-summary strong,
+.evaluation-metrics strong {
+  font-size: 24px;
+}
+
+.evaluation-summary small {
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.evaluation-breakdown {
+  display: grid;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.evaluation-row {
+  display: grid;
+  grid-template-columns: minmax(160px, 1.3fr) repeat(3, minmax(90px, 1fr));
+  gap: 12px;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  padding: 12px 14px;
+}
+
+.evaluation-row:last-child {
+  border-bottom: 0;
+}
+
+.evaluation-row span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.compact-rules {
+  color: var(--muted);
+}
+
 @media (max-width: 980px) {
   .app-shell {
     grid-template-columns: 1fr;
@@ -554,7 +623,10 @@ th {
 
   .metric-grid,
   .split-layout,
-  .settings-grid {
+  .settings-grid,
+  .evaluation-summary,
+  .evaluation-metrics,
+  .evaluation-row {
     grid-template-columns: 1fr;
   }
 }

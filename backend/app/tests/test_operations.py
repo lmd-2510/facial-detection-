@@ -102,3 +102,32 @@ def test_admin_status_rejects_user_role(monkeypatch):
 
     assert response.status_code == 403
     assert response.json()["detail"] == "Admin role required"
+
+
+def test_admin_evaluation_report_returns_internal_metrics():
+    app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(role="admin")
+    try:
+        with TestClient(app) as client:
+            response = client.get("/admin/evaluation-report")
+    finally:
+        app.dependency_overrides.clear()
+
+    body = response.json()
+    assert response.status_code == 200
+    assert body["dataset"]["subjects"] >= 3
+    assert body["dataset"]["total_cases"] == (
+        body["metrics"]["correct"] + body["metrics"]["wrong"] + body["metrics"]["rejected"]
+    )
+    assert body["metrics"]["average_access_seconds"] > 0
+
+
+def test_admin_evaluation_report_rejects_user_role():
+    app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(role="user")
+    try:
+        with TestClient(app) as client:
+            response = client.get("/admin/evaluation-report")
+    finally:
+        app.dependency_overrides.clear()
+
+    assert response.status_code == 403
+    assert response.json()["detail"] == "Admin role required"

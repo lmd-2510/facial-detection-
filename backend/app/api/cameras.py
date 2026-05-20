@@ -1,11 +1,8 @@
-from fastapi import APIRouter, HTTPException, Response, status
+from fastapi import APIRouter, HTTPException, status
 
 from app.core.deps import AdminUser, CurrentUser, DbSession
 from app.schemas.camera import CameraCreate, CameraRead, CameraUpdate
 from app.services.camera_service import (
-    add_camera,
-    delete_camera,
-    edit_camera,
     get_default_active_camera,
     get_camera,
     get_cameras,
@@ -13,6 +10,10 @@ from app.services.camera_service import (
 
 
 router = APIRouter(prefix="/cameras", tags=["cameras"])
+
+CAMERA_READ_ONLY_MESSAGE = (
+    "Camera management is read-only in this demo. The system uses a single built-in gate camera."
+)
 
 
 @router.get("/active-default", response_model=CameraRead)
@@ -44,7 +45,10 @@ def create_camera_record(
     db: DbSession,
     current_user: AdminUser,
 ) -> CameraRead:
-    return add_camera(db, payload)
+    raise HTTPException(
+        status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
+        detail=CAMERA_READ_ONLY_MESSAGE,
+    )
 
 
 @router.get("/{camera_id}", response_model=CameraRead)
@@ -70,14 +74,10 @@ def update_camera_record(
     db: DbSession,
     current_user: AdminUser,
 ) -> CameraRead:
-    camera = edit_camera(db, camera_id, payload)
-    if camera is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Camera not found",
-        )
-
-    return camera
+    raise HTTPException(
+        status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
+        detail=CAMERA_READ_ONLY_MESSAGE,
+    )
 
 
 @router.delete("/{camera_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -85,12 +85,8 @@ def delete_camera_record(
     camera_id: int,
     db: DbSession,
     current_user: AdminUser,
-) -> Response:
-    camera = delete_camera(db, camera_id)
-    if camera is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Camera not found",
-        )
-
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+) -> None:
+    raise HTTPException(
+        status_code=status.HTTP_405_METHOD_NOT_ALLOWED,
+        detail=CAMERA_READ_ONLY_MESSAGE,
+    )

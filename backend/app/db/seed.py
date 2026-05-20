@@ -131,15 +131,40 @@ def seed_demo_records(db: Session) -> dict[str, int]:
         ):
             existing_camera.status = "inactive"
 
-    for demo_camera in DEMO_CAMERAS:
-        existing_camera = db.scalar(
-            select(Camera).where(Camera.name == demo_camera["name"])
-        )
-        if existing_camera is not None:
-            continue
-
-        db.add(Camera(**demo_camera))
+    primary_camera_config = DEMO_CAMERAS[0]
+    primary_camera = db.scalar(select(Camera).order_by(Camera.id.asc()).limit(1))
+    if primary_camera is None:
+        primary_camera = Camera(**primary_camera_config)
+        db.add(primary_camera)
+        db.flush()
         created_counts["cameras"] += 1
+    else:
+        primary_camera.name = primary_camera_config["name"]
+        primary_camera.location = primary_camera_config["location"]
+        primary_camera.stream_url = primary_camera_config["stream_url"]
+        primary_camera.status = primary_camera_config["status"]
+
+    db.flush()
+
+    extra_cameras = list(
+        db.scalars(
+            select(Camera)
+            .where(Camera.id != primary_camera.id)
+            .order_by(Camera.id.asc())
+        )
+    )
+    if extra_cameras:
+        extra_camera_ids = [camera.id for camera in extra_cameras]
+        access_logs = list(
+            db.scalars(
+                select(AccessLog).where(AccessLog.camera_id.in_(extra_camera_ids))
+            )
+        )
+        for access_log in access_logs:
+            access_log.camera_id = primary_camera.id
+
+        for extra_camera in extra_cameras:
+            db.delete(extra_camera)
 
     for demo_employee in DEMO_EMPLOYEES:
         existing_employee = db.scalar(
@@ -161,10 +186,7 @@ def seed_demo_records(db: Session) -> dict[str, int]:
         employee.code: employee
         for employee in db.scalars(select(Employee)).all()
     }
-    cameras_by_name = {
-        camera.name: camera
-        for camera in db.scalars(select(Camera)).all()
-    }
+    cameras_by_name = {primary_camera.name: primary_camera}
 
     for demo_log in DEMO_ACCESS_LOGS:
         employee_code = demo_log["employee_code"]

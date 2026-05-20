@@ -115,13 +115,9 @@ def test_create_camera(client, auth_headers):
         },
     )
 
-    assert response.status_code == 201
+    assert response.status_code == 405
     body = response.json()
-    assert body["id"]
-    assert body["name"] == "Back Door"
-    assert body["location"] == "Warehouse"
-    assert body["stream_url"] == "rtsp://example.local/back"
-    assert body["status"] == "active"
+    assert "read-only" in body["detail"]
 
 
 def test_user_role_cannot_create_camera(client, user_headers):
@@ -166,12 +162,9 @@ def test_update_camera(client, auth_headers):
         },
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 405
     body = response.json()
-    assert body["name"] == "Main Gate Updated"
-    assert body["location"] == "Front Lobby"
-    assert body["stream_url"] is None
-    assert body["status"] == "inactive"
+    assert "read-only" in body["detail"]
 
 
 def test_update_camera_returns_404(client, auth_headers):
@@ -181,23 +174,20 @@ def test_update_camera_returns_404(client, auth_headers):
         json={"name": "Missing"},
     )
 
-    assert response.status_code == 404
+    assert response.status_code == 405
 
 
-def test_delete_camera_soft_deletes_record(client, auth_headers):
+def test_delete_camera_is_not_allowed(client, auth_headers):
     delete_response = client.delete("/cameras/1", headers=auth_headers)
 
-    assert delete_response.status_code == 204
-
-    get_response = client.get("/cameras/1", headers=auth_headers)
-    assert get_response.status_code == 200
-    assert get_response.json()["status"] == "inactive"
+    assert delete_response.status_code == 405
+    assert "read-only" in delete_response.json()["detail"]
 
 
 def test_delete_camera_returns_404(client, auth_headers):
     response = client.delete("/cameras/999", headers=auth_headers)
 
-    assert response.status_code == 404
+    assert response.status_code == 405
 
 
 def test_user_role_cannot_update_or_delete_camera(client, user_headers):

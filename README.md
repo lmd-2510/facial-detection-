@@ -123,39 +123,112 @@ Frontend Home / User / Admin
 
 ### Luồng Demo Chính
 
-1. Admin tạo employee và camera trong Admin Console.
-2. Admin upload ảnh khuôn mặt cho employee.
-3. Backend lưu ảnh vào MinIO, tạo `embedding_jobs` trong Redis.
-4. Worker tạo embedding, lưu PostgreSQL và index vector vào Qdrant.
-5. User upload snapshot hoặc chụp frame webcam tại User Terminal.
-6. Backend lưu snapshot, tạo `access_jobs`.
-7. Worker so khớp khuôn mặt, cập nhật access log thành `granted`, `denied`, `processing` hoặc `error`.
+<table>
+  <tr>
+    <td align="center" width="140">
+      <img src="https://img.shields.io/badge/Bước-01-0EA5E9?style=for-the-badge" alt="Bước 01">
+    </td>
+    <td>
+      <strong>Khởi tạo dữ liệu vận hành</strong>
+      <br>
+      Admin tạo employee và camera trong Admin Console.
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="https://img.shields.io/badge/Bước-02-14B8A6?style=for-the-badge" alt="Bước 02">
+    </td>
+    <td>
+      <strong>Enrollment khuôn mặt</strong>
+      <br>
+      Admin upload ảnh khuôn mặt cho employee, backend lưu object vào MinIO.
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="https://img.shields.io/badge/Bước-03-6366F1?style=for-the-badge" alt="Bước 03">
+    </td>
+    <td>
+      <strong>Tạo embedding job</strong>
+      <br>
+      Backend đẩy job vào Redis queue <code>embedding_jobs</code> để worker xử lý nền.
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="https://img.shields.io/badge/Bước-04-8B5CF6?style=for-the-badge" alt="Bước 04">
+    </td>
+    <td>
+      <strong>Index vector nhận diện</strong>
+      <br>
+      Worker tạo embedding, lưu PostgreSQL và index vector vào Qdrant.
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="https://img.shields.io/badge/Bước-05-F59E0B?style=for-the-badge" alt="Bước 05">
+    </td>
+    <td>
+      <strong>Check access tại cổng</strong>
+      <br>
+      User upload snapshot hoặc chụp frame webcam tại User Terminal.
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="https://img.shields.io/badge/Bước-06-EF4444?style=for-the-badge" alt="Bước 06">
+    </td>
+    <td>
+      <strong>Ra quyết định truy cập</strong>
+      <br>
+      Worker so khớp khuôn mặt và cập nhật access log thành
+      <code>granted</code>, <code>denied</code>, <code>processing</code> hoặc <code>error</code>.
+    </td>
+  </tr>
+</table>
 
 ## Chạy Nhanh
 
-Yêu cầu:
+<p>
+  <img src="https://img.shields.io/badge/Yêu%20cầu-Docker%20Desktop%20đang%20chạy-0EA5E9?style=for-the-badge" alt="Docker Desktop đang chạy">
+  <img src="https://img.shields.io/badge/Yêu%20cầu-Docker%20Compose-14B8A6?style=for-the-badge" alt="Docker Compose">
+  <img src="https://img.shields.io/badge/Lưu%20ý-Lần%20đầu%20worker%20có%20thể%20khởi%20động%20lâu-F59E0B?style=for-the-badge" alt="Lần đầu worker có thể khởi động lâu">
+</p>
 
-- Docker Desktop đang chạy.
-- Docker Compose plugin có sẵn qua `docker compose`.
-- Lần đầu khởi động worker có thể lâu vì DeepFace/TensorFlow và model weights khá nặng.
+<table>
+  <tr>
+    <th width="33%">
+      <img src="https://img.shields.io/badge/01-Chuẩn%20bị%20env-0EA5E9?style=for-the-badge" alt="Chuẩn bị env">
+    </th>
+    <th width="33%">
+      <img src="https://img.shields.io/badge/02-Chạy%20stack-14B8A6?style=for-the-badge" alt="Chạy stack">
+    </th>
+    <th width="33%">
+      <img src="https://img.shields.io/badge/03-Kiểm%20tra-EF4444?style=for-the-badge" alt="Kiểm tra">
+    </th>
+  </tr>
+  <tr>
+    <td>
+      <pre><code>Copy-Item .env.example .env</code></pre>
+    </td>
+    <td>
+      <pre><code>docker compose up --build -d</code></pre>
+    </td>
+    <td>
+      <pre><code>docker compose ps
+.\scripts\demo-baseline-check.ps1</code></pre>
+    </td>
+  </tr>
+</table>
 
-```powershell
-Copy-Item .env.example .env
-docker compose up --build -d
-```
-
-Kiểm tra stack:
-
-```powershell
-docker compose ps
-.\scripts\demo-baseline-check.ps1
-```
-
-Dừng stack:
+<details>
+  <summary><strong>Dừng stack</strong></summary>
 
 ```powershell
 docker compose down
 ```
+
+</details>
 
 ## URL Mặc Định
 

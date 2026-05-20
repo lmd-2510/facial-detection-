@@ -119,7 +119,12 @@ th {
 .sidebar {
   display: grid;
   grid-template-rows: auto 1fr auto;
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
   min-height: 100vh;
+  overflow-y: auto;
   gap: 28px;
   padding: 28px;
   color: #f6fbf8;
@@ -618,7 +623,10 @@ th {
   }
 
   .sidebar {
+    position: static;
+    height: auto;
     min-height: auto;
+    overflow: visible;
   }
 
   .metric-grid,

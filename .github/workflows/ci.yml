@@ -36,6 +36,11 @@ jobs:
           python-version: "3.12"
           cache: pip
 
+      - name: Install worker system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libgl1 libglib2.0-0
+
       - name: Install worker dependencies
         run: pip install -r worker/requirements.txt
 
